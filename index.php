@@ -61,7 +61,7 @@
         <h1><a href="/" title="Marketing">University Marketing</a><br />&nbsp;</h1>
       </div>
       <div class="nav-wrapper">
-				<?php include("lib/menu.html"); ?>
+				<?php include("includes/menu.html"); ?>
       </div>
     </div>
     
@@ -83,7 +83,7 @@
   </div>
   <hr>
   <div class="footer">
-    <?php include("lib/mcd-footer.html"); ?>
+    <?php include("includes/mcd-footer.html"); ?>
   </div>
 </body>
 </html>

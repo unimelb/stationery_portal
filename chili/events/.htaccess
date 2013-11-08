@@ -1,0 +1,35 @@
+AuthLDAPUrl "ldaps://centaur.unimelb.edu.au:636/ou=people,o=unimelb?uid?sub?(&(objectClass=*)(auEduPersonType=staff))"
+AuthName "University central password"
+AuthType Basic
+AuthBasicProvider ldap
+Require user gilesng johnvb ejvf bhider ebeltsos kevinrc winniet
+AuthzLDAPAuthoritative Off
+
+<FilesMatch "\.doc$">
+ForceType application/octet-stream
+</FilesMatch>
+
+<FilesMatch "\.xls$">
+ForceType application/octet-stream
+</FilesMatch>
+
+<FilesMatch "\.ppt$">
+ForceType application/octet-stream
+</FilesMatch>
+
+<FilesMatch "\.docx$">
+ForceType application/octet-stream
+</FilesMatch>
+
+<FilesMatch "\.xlsx$">
+ForceType application/octet-stream
+</FilesMatch>
+
+<FilesMatch "\.pptx$">
+ForceType application/octet-stream
+</FilesMatch>
+
+order deny,allow
+deny from all
+
+Satisfy Any

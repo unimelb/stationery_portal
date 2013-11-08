@@ -1,0 +1,101 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>University Marketing Planning : Marketing : The University of Melbourne</title>  
+
+<!-- Authoriser and maintainer related meta data - developers, don't forget humans.txt   -->
+  <meta name="DC.Creator" content="The University of Melbourne">
+
+  <meta name="UM.Authoriser.Name" content="">
+  <meta name="UM.Authoriser.Title" content="">
+  <meta name="UM.Maintainer.Name" content="">
+  <meta name="UM.Maintainer.Department" content="">
+  <meta name="UM.Maintainer.Email" content="">
+<!-- End authoriser and maintainer meta data -->
+<!-- Static meta data   -->
+  <meta name="DC.Rights" content="http://www.unimelb.edu.au/disclaimer">
+  <meta name="DC.Publisher" content="The University of Melbourne">
+  <meta name="DC.Format" content="text/html">
+  <meta name="DC.Language" content="en">
+  <meta name="DC.Identifier" content="http://www.unimelb.edu.au/">
+<!-- End static meta data -->
+<!-- Meta data to be autofilled -->
+  <meta name="DC.Date" content="">
+  <!--#config timefmt="%Y-%m-%d" --><meta name="DC.Date.Modified" content="<!--#echo var='LAST_MODIFIED' -->">
+<!-- End meta data to be autofilled -->
+  <meta content="width=device-width; initial-scale=0.67;" name="viewport">
+
+  <!-- GLOBAL RESOURCES -->
+  <!-- DO NOT CHANGE -->
+    <link rel="stylesheet" href="http://brand.unimelb.edu.au/web-templates/LATEST/css/complete.css">
+    <script src="http://brand.unimelb.edu.au/web-templates/LATEST/js/complete.js"></script>
+    <script src="http://brand.unimelb.edu.au/global-header/js/injection.js"></script>
+  <!-- /GLOBAL RESOURCES -->
+  <link rel="stylesheet" href="../../css/custom.css" media="screen">
+  <script type="text/javascript" src="../../js/custom.js"></script>
+
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-9675738-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</head>
+<body class="no-logo sub-page">
+  <div class="wrapper">
+    
+    <div id="header" class="header">
+      
+      <div class="hgroup">
+        <h1><a href="/" title="Marketing">University Marketing</a><br />&nbsp;</h1>
+      </div>
+			<div class="nav-wrapper">
+				<?php include("../../lib/menu.html"); ?>
+			</div>
+    </div>
+    
+    <div class="col-8" id="main">
+      <h2>A4 Public Lectures Flyer Editor</h2>
+			
+			<script>
+			
+			var editor;
+
+			function GetEditor()
+			{
+			    if (document.getElementsByTagName("iframe").length > 0)
+			    {
+			      if (document.getElementsByTagName("iframe")[0].src != "")
+			      {
+			         frameWindow = document.getElementsByTagName("iframe")[0].contentWindow;
+			         frameWindow.GetEditor(EditorLoaded);
+			      }
+			    }
+			}
+
+			function EditorLoaded(jsInterface)
+			{
+			    editor = frameWindow.editorObject;
+			}
+			
+			</script>
+			<iframe id="iframe" width="100%" height="800" onload="GetEditor()" src="http://011s-chili-web.its.unimelb.edu.au/CHILI//Client_48/editor.aspx?doc=de5fa915-9376-4bf9-bc2b-fbec8195c5c1&ws=149598f7-4881-4fbf-86e5-675257f7f4c3&apiKey=ri6ggxyqdA5j5+xyptuoFYOP00geV025dCXweXgdPnoWgWBzMICHzC+7Z87CGpqWF2NvpcC_tdBJuYYfCsovKg&username=Anonymous&password=" />
+    </div>
+    <hr>
+  </div>
+  <hr>
+  <div class="footer">
+    <!--#include virtual="/lib/mcd-footer.html" -->
+  </div>
+</body>
+</html>

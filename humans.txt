@@ -1,0 +1,21 @@
+This file is designed to let interested parties know who designed and developed this website - More information can be found at http://humanstxt.org/
+
+/* Local Site */
+	Designer: Marketing Web Team
+	Developer: Marketing Web Team
+	Content Producers: The Marketing Office
+		
+
+/* Web Templates */
+
+Web Branding for The University of Melbourne is defined by the Marketing Web Team (http://www.unimelb.edu.au/). 
+
+More information can be found at http://brand.unimelb.edu.au.
+
+Templates designed and developed by:
+
+  Anthony Kolber (@kolber)
+  Toby Hede (@tobyhede)
+  Paul Tagell (@tagell).
+
+Iconography under licence from helveticons.ch

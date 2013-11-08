@@ -1,0 +1,29 @@
+DAOPHP5
+---------------------------- 
+copyright Chris Hall, 2004,2005
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+Installation
+---------------------------- 
+1) put the code somewhere in your include path or in your web dir.
+2) see the example dir on how to use it.
+3) docs/comments are very minimal right now.  it won't be that way for long
+
+any questions, drop a note at http://sourceforge.net/projects/daophp5
+
+thanks, hopefully this is useful.
+
+Chris

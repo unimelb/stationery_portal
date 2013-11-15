@@ -67,7 +67,7 @@
     
     <div class="col-6" id="main">
 			
-			<h2>Publishing Artwork Portal</h2>
+			<h2>University Stationery</h2>
 			<?php Echo "Hello Giles!"; ?>
 			
 		</div>

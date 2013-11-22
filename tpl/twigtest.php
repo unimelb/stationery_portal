@@ -15,8 +15,4 @@ $twig = new Twig_Environment($loader, array(
 $template = $twig->loadTemplate('base.html');
 echo $template->render(array(
 ));
-$doesit = "but it doesn't";
-if (file_exists($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/addons/Twig/lib/Twig/Autoloader.php")) {
-  $doesit = "and it does!";
-}
 ?>

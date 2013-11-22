@@ -1,12 +1,12 @@
 <?php
 /* a test script for Giles to run the Twig templates in this folder */
-require_once(dirname(__FILE__) . "../lib/find_path.inc.php");
-require_once ($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/addons/Twig/Autoloader.php");
+require_once(dirname(__FILE__) . "/../lib/find_path.inc.php");
+require_once ($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/addons/Twig/lib/Twig/Autoloader.php");
 Twig_Autoloader::register();
-/* prepare Twig environment */
+/*prepare Twig environment */
 $loader = new Twig_Loader_Filesystem($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/tpl"); 
 $twig = new Twig_Environment($loader, array(
-					    "auto_reload" => true,
+					    "auto_reload" => true
 					    
 ));
 /* define variables to be used with the template */
@@ -14,7 +14,9 @@ $twig = new Twig_Environment($loader, array(
 
 $template = $twig->loadTemplate('base.html');
 echo $template->render(array(
-'the' => 'variables',
-'go' => 'here'
 ));
+$doesit = "but it doesn't";
+if (file_exists($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/addons/Twig/lib/Twig/Autoloader.php")) {
+  $doesit = "and it does!";
+}
 ?>

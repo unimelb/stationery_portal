@@ -84,11 +84,25 @@ class Stationery extends Cgiapp2 {
      * (see passport)
      */
     $this->run_modes(array(
-			   'start' => 'showStart'
+			   'start' => 'showStart',
+			   'profile' => 'showProfile',
+			   'template' => 'selectTemplate',
+			   'edit' => 'editTemplate',
+			   'history' => 'showHistory',
+			   'detail' => 'showJobDetail',
+			   'confirm' => 'showConfirmation',
+			   'thanks' => 'showFinal'
 			   ));
     // should be an entry for each of the run modes above
     $this->run_modes_default_text = array(
-					  'start' => 'University Stationery home'
+					  'start' => 'University Stationery home',
+					  'profile' => 'Edit your Profile',
+					  'template' => 'Select a Template',
+					  'edit' => 'Edit your Template',
+					  'history' => 'Order history',
+					  'detail' => 'Previous job details',
+					  'confirm' => 'Confirm and Print',
+					  'thanks' => 'Thank you'
 					  );
     $this->start_mode('start');
     //$this->error_mode('handle_errors');
@@ -119,13 +133,74 @@ class Stationery extends Cgiapp2 {
   /**
    * showStart
    * Starting page -- shows instructions on how to use the app.
+   * redirect to showProfile if no profile is defined locally
+   * for this username
    */
   function showStart() {
-    $t = 'base.html';
-      /*if (!empty($this->template_filename)) {
-      echo($this->template_filename); 
-      
-      }*/
+    $t = 'start.html';
+    $t = $this->twig->loadTemplate($t);
+    $output = $t->render(array());
+    return $output;
+  }
+function showProfile() {
+  /* edit account profile
+   * default if no account setup
+   */
+    $t = 'profile.html';
+    $t = $this->twig->loadTemplate($t);
+    $output = $t->render(array());
+    return $output;
+  }
+function selectTemplate() {
+  /* choose from one of the available CHILI templates */
+    $t = 'template.html';
+    $t = $this->twig->loadTemplate($t);
+    $output = $t->render(array());
+    return $output;
+  }
+function editTemplate() {
+  /* embed the CHILI editor and submit button */
+    $t = 'edit.html';
+    $t = $this->twig->loadTemplate($t);
+    $output = $t->render(array());
+    return $output;
+  }
+function showHistory() {
+  /* show a list of past jobs for this user */
+    $t = 'history.html';
+    $t = $this->twig->loadTemplate($t);
+    $output = $t->render(array());
+    return $output;
+  }
+function showJobDetail() {
+  /* show details of a specific past job
+   * include a 're-order' button which defines
+   * a new job with the parameters of this one
+   */
+     $t = 'detail.html';
+    $t = $this->twig->loadTemplate($t);
+    $output = $t->render(array());
+    return $output;
+  }
+function showConfirmation() {
+  /* confirmation screen requires
+   * THEMIS code
+   * quantity
+   * special comments
+   * pressing Submit here: 
+   * updates the local job database, 
+   * contacts CHILI for a job number
+   * prints job as proof pdf
+   * sends proof and job data to temporary storage area
+   * redirect to showFinal 
+   */ 
+    $t = 'confirm.html';
+    $t = $this->twig->loadTemplate($t);
+    $output = $t->render(array());
+    return $output;
+  }
+function showFinal() {
+    $t = 'final.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array());
     return $output;

@@ -12,7 +12,7 @@ $twig = new Twig_Environment($loader, array(
 /* define variables to be used with the template */
 /* Load the actual template here */
 
-$template = $twig->loadTemplate('base.html');
+$template = $twig->loadTemplate('start.html');
 echo $template->render(array(
 ));
 ?>

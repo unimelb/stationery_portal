@@ -94,6 +94,7 @@ class Stationery extends Cgiapp2 {
 			   'thanks' => 'showFinal'
 			   ));
     // should be an entry for each of the run modes above
+    /* not yet used 2013-12-13 */
     $this->run_modes_default_text = array(
 					  'start' => 'University Stationery home',
 					  'profile' => 'Edit your Profile',

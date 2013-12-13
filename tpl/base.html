@@ -61,14 +61,16 @@
         <h1><a href="/" title="Marketing">University Marketing</a><br />&nbsp;</h1>
       </div>
       <div class="nav-wrapper">
-				<!-- work out how to include "includes/menu.html" -->
+				{% include 'menu.html' %}
       </div>
     </div>
     
     <div class="col-6" id="main">
 			
-			<h2>University Stationery</h2>
-			<!-- content sub template goes here ie. <%block content%>Hello Giles!<%endblock%> or whatever -->
+			<h2>{% block title %}University Stationery{% endblock %}</h2>
+			{% block content %}
+			<p>Hello Giles!</p>
+			{% endblock %}
 			
 		</div>
 		<div class="aside col-2">
@@ -83,7 +85,7 @@
   </div>
   <hr>
   <div class="footer">
-    <!-- include footer.html -->
+    {% include 'mcd-footer.html' %}
   </div>
 </body>
 </html>

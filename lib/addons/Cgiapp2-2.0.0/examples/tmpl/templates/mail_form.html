@@ -1,0 +1,49 @@
+<style><!--{literal}
+    form fieldset label {
+        clear: both;
+        float: left;
+        width: 150px;
+    }
+    .center {
+        text-align: center;
+    }
+{/literal}--></style>
+{if $errors}
+<h4>Warning!</h4>
+<p>The following errors occurred in your submission:</p>
+<ul>
+    {foreach from=$errors item=msg}
+    <li>{$msg}</li>
+    {/foreach}
+</ul>
+{/if}
+<form action="{$smarty.server.SCRIPT_NAME}" method="post">
+    <fieldset>
+        <legend>Contact Me:</legend>
+        <label for="fromName">Your name:</label>
+        <input type='text' name='fromName' value="{$values.fromName}" 
+            size="30" maxlength="255" />
+        <br /><br />
+
+        <label for="fromEmail"</label>
+        <label for="fromEmail">Your email address:</label>
+        <input type='text' name='fromEmail' value="{$values.fromEmail}" 
+            size="30" maxlength="255" />
+        <br /><br />
+
+        <label for="subject">Message Subject:</label>
+        <input type='text' name='subject' value="{$values.subject}" 
+            size="30" maxlength="255" />
+        <br /><br />
+
+        <label for="message">Your Message:</label><br />
+        <textarea name="message" cols="27"
+            rows="10">{$values.message}</textarea>
+
+        <input name="q" type="hidden" value="mail" />
+
+        <p class="center"><input name="submit" type="submit"
+            value="Send!" /></p>
+    </fieldset>
+</form>
+

@@ -1,0 +1,8 @@
+<h4>The following information was sent:</h4>
+<ul>
+{foreach from=$values item=item key=key}
+    <li><b>{$key}:</b> {$item}</li>
+{/foreach}
+</ul>
+<p><a href="{$smarty.server.SCRIPT_NAME}">Send another</a></p>
+

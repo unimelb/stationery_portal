@@ -1,0 +1,80 @@
+Cgiapp2 - Framework for building reusable web-applications
+
+A PHP5 port of perl's CGI::Application, a framework for building reusable web
+applications.
+
+Cgiapp2 provides an extensible framework for creating reusable web applications
+that allows for clean separation of design and code. It is an object oriented,
+abstract class; the intention is that programmers using it will subclass, or
+extend, the class for their individual application(s).
+
+INSTALLATION
+============
+You may install Cgiapp2 in two ways: with the pear command, or manually.
+
+PEAR INSTALLER:
+As a user with PEAR privileges, simply execute 'pear install Cgiapp2-X.Y.Z.tgz'
+(where X.Y.Z is the current version number). Cgiapp2.class.php will then be
+installed in your PEAR repository, as will all helper classes, unit tests,
+documentation, and example code.
+
+To upgrade as a PEAR package, assuming you have installed Cgiapp2 previously as
+a PEAR package, execute 'pear upgrade Cgiapp2-X.Y.Z.tgz'.
+
+MANUAL INSTALLATION:
+Untar the tarball somewhere in your PHP include path. 
+
+ALL INSTALLATIONS:
+You may then use Cgiapp2 by using
+    'require_once "Cgiapp2.class.php";' 
+or 
+    'require_once "/path/to/Cgiapp2.class.php";'
+
+Since Cgiapp2 is an abstract class, it cannot be used out-of-the box; you will
+need to extend the class as outlined in the documentation.
+
+DOCUMENTATION
+=============
+For those doing a manual installation, documentation is found in the 'doc'
+folder, and was generated using PhpDocumentor (http://www.phpdoc.org) directly
+on the source code. 
+
+Documentation for the 2.x.y branch of Cgiapp2 is always available at:
+
+    http://cgiapp.sourceforge.net/cgiapp2_doc/
+
+While the documentation is complete, you may wish to consult various
+CGI::Application resources, including:
+
+* "Using CGI::Application":
+  http://www.perl.com/pub/a/2001/06/05/cgi.html
+
+* the CGI::Application wiki:
+  http://cgiapp.erlbaum.net/cgi-bin/cgi-app/index.cgi
+
+If you are new to Cgiapp2 or CGI::Application, PLEASE READ THE DOCUMENTATION,
+and I recommend reading the article "Using CGI::Application", linked above. 
+
+PLUGINS
+=======
+Cgiapp version 1.7.0 introduced a plugin architecture. However, that
+architecture was completely rewritten for the Cgiapp2 series to comply with the
+4.x series of CGI::Application.  The documentation has details on how to
+implement a plugin. 
+
+If you have a plugin that you wish to bundle with Cgiapp2, please contact the
+author or file a feature request on the SourceForge tracker.
+
+SUPPORT
+=======
+Cgiapp2 is provided as-is. However, bug, patch, and feature request trackers are
+present via the SourceForge project, as are two mailing lists:
+
+    http://sourceforge.net/projects/cgiapp 
+
+Please utilize these before contacting me so that a public record exists (and
+thus eliminate the chance of duplicate bugs, etc.).
+
+AUTHOR
+======
+Matthew Weier O'Phinney <mweierophinney@gmail.com>

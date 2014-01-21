@@ -1,0 +1,149 @@
+2006-06-03: v2.0.0
+================
+First STABLE release of 2.x series
+
+The 2.x series of Cgiapp completes a PHP5 port of Cgiapp2. PHP5 compatibility
+changes include visibility operators for all properties and methods, declaration
+of many methods as static and/or final, and the use of exceptions for catching
+run mode errors. Most notably, though, is the fact that Cgiapp2 is now an
+abstract class, with one abstract method, setup(); this enforces the fact that
+you must subclass Cgiapp2 in order to create your application.
+
+New features include:
+* Callback hook system. Cgiapp2 is now an observer subject, and has hooks at
+  several locations within the application. Additionally, it provides a method
+  for registering new hooks in your applications. The callback hook system
+  replaces the plugin system introduced in Cgiapp 1.7.0.
+
+* Template engines are now relegated to plugin classes, and should implement the
+  Cgiapp2_Plugin_Template_Interface. Shipped template engines include Smarty,
+  Savant2, Savant3, and XSLT.
+
+* Improved and more extensive error handling, which has been expanded to
+  exceptions as well. Cgiapp2_Exception and Cgiapp2_Error are both observable
+  subjects, with interface classes for implementing observers. This allows the
+  developer to tie into exceptions and errors and perform actions when triggered
+  (Log and Mail observers are implemented for each).
+
+* Cgiapp2_FrontController class. This is a simple front controller that
+  dispatches to public static methods in registered classes. Included is a
+  'page' controller for handling static pages.
+
+For more information and upgrade notes, see the documentation.
+
+2006-05-03: v2.0.0rc2
+================
+RELEASE CANDIDATE!
+This is the second release candidate for the 2.0.0 branch of Cgiapp, Cgiapp2.
+
+* Fixes path_info() to determine path based on REQUEST_URI when PATH_INFO is
+  either empty or not present.
+
+* Added additional test to mode_param.phpt to test using a method as the
+  mode_param
+
+* A BC break with cgiapp_postrun() was discovered. Since call_hook() cannot
+  accept arguments by reference (since it allows variable numbers of arguments),
+  the $body argument wasn't being passed by reference, and the generated content
+  could not be altered. A new method, postrun_body() was created that may be
+  called from any postrun hook, allowing it to set the contents of $body.
+
+* NEW: Cgiapp2_FrontController class added. Simple front controller that
+  dispatches to registered class public static methods. Includes a 'page'
+  controller for static pages.
+
+2006-02-09: v2.0.0rc1
+================
+RELEASE CANDIDATE!
+This is the initial release of the 2.0.0 branch of Cgiapp, Cgiapp2.
+
+Version 2.0.0 has several goals:
+
+* PHP5-only, E_STRICT compatible. Note: libraries used with Cgiapp2 may or may
+  not be E_STRICT compatible. At the time of this writing, for instance, Smarty
+  and Savant2 are not.
+
+* Cgiapp2 is now an abstract class, preventing it from being instantiated by
+  itself. All methods and variables now have visibility operators. The setup()
+  method is now abstract and MUST be overridden in the extending class.
+
+* Adds in new functionality from recent CGI::Application releases. This
+  includes the extensive callback hook system introduced in that library
+  (add_callback(), new_hook(), and call_hook() methods).
+
+* Addition of exception and error handling helper classes
+
+* Code cleanup
+
+Changes in this release:
+
+* Code cleanup. Changed many instances of "in_array($key, array_keys($array))"
+  to simply "isset($array[$key])"; replaced redundant "is_array($array) &&
+  self::is_assoc_array($array)" calls with "self::is_assoc_array($array)"; and
+  many other code optimizations.
+
+* Simplified is_assoc_array()
+
+* Removed punctuation at end of all croak() and carp() calls.
+
+* Removed __call() in favor of CGI::Application callback hook API. Added
+  add_callback(), new_hook(), and call_hook() methods; added static property
+  $-INSTALLED_CALLBACKS to register hooks and callbacks.
+
+* Added path_info() static method. Allows retrieving of PATH_INFO as an array,
+  or retrieving an element from PATH_INFO by index. mode_param() was altered to
+  use this.
+
+* Added three template plugins: Cgiapp2_Plugin_Smarty, Cgiapp2_Plugin_Savant2,
+  and Cgiapp2_Plugin_Savant3 (all of which implement
+  Cgiapp2_Plugin_Template_Interface). 
+
+* No longer uses Smarty by default. Developers will need to include a template
+  plugin when using their classes. However, if these implement the
+  Cgiapp2_Plugin_Template_Interface, usage of the tmpl_path(), tmpl_assign(),
+  and load_tmpl() methods will make switching template engines trivial.
+
+* Removed Cgiapp2_Plugin_HTML_QuickForm plugin. Doesn't conform with the new
+  callback hook API, and I don't personally have the time or interest to
+  maintain it.
+
+* Added exception and error handling classes.
+  Cgiapp2_Exception is an observable exception class; two observers,
+  Cgiapp2_Exception_Observer_Log and Cgiapp2_Exception_Observer_Mail, are
+  included as well. Additionally, Cgiapp2_Exception_Error can be used to throw
+  exceptions from non-fatal PHP errors, and is used in run() when evaluating a
+  run mode.
+
+  Cgiapp2_Error is an observable PHP error handler class. It, too, has two
+  observer classes, Cgiapp2_Error_Observer_Log and Cgiapp2_Error_Observer_Mail.
+  It can be used to handle non-fatal PHP errors, such as those triggered by
+  carp().
+
+* Visibility operators. Many functions are now static, including:
+  * query()
+  * path_info()
+  * cap_hash() (was _cap_hash())
+  * is_assoc_array()
+  * array_to_hash()
+  * carp()
+  * croak()
+
+* Several methods marked as 'final' to prevent overriding in subclasses:
+  * __construct()
+  * run()
+  * add_callback()
+  * new_hook()
+  * call_hook()
+  * header_props()
+  * header_type()
+  * mode_param()
+  * run_modes()
+  * start_mode()
+  * prerun_mode()
+  * error_mode()
+  * param()
+  * delete()
+  * s_param()
+  * s_delete()
+  * _send_headers()
+

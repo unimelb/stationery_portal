@@ -1,0 +1,145 @@
+<html>
+<head>
+<title>File Source for Interface.class.php</title>
+<link rel="stylesheet" type="text/css" href="../media/style.css">
+</head>
+<body>
+
+<table border="0" cellspacing="0" cellpadding="0" height="48" width="100%">
+  <tr>
+    <td class="header_top">Cgiapp2</td>
+  </tr>
+  <tr><td class="header_line"><img src="../media/empty.png" width="1" height="1" border="0" alt=""  /></td></tr>
+  <tr>
+    <td class="header_menu">
+  		  [ <a href="../classtrees_Cgiapp2.html" class="menu">class tree: Cgiapp2</a> ]
+		  [ <a href="../elementindex_Cgiapp2.html" class="menu">index: Cgiapp2</a> ]
+		  [ <a href="../elementindex.html" class="menu">all elements</a> ]
+    </td>
+  </tr>
+  <tr><td class="header_line"><img src="../media/empty.png" width="1" height="1" border="0" alt=""  /></td></tr>
+</table>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="200" class="menu">
+	<div id="ric">
+					<p><a href="../ric_Changelog.html">Changelog</a></p>
+					<p><a href="../ric_README.html">README</a></p>
+			</div>
+      <b>Packages:</b><br />
+              <a href="../li_Cgiapp2.html">Cgiapp2</a><br />
+            <br /><br />
+                  
+                </td>
+    <td>
+      <table cellpadding="10" cellspacing="0" width="100%" border="0"><tr><td valign="top">
+
+<h1 align="center">Source for file Interface.class.php</h1>
+<p>Documentation is available at <a href="../Cgiapp2/_Cgiapp2_Plugin_Template_Interface_class_php.html">Interface.class.php</a></p>
+<div class="php">
+<div class="listing"><pre><ol><li><a name="a1"></a><span class="src-php">&lt;?php</span></li>
+<li><a name="a2"></a><span class="src-doc">/**</span></li>
+<li><a name="a3"></a><span class="src-doc"> * Cgiapp2 - Framework for building reusable web-applications</span></li>
+<li><a name="a4"></a><span class="src-doc"> *</span></li>
+<li><a name="a5"></a><span class="src-doc"> * A PHP5 port of perl's CGI::Application, a framework for building reusable web</span></li>
+<li><a name="a6"></a><span class="src-doc"> * applications.</span></li>
+<li><a name="a7"></a><span class="src-doc"> *</span></li>
+<li><a name="a8"></a><span class="src-doc"> * </span><span class="src-doc-coretag">@package</span><span class="src-doc"> Cgiapp2</span></li>
+<li><a name="a9"></a><span class="src-doc"> * </span><span class="src-doc-coretag">@author</span><span class="src-doc"> Matthew Weier O'Phinney &lt;mweierophinney@gmail.com&gt;; based on</span></li>
+<li><a name="a10"></a><span class="src-doc"> *  CGI::Application, by Jesse Erlbaum &lt;jesse@erlbaum.net&gt;, et. al.</span></li>
+<li><a name="a11"></a><span class="src-doc"> * </span><span class="src-doc-coretag">@copyright</span><span class="src-doc"> (c) 2004 - present, Matthew Weier O'Phinney</span></li>
+<li><a name="a12"></a><span class="src-doc"> * </span><span class="src-doc-coretag">@license</span><span class="src-doc"> BSD License (http://www.opensource.org/licenses/bsd-license.php)</span></li>
+<li><a name="a13"></a><span class="src-doc"> * </span><span class="src-doc-coretag">@category</span><span class="src-doc"> Tools and Utilities</span></li>
+<li><a name="a14"></a><span class="src-doc"> * </span><span class="src-doc-coretag">@tutorial</span><span class="src-doc"> Cgiapp2/Cgiapp2.cls</span></li>
+<li><a name="a15"></a><span class="src-doc"> * </span><span class="src-doc-coretag">@version</span><span class="src-doc"> $Id:$</span></li>
+<li><a name="a16"></a><span class="src-doc"> */</span></li>
+<li><a name="a17"></a>&nbsp;</li>
+<li><a name="a18"></a><span class="src-doc">/**</span></li>
+<li><a name="a19"></a><span class="src-doc"> * Cgiapp2_Plugin_Template_Interface</span></li>
+<li><a name="a20"></a><span class="src-doc"> *</span></li>
+<li><a name="a21"></a><span class="src-doc"> * Defines an interface for a template plugin. A template engine should</span></li>
+<li><a name="a22"></a><span class="src-doc"> * implement </span><span class="src-doc-inlinetag">{@link init() an initialization method}</span><span class="src-doc">,</span></li>
+<li><a name="a23"></a><span class="src-doc"> * </span><span class="src-doc-inlinetag">{@link assign() a variable assignment method}</span><span class="src-doc">, and</span></li>
+<li><a name="a24"></a><span class="src-doc"> * </span><span class="src-doc-inlinetag">{@link fetch() a method for fetching the compiled template}</span><span class="src-doc">.</span></li>
+<li><a name="a25"></a><span class="src-doc"> *</span></li>
+<li><a name="a26"></a><span class="src-doc"> * Template plugins that utilize this interface will work seamlessly with</span></li>
+<li><a name="a27"></a><span class="src-doc"> * Cgiapp2's </span><span class="src-doc-inlinetag">{@link Cgiapp2::tmpl_path()}</span><span class="src-doc">, </span><span class="src-doc-inlinetag">{@link Cgiapp2::tmpl_assign()}</span><span class="src-doc">, and</span></li>
+<li><a name="a28"></a><span class="src-doc"> * </span><span class="src-doc-inlinetag">{@link Cgiapp2::load_tmpl()}</span><span class="src-doc"> methods.</span></li>
+<li><a name="a29"></a><span class="src-doc"> *</span></li>
+<li><a name="a30"></a><span class="src-doc"> * Since a </span><span class="src-doc-inlinetag">{@link Cgiapp2}</span><span class="src-doc"> derived class is passed to each, the template engine</span></li>
+<li><a name="a31"></a><span class="src-doc"> * may choose to register itself with that class using the</span></li>
+<li><a name="a32"></a><span class="src-doc"> * </span><span class="src-doc-inlinetag">{@link Cgiapp2::param()}</span><span class="src-doc"> method. Alternatively, it may implement a singleton;</span></li>
+<li><a name="a33"></a><span class="src-doc"> * these details are left to the programmer.</span></li>
+<li><a name="a34"></a><span class="src-doc"> *</span></li>
+<li><a name="a35"></a><span class="src-doc"> * The plugin class should then register itself with Cgiapp2 or a Cgiapp2-derived</span></li>
+<li><a name="a36"></a><span class="src-doc"> * class via </span><span class="src-doc-inlinetag">{@link Cgiapp2::add_callback()}</span><span class="src-doc">:</span></li>
+<li><a name="a37"></a><span class="src-doc"> * &lt;code&gt;</span></li>
+<li><a name="a38"></a><span class="src-doc"> * class MyTemplatePlugin implements Cgiapp2_Plugin_Template_Interface { //... }</span></li>
+<li><a name="a39"></a><span class="src-doc"> *  Cgiapp2::add_callback('tmpl_path', array('MyTemplatePlugin', 'init'), 'Cgiapp2');</span></li>
+<li><a name="a40"></a><span class="src-doc"> *  Cgiapp2::add_callback('tmpl_assign', array('MyTemplatePlugin', 'assign'), 'Cgiapp2');</span></li>
+<li><a name="a41"></a><span class="src-doc"> *  Cgiapp2::add_callback('tmpl_fetch', array('MyTemplatePlugin', 'fetch'), 'Cgiapp2');</span></li>
+<li><a name="a42"></a><span class="src-doc"> * &lt;/code&gt;</span></li>
+<li><a name="a43"></a><span class="src-doc"> * </span></li>
+<li><a name="a44"></a><span class="src-doc"> * </span><span class="src-doc-coretag">@package</span><span class="src-doc"> Cgiapp2</span></li>
+<li><a name="a45"></a><span class="src-doc"> * </span><span class="src-doc-coretag">@author</span><span class="src-doc"> Matthew Weier O'Phinney &lt;mweierophinney@gmail.com&gt;</span></li>
+<li><a name="a46"></a><span class="src-doc"> * </span><span class="src-doc-coretag">@copyright</span><span class="src-doc"> 2006-Present, Matthew Weier O'Phinney &lt;mweierophinney@gmail.com&gt;</span></li>
+<li><a name="a47"></a><span class="src-doc"> * </span><span class="src-doc-coretag">@version</span><span class="src-doc"> @release-version@</span></li>
+<li><a name="a48"></a><span class="src-doc"> */</span></li>
+<li><a name="a49"></a><span class="src-key">interface </span><a href="../Cgiapp2/Cgiapp2_Plugin_Template_Interface.html">Cgiapp2_Plugin_Template_Interface</a></li>
+<li><a name="a50"></a><span class="src-sym">{</span></li>
+<li><a name="a51"></a>    <span class="src-doc">/**</span></li>
+<li><a name="a52"></a><span class="src-doc">     * Initialize template engine</span></li>
+<li><a name="a53"></a><span class="src-doc">     *</span></li>
+<li><a name="a54"></a><span class="src-doc">     * Note: Classes that implement must include the class hint for the $cgiapp</span></li>
+<li><a name="a55"></a><span class="src-doc">     * argument.</span></li>
+<li><a name="a56"></a><span class="src-doc">     * </span></li>
+<li><a name="a57"></a><span class="src-doc">     * </span><span class="src-doc-coretag">@static</span></li>
+<li><a name="a58"></a><span class="src-doc">     * </span><span class="src-doc-coretag">@access</span><span class="src-doc"> public</span></li>
+<li><a name="a59"></a><span class="src-doc">     * </span><span class="src-doc-coretag">@param </span><span class="src-doc-type">Cgiapp2 </span><span class="src-doc-var">$cgiapp </span></li>
+<li><a name="a60"></a><span class="src-doc">     * </span><span class="src-doc-coretag">@param </span><span class="src-doc-type">string </span><span class="src-doc-var">$tmpl_path </span></li>
+<li><a name="a61"></a><span class="src-doc">     * </span><span class="src-doc-coretag">@param </span><span class="src-doc-type">array </span><span class="src-doc-var">$extra_params </span></li>
+<li><a name="a62"></a><span class="src-doc">     * </span><span class="src-doc-coretag">@return </span><span class="src-doc-type">bool </span></li>
+<li><a name="a63"></a><span class="src-doc">     */</span></li>
+<li><a name="a64"></a>    <span class="src-key">public </span><span class="src-key">static </span><span class="src-key">function </span><a href="../Cgiapp2/Cgiapp2_Plugin_Template_Interface.html#methodinit">init</a><span class="src-sym">(</span><span class="src-id">Cgiapp2 </span><span class="src-var">$cgiapp</span><span class="src-sym">, </span><span class="src-var">$tmpl_path</span><span class="src-sym">, </span><span class="src-var">$extra_params </span>= <span class="src-id">null</span><span class="src-sym">)</span><span class="src-sym">;</span></li>
+<li><a name="a65"></a>&nbsp;</li>
+<li><a name="a66"></a>    <span class="src-doc">/**</span></li>
+<li><a name="a67"></a><span class="src-doc">     * Assign variables to the template</span></li>
+<li><a name="a68"></a><span class="src-doc">     * </span></li>
+<li><a name="a69"></a><span class="src-doc">     * Note: Classes that implement must include the class hint for the $cgiapp</span></li>
+<li><a name="a70"></a><span class="src-doc">     * argument.</span></li>
+<li><a name="a71"></a><span class="src-doc">     * </span></li>
+<li><a name="a72"></a><span class="src-doc">     * </span><span class="src-doc-coretag">@static</span></li>
+<li><a name="a73"></a><span class="src-doc">     * </span><span class="src-doc-coretag">@access</span><span class="src-doc"> public</span></li>
+<li><a name="a74"></a><span class="src-doc">     * </span><span class="src-doc-coretag">@param </span><span class="src-doc-type">Cgiapp2 </span><span class="src-doc-var">$cgiapp </span></li>
+<li><a name="a75"></a><span class="src-doc">     * </span><span class="src-doc-coretag">@return </span><span class="src-doc-type">bool </span></li>
+<li><a name="a76"></a><span class="src-doc">     */</span></li>
+<li><a name="a77"></a>    <span class="src-key">public </span><span class="src-key">static </span><span class="src-key">function </span><a href="../Cgiapp2/Cgiapp2_Plugin_Template_Interface.html#methodassign">assign</a><span class="src-sym">(</span><span class="src-id">Cgiapp2 </span><span class="src-var">$cgiapp</span><span class="src-sym">)</span><span class="src-sym">;</span></li>
+<li><a name="a78"></a>&nbsp;</li>
+<li><a name="a79"></a>    <span class="src-doc">/**</span></li>
+<li><a name="a80"></a><span class="src-doc">     * Fetch compiled template</span></li>
+<li><a name="a81"></a><span class="src-doc">     * </span></li>
+<li><a name="a82"></a><span class="src-doc">     * Note: Classes that implement must include the class hint for the $cgiapp</span></li>
+<li><a name="a83"></a><span class="src-doc">     * argument.</span></li>
+<li><a name="a84"></a><span class="src-doc">     * </span></li>
+<li><a name="a85"></a><span class="src-doc">     * </span><span class="src-doc-coretag">@static</span></li>
+<li><a name="a86"></a><span class="src-doc">     * </span><span class="src-doc-coretag">@access</span><span class="src-doc"> public</span></li>
+<li><a name="a87"></a><span class="src-doc">     * </span><span class="src-doc-coretag">@param </span><span class="src-doc-type">Cgiapp2 </span><span class="src-doc-var">$cgiapp </span></li>
+<li><a name="a88"></a><span class="src-doc">     * </span><span class="src-doc-coretag">@param </span><span class="src-doc-type">mixed </span><span class="src-doc-var">$tmpl_file </span></li>
+<li><a name="a89"></a><span class="src-doc">     * </span><span class="src-doc-coretag">@return </span><span class="src-doc-type">string </span></li>
+<li><a name="a90"></a><span class="src-doc">     */</span></li>
+<li><a name="a91"></a>    <span class="src-key">public </span><span class="src-key">static </span><span class="src-key">function </span><a href="../Cgiapp2/Cgiapp2_Plugin_Template_Interface.html#methodfetch">fetch</a><span class="src-sym">(</span><span class="src-id">Cgiapp2 </span><span class="src-var">$cgiapp</span><span class="src-sym">, </span><span class="src-var">$tmpl_file</span><span class="src-sym">)</span><span class="src-sym">;</span></li>
+<li><a name="a92"></a><span class="src-sym">}</span></li>
+</ol></pre></div>
+</div>
+        <div class="credit">
+		    <hr />
+		    Documentation generated on Sat, 03 Jun 2006 10:48:43 -0400 by <a href="http://www.phpdoc.org">phpDocumentor 1.3.0RC5</a>
+	      </div>
+      </td></tr></table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

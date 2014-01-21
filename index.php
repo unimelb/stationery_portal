@@ -5,10 +5,10 @@
  * @author Damian Sweeney <dsweeney@unimelb.edu.au>
  * @author Patrick Maslen <pmaslen@unimelb.edu.au>
  */
-//session_name('stationery');
-//session_start();
+session_name('stationery');
+session_start();
 require_once(dirname(__FILE__) . "/lib/find_path.inc.php");
-//include_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/passport.php");
+include_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/passport.php");
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/cgiapps/stationery.class.php");
 // require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/dbconnect.inc.php");
 $template_path = $_SERVER["DOCUMENT_ROOT"] . LIBPATH . '/tpl/';

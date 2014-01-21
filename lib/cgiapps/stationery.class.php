@@ -140,7 +140,9 @@ class Stationery extends Cgiapp2 {
   function showStart() {
     $t = 'start.html';
     $t = $this->twig->loadTemplate($t);
-    $output = $t->render(array());
+    $output = $t->render(array(
+			       'modes' => $this->run_modes_default_text
+			       ));
     return $output;
   }
 function showProfile() {
@@ -149,28 +151,36 @@ function showProfile() {
    */
     $t = 'profile.html';
     $t = $this->twig->loadTemplate($t);
-    $output = $t->render(array());
+    $output = $t->render(array(
+			       'modes' => $this->run_modes_default_text
+			       ));
     return $output;
   }
 function selectTemplate() {
   /* choose from one of the available CHILI templates */
     $t = 'template.html';
     $t = $this->twig->loadTemplate($t);
-    $output = $t->render(array());
+    $output = $t->render(array(
+			       'modes' => $this->run_modes_default_text
+			       ));
     return $output;
   }
 function editTemplate() {
   /* embed the CHILI editor and submit button */
     $t = 'edit.html';
     $t = $this->twig->loadTemplate($t);
-    $output = $t->render(array());
+    $output = $t->render(array(
+			       'modes' => $this->run_modes_default_text
+			       ));
     return $output;
   }
 function showHistory() {
   /* show a list of past jobs for this user */
     $t = 'history.html';
     $t = $this->twig->loadTemplate($t);
-    $output = $t->render(array());
+    $output = $t->render(array(
+			       'modes' => $this->run_modes_default_text
+			       ));
     return $output;
   }
 function showJobDetail() {
@@ -180,7 +190,9 @@ function showJobDetail() {
    */
      $t = 'detail.html';
     $t = $this->twig->loadTemplate($t);
-    $output = $t->render(array());
+    $output = $t->render(array(
+			       'modes' => $this->run_modes_default_text
+			       ));
     return $output;
   }
 function showConfirmation() {
@@ -197,13 +209,17 @@ function showConfirmation() {
    */ 
     $t = 'confirm.html';
     $t = $this->twig->loadTemplate($t);
-    $output = $t->render(array());
+    $output = $t->render(array(
+			       'modes' => $this->run_modes_default_text
+			       ));
     return $output;
   }
 function showFinal() {
     $t = 'final.html';
     $t = $this->twig->loadTemplate($t);
-    $output = $t->render(array());
+    $output = $t->render(array(
+			       'modes' => $this->run_modes_default_text
+			       ));
     return $output;
   }
 }

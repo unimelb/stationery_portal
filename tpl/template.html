@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Choose template{% endblock %}
+{% block content %}
+<p>Choose from one of the available CHILI templates</p>
+<p>Requires:</p>
+<ul>
+  <li>profile information (from database)</li>
+    </ul>
+<p>Yields:</p>
+<ul>
+  <li>Template type</li>
+    </ul>
+{% endblock %}
+{% block nav %}
+{% include 'nav.html' %}
+{% endblock nav %}

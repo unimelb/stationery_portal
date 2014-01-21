@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Confirm order{% endblock %}
+{% block content %}
+<p>Confirm order and take final details</p>
+<p>Requires:</p>
+<ul>
+  <li>job details</li>
+  <li>themis code</li>
+  <li>quantity</li>
+  <li>special comments</li>
+    </ul>
+<p>Yields: a CHILI request</p>
+<p>prints job as proof pdf</p>
+<p>sends proof and job data to temporary storage area</p>
+<p>redirect to <a href="index.php?mode=final">final screen</a></p>
+{% endblock %}
+{% block nav %}
+{% include 'nav.html' %}
+{% endblock nav %}

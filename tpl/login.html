@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block title %}University Stationery login{% endblock %}
 {% block content %}
+{{ notice | raw }}
 <form method="post" action="checkin.php">
+  <p>If LDAP isn't working, or for testing, user godzilla; pass monster</p>
 	<fieldset>
 		<legend id="login">Please enter your UniMelb student email username and password:</legend>
 		<p><label for="userName" class="greenbodytext">Username</label>: <input id="userName" name="userName" type="text" size="20" /></p>

@@ -2,13 +2,33 @@
 {% block title %}University Stationery login{% endblock %}
 {% block content %}
 {{ notice | raw }}
-<form method="post" action="checkin.php">
-  <p>If LDAP isn't working, or for testing, user godzilla; pass monster</p>
-	<fieldset>
-		<legend id="login">Please enter your University of Melbourne email username and password:</legend>
-		<p><label for="userName" class="greenbodytext">Username</label>: <input id="userName" name="userName" type="text" size="20" /></p>
-		<p><label for="pw" class="greenbodytext">Password</label>: &nbsp;<input id="pw" name="pw" type="password" size="20" value="" /></p>
-		<p><input type="submit" value="Login" /></p>
+<hr><br />
+<form method="post" action="checkin.php" id="login_form_login_prompt">
+  
+	<fieldset class="col-6 first">
+		<p>If LDAP isn't working, or for testing, user godzilla; pass monster</p>
+		<legend>Please login using your Unimelb staff credentials</legend>
+		<p><label for="userName" class="col-2">Username</label>: <span class="col-3"><input id="userName" name="userName" type="text" size="30" /></span></p>
+		<p><label for="pw" class="col-2">Password</label>: <span class="col-3"><input id="pw" name="pw" type="password" size="30" value="" /></span></p>
+		<hr>
+		<p><span class="push-2 col-3"><input type="submit" value="Login" id="log_in_out_button" /></span></p>
 	</fieldset>
 </form>
 {% endblock %}
+
+
+{# <form action="/intranet/lti?SQ_ACTION=login" id="login_form_login_prompt" method="post" onsubmit="return checkEntry();">
+					
+    <fieldset>
+    <h4>Please login using your Unimelb staff credentials</h4>
+    
+    <label class="col-2">Username:</label>
+    <span class="col-3"><input type="hidden" name="SQ_LOGIN_KEY"      value="swkqnfvyqrpzqwldhvfn" />
+					  <input type="hidden" name="SQ_LOGIN_REFERER"  value="" /><input type="text" name="SQ_LOGIN_USERNAME" value="" size="30" onfocus="this.select();" class="sq-data" id="SQ_LOGIN_USERNAME" /></span>
+    <hr>
+    <label class="col-2">Password:</label>
+    <span class="col-3"><input type="password" name="SQ_LOGIN_PASSWORD" value="" size="30" onfocus="this.select();" class="sq-data" id="SQ_LOGIN_PASSWORD" /></span>
+    <hr>
+    <span class="push-2 col-3"><input type="submit" name="log_in_out_button" value="Login"  class="sq-data" id="log_in_out_button" /></span>
+    
+					</form> #}

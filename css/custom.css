@@ -58,6 +58,23 @@ padding: 8px;
 
 /*#main h2 { margin-bottom: 50px;}*/
 
+/* ========= Login box ======= */
+
+/* #login_form_login_prompt { display: none; } */
+
+body.login #login_form_login_prompt, #loggedin.intranet #login_form_login_prompt { display: inherit; }
+
+body.login #login_form_login_prompt {
+  position: relative;
+  color: #333;
+}
+body.login #login_form_login_prompt #log_in_out_button {
+  float: none;
+  color: white;
+}
+body.login h2 { margin-top: 90px; }
+body.login .hgroup .subheading { display: none; }
+
 /*nav styles*/
 
 .nav-wrapper { float: right;}

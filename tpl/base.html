@@ -68,6 +68,9 @@
     <div class="col-6" id="main">
 			
 			<h2>{% block title %}University Stationery{% endblock %}</h2>
+{% block error %}
+{{(error|default(''))|raw}}
+{% endblock %}
 			{% block content %}
 			<p>Hello Giles!</p>
 			{% endblock %}

@@ -41,7 +41,6 @@ class Stationery extends Cgiapp2 {
    * loader for twig environment
    */
   private $loader;
-
   function setup() {
     /** 
      * database
@@ -135,27 +134,58 @@ class Stationery extends Cgiapp2 {
    * showStart
    * Starting page -- shows instructions on how to use the app.
    * redirect to showProfile if no profile is defined locally
-   * for this username
+   * for this username ($_SESSION["username"])
    */
   function showStart() {
+    /* check database for user name */
+    $username = $_SESSION["username"];
+    try {
+      $conn = new PDO(DBCONNECT, DBUSER, DBPASS);
+      $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $stmt = $conn->prepare('SELECT * FROM user WHERE username = :id');
+      $stmt->execute(array('id' => $username));
+      if ($stmt->rowCount() == 0) {
+	// go to profile page
+	return $this->showProfile();
+      }
+    } catch(Exception $e) {
+      $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
     $t = 'start.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
-			       'modes' => $this->run_modes_default_text
+			       'modes' => $this->run_modes_default_text,
+			       'error' => $error
 			       ));
     return $output;
   }
-function showProfile() {
-  /* edit account profile
-   * default if no account setup
-   */
+  function showProfile() {
+    /* edit account profile
+     * default if no account setup
+     * save profile in database
+     */
+    /* Show an introductory message for first-time users
+     */
+    $first_time = false;
+ try {
+      $conn = new PDO(DBCONNECT, DBUSER, DBPASS);
+      $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $stmt = $conn->prepare('SELECT * FROM user WHERE username = :id');
+      $stmt->execute(array('id' => $username));
+      if ($stmt->rowCount() == 0) {
+	// go to profile page
+	$first_time = true;
+      }
+    } catch(Exception $e) {
+      $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
     $t = 'profile.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
 			       'modes' => $this->run_modes_default_text
 			       ));
     return $output;
-  }
+}
 function selectTemplate() {
   /* choose from one of the available CHILI templates */
     $t = 'template.html';

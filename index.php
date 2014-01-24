@@ -10,7 +10,7 @@ session_start();
 require_once(dirname(__FILE__) . "/lib/find_path.inc.php");
 include_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/passport.php");
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/cgiapps/stationery.class.php");
-// require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/dbconnect.inc.php");
+require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/dbconnect.inc.php");
 $template_path = $_SERVER["DOCUMENT_ROOT"] . LIBPATH . '/tpl/';
 // template_params must at minimum include 'filename' keyword
 $title = "University Stationery";

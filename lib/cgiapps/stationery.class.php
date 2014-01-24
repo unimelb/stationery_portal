@@ -41,11 +41,18 @@ class Stationery extends Cgiapp2 {
    * loader for twig environment
    */
   private $loader;
+  /** 
+   * @var object $conn
+   * PDO database connection
+   */
+  private $conn;
   function setup() {
     /** 
      * database
      */
     // $this->dbconnect_string = DBCONNECT;
+    $this->conn = new PDO(DBCONNECT, DBUSER, DBPASS);
+    $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     /** 
      * template
      */
@@ -121,6 +128,8 @@ class Stationery extends Cgiapp2 {
    * function to shut everything down after the app has run
    */
   function teardown() {
+    // close database connection
+    $this->conn = null;
   }  
   /**
    * error handling
@@ -138,12 +147,11 @@ class Stationery extends Cgiapp2 {
    */
   function showStart() {
     /* check database for user name */
-    $username = $_SESSION["username"];
     try {
-      $conn = new PDO(DBCONNECT, DBUSER, DBPASS);
-      $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-      $stmt = $conn->prepare('SELECT * FROM user WHERE username = :id');
-      $stmt->execute(array('id' => $username));
+      //$conn = new PDO(DBCONNECT, DBUSER, DBPASS);
+      //$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $stmt = $this->conn->prepare('SELECT * FROM user WHERE username = :id');
+      $stmt->execute(array('id' => $_SESSION["username"]));
       if ($stmt->rowCount() == 0) {
 	// go to profile page
 	return $this->showProfile();
@@ -168,10 +176,10 @@ class Stationery extends Cgiapp2 {
      */
     $first_time = false;
  try {
-      $conn = new PDO(DBCONNECT, DBUSER, DBPASS);
-      $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-      $stmt = $conn->prepare('SELECT * FROM user WHERE username = :id');
-      $stmt->execute(array('id' => $username));
+   //$conn = new PDO(DBCONNECT, DBUSER, DBPASS);
+   //$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $stmt = $this->conn->prepare('SELECT * FROM user WHERE username = :id');
+      $stmt->execute(array('id' => $_SESSION["username"]));
       if ($stmt->rowCount() == 0) {
 	// go to profile page
 	$first_time = true;

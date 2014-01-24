@@ -60,7 +60,9 @@ class LDAPLogin extends Login
 	 */
 	public function connect()
 	{
-		$this->ldapconn = @ldap_connect(LDAP_CONNECTION);
+	  //$this->ldapconn = @ldap_connect(LDAP_CONNECTION);
+	  // @ suppresses error message; restore after testing without
+		$this->ldapconn = ldap_connect(LDAP_CONNECTION);
 	}
 	/**
 	 * disconnect from an LDAP server

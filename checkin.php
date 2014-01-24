@@ -32,7 +32,7 @@ $_SESSION = array();
 /**
  * Check the login details provided
  */
-require_once(dirname(__FILE__) . "/lib/find_path.inc.php");
+//require_once(dirname(__FILE__) . "/lib/find_path.inc.php");
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/controllers/auth/ldap_login.class.php");
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/controllers/request.class.php");
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/login_session_updater.class.php");

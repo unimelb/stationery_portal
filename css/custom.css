@@ -1,7 +1,7 @@
 /*  Used to manage your own custom styles  */
 /*  universal styles  */
 
-h2 { font-size: 32px; margin-bottom: 30px; color: #fff;}
+h2 { font-size: 32px; margin-bottom: 14px; color: #fff;}
 
 h2.uniblue { color: #003366; }
 
@@ -11,12 +11,13 @@ a { text-decoration: underline;}
 
 form { overflow: visible;}
 
-.wrapper { margin-bottom: 100px;}
+.wrapper { margin-bottom: 100px; }
+.wrapper.white { background: #fff; padding: 20px 40px 40px 20px; margin-left: -30px; margin-bottom: 40px; }
 
 .header .hgroup h1 { padding-top: 32px; padding-bottom: 0; }
 .header .hgroup h1 a { text-decoration: none;}
 
-.aside { padding-top: 69px;}
+.aside { padding: 0; margin-top: 0;}
 .aside span { font-size: 12px;}
 
 .pullquote { font-size: 20px; line-height: 1.3em;}
@@ -39,7 +40,7 @@ span.red-notice { font-size: 16px; font-weight: bold; color: #cc0000; padding-le
 
 #local { margin-bottom: 0px;}
 
-.sub-page { background: url('../images/header-background/branding-background.jpg') repeat-x; background-position: 50% 60px !important;}
+.sub-page { background: url('../images/header-background/branding-background-1.jpg') #003366 repeat-x; background-position: 50% 60px !important;}
 
 .footnote {font-size:11px;}
 

@@ -64,31 +64,36 @@
 				{% include 'menu.html' %}
       </div>
     </div>
-    
-    <div class="col-6" id="main">
+
+		<h2>{% block title %}University Stationery{% endblock %}</h2>
+		
+		<hr />
+		
+		<div class="wrapper white col-8 first" id="main">
+			<div class="col-6" id="content">
+				{% block error %}
+					{{(error|default(''))|raw}}
+				{% endblock %}
+				
+				{% block content %}
+					<p>Hello Giles!</p>
+				{% endblock %}
+			</div>
 			
-			<h2>{% block title %}University Stationery{% endblock %}</h2>
-{% block error %}
-{{(error|default(''))|raw}}
-{% endblock %}
-			{% block content %}
-			<p>Hello Giles!</p>
-			{% endblock %}
-			
+			<div class="aside col-2">
+				<h3>Having a Problem with this Portal?</h3>
+				<p><strong>UOM Chili Publish Admin</strong><br />
+					<strong>Email:</strong> <a href="mailto:&#x63;&#x68;&#x69;&#x6C;&#x69;&#x40;&#x6C;&#x69;&#x73;&#x74;&#x73;&#x2E;&#x75;&#x6E;&#x69;&#x6D;&#x65;&#x6C;&#x62;&#x2E;&#x65;&#x64;&#x75;&#x2E;&#x61;&#x75;">chili@lists.unimelb.edu.au</a></p>
+				<hr class="visible" />
+				<p><a class="icon document large" href=""><strong>Looking to</strong>Order Stationery</a></p>
+				<hr /><br />
+				{% block nav %}
+				{% endblock nav %}
+				<hr />
+			</div>
+			<hr>
 		</div>
-		<div class="aside col-2">
-			<h3>Having a Problem with this Portal?</h3>
-			<p><strong>UOM Chili Publish Admin</strong><br />
-				<strong>Email:</strong> <a href="mailto:&#x63;&#x68;&#x69;&#x6C;&#x69;&#x40;&#x6C;&#x69;&#x73;&#x74;&#x73;&#x2E;&#x75;&#x6E;&#x69;&#x6D;&#x65;&#x6C;&#x62;&#x2E;&#x65;&#x64;&#x75;&#x2E;&#x61;&#x75;">chili@lists.unimelb.edu.au</a></p>
-			<hr class="visible" />
-			<p><a class="icon document large" href=""><strong>Looking to</strong>Order Stationery</a></p>
-			<hr /><br />
-{% block nav %}
-{% endblock nav %}
-<hr />
-		</div>
-		<hr> 
-  </div>
+	</div>
   <hr>
   <div class="footer">
     {% include 'mcd-footer.html' %}

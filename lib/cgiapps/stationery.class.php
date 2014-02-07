@@ -172,16 +172,25 @@ class Stationery extends Cgiapp2 {
      * default if no account setup
      * save profile in database
      */
-    /* Show an introductory message for first-time users
-     */
     $first_time = false;
-    $first_name = $_SESSION["given_names"] = "Godzilla";
-    
+    $selects = array(
+		     'SELECT * FROM user WHERE username = :id',
+		     'SELECT name FROM department'
+		     );
  try {
-      $stmt = $this->conn->prepare('SELECT * FROM user WHERE username = :id');
+      $stmt = $this->conn->prepare($selects[0]);
       $stmt->execute(array('id' => $_SESSION["username"]));
       if ($stmt->rowCount() == 0) {
+	/* Show an introductory message for first-time users */
 	$first_time = true;
+	$first_name = $_SESSION["given_names"];
+	$surname = $_SESSION["family_name"];
+	$email = $_SESSION["email"];
+       }
+      else {
+	//while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
+	//print_r($row);
+	}
       }
     } catch(Exception $e) {
       $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
@@ -191,7 +200,10 @@ class Stationery extends Cgiapp2 {
     $output = $t->render(array(
 			       'modes' => $this->run_modes_default_text,
 			       'user' => $this->username,
-			       'first_time' => $first_time
+			       'first_time' => $first_time,
+			       'first_name' => $first_name,
+			       'surname' => $surname,
+			       'email' => $email
 			       ));
     return $output;
 }

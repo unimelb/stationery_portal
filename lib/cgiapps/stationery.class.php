@@ -175,13 +175,12 @@ class Stationery extends Cgiapp2 {
     /* Show an introductory message for first-time users
      */
     $first_time = false;
+    $first_name = $_SESSION["given_names"] = "Godzilla";
+    
  try {
-   //$conn = new PDO(DBCONNECT, DBUSER, DBPASS);
-   //$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
       $stmt = $this->conn->prepare('SELECT * FROM user WHERE username = :id');
       $stmt->execute(array('id' => $_SESSION["username"]));
       if ($stmt->rowCount() == 0) {
-	// go to profile page
 	$first_time = true;
       }
     } catch(Exception $e) {
@@ -191,7 +190,8 @@ class Stationery extends Cgiapp2 {
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
 			       'modes' => $this->run_modes_default_text,
-			       'user' => $this->username
+			       'user' => $this->username,
+			       'first_time' => $first_time
 			       ));
     return $output;
 }

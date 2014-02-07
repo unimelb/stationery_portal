@@ -190,7 +190,8 @@ class Stationery extends Cgiapp2 {
     $t = 'profile.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
-			       'modes' => $this->run_modes_default_text
+			       'modes' => $this->run_modes_default_text,
+			       'user' => $this->username
 			       ));
     return $output;
 }

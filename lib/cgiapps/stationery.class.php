@@ -187,9 +187,10 @@ class Stationery extends Cgiapp2 {
     $first_time = false;
     $selects = array(
 		     'SELECT * FROM user WHERE username = :id',
-		     'SELECT name FROM department'
+		     'SELECT name, department_id FROM department'
 		     );
- try {
+    /* get user details */
+    try {
       $stmt = $this->conn->prepare($selects[0]);
       $stmt->execute(array('id' => $_SESSION["username"]));
       if ($stmt->rowCount() == 0) {
@@ -200,13 +201,27 @@ class Stationery extends Cgiapp2 {
 	$email = $_SESSION["email"];
        }
       else {
-	//while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
-	//print_r($row);
+	while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+	  $first_name = $row["given_name"];
+	  $surname = $row["family_name"];
+	  $email = $row["email"];
+	  $phone = $row["phone"];
 	}
       }
      catch(Exception $e) {
       $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     }
+     /* get department names */
+	$departments = new array();
+    try {
+      $stmt = $this->conn->prepare($selects[1]);
+      $stmt->execute(array();
+	while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
+	  array_push ($departments, $row);
+	}
+     catch(Exception $e) {
+      $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    } 
     $t = 'profile.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
@@ -215,7 +230,9 @@ class Stationery extends Cgiapp2 {
 			       'first_time' => $first_time,
 			       'first_name' => $first_name,
 			       'surname' => $surname,
-			       'email' => $email
+			       'email' => $email,
+			       'phone' => $phone,
+			       'departments' => $departments
 			       ));
     return $output;
 }

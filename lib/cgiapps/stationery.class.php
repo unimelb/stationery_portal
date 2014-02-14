@@ -52,7 +52,7 @@ class Stationery extends Cgiapp2 {
      */
     // $this->dbconnect_string = DBCONNECT;
     $this->conn = new PDO(DBCONNECT, DBUSER, DBPASS);
-    $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     /** 
      * template
      */

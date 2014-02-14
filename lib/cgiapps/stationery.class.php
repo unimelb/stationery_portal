@@ -46,13 +46,25 @@ class Stationery extends Cgiapp2 {
    * PDO database connection
    */
   private $conn;
+  /**
+   * @var error
+   * error messages
+   */
+  private $error;
+
   function setup() {
     /** 
      * database
      */
     // $this->dbconnect_string = DBCONNECT;
-    $this->conn = new PDO(DBCONNECT, DBUSER, DBPASS);
-    $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    /* should put some error catching here */
+    try {
+      $this->conn = new PDO(DBCONNECT, DBUSER, DBPASS);
+      $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    }
+    catch(PDOException $e) {
+      $this->error = 'ERROR: ' . $e->getMessage();
+    }
     /** 
      * template
      */

@@ -192,7 +192,7 @@ class Stationery extends Cgiapp2 {
 	//print_r($row);
 	}
       }
-    } catch(Exception $e) {
+     catch(Exception $e) {
       $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     }
     $t = 'profile.html';

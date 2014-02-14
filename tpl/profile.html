@@ -5,48 +5,51 @@
 {% if first_time == true %}
 <p><span class="important">IMPORTANT:</span> Before you start using University Stationery, you must set up a profile by completing the form below.</p>
 {% endif %}
-<h4>Username: <span class="username">{{ user }}</span></h4>
 <form>
 	<fieldset class="personal-details">
-  <label for="firstname">First name</label>
-  <input id="firstname" required="required" value="{{ first_name }}" />
-  <label for="lastname">Last name</label>
-  <input id="lastname" required="required" value="{{ surname }}" />
-  <label for="phone">Telephone</label>
-  <input id="telephone" required="required"/>
-  <label for="email">Email</label>
-  <input type="email" id="email" required="required" value="{{ email }}" />
-  <label for="department">Department/Faculty</label>
-  <select>
-    {% for department in departments %}
-    <option>{{ department }}</option>
-    {% endfor %}
-  </select>
+		<h3>Username: <span class="username">{{ user }}</span></h3>
+		<label for="firstname">First name</label>
+		<input id="firstname" required="required" value="{{ first_name }}" />
+		<label for="lastname">Last name</label>
+		<input id="lastname" required="required" value="{{ surname }}" />
+		<label for="phone">Telephone</label>
+		<input id="telephone" required="required"/>
+		<label for="email">Email</label>
+		<input type="email" id="email" required="required" value="{{ email }}" />
+		<label for="department">Department/Faculty</label>
+		<select>
+			{% for department in departments %}
+			<option>{{ department }}</option>
+			{% endfor %}
+		</select>
 	</fieldset>
-
-<fieldset class="address">
-  <h3>Delivery Address</h3>
-  <label for="addressee">Addressee</label>
-  <input id="addressee">
-  <label for="location">Location</label>
-  <input id="location" placeholder="eg. level, office no, etc">
-  <label for="number">Number</label>
-  <input id="number">
-  <label for="street">Street name</label>
-  <input id="street">
-  <label for="town">Town/Campus</label>
-  <input id="town">
-  <label for="postcode">Postcode</label>
-  <input id="postcode">
-  <!-- note that 2-letter country code is a field in the database, but deliveries are assumed to be in Australia for now 2014-02-07 -->
-</fieldset>
-  <p>The system automatically grants access to the approved University of Melbourne corporate style for stationery. If you require access to other templates, such as those for Faculties or Graduate Schools, please select from the list below:</p>
-<fieldset>
-  {% for department in departments %}
-  <label><input type="checkbox" name="department" />{{ department }}</label>
-  {% endfor %}
-</fieldset>
-<label><input type="submit" value="Update details"></label>
+	
+	<fieldset class="address">
+		<h3>Delivery Address</h3>
+		<label for="addressee">Addressee</label>
+		<input id="addressee">
+		<label for="location">Location</label>
+		<input id="location" placeholder="eg. level, office no, etc">
+		<label for="number">Number</label>
+		<input id="number">
+		<label for="street">Street name</label>
+		<input id="street">
+		<label for="town">Town/Campus</label>
+		<input id="town">
+		<label for="postcode">Postcode</label>
+		<input id="postcode">
+		<!-- note that 2-letter country code is a field in the database, but deliveries are assumed to be in Australia for now 2014-02-07 -->
+	</fieldset>
+	
+	<p>The system automatically grants access to the approved University of Melbourne corporate style for stationery. If you require access to other templates, such as those for Faculties or Graduate Schools, please select from the list below:</p>
+	
+	<fieldset>
+		{% for department in departments %}
+		<label><input type="checkbox" name="department" />{{ department }}</label>
+		{% endfor %}
+	</fieldset>
+	
+	<label><input type="submit" value="Update details"></label>
 </form>
 {% endblock %}
 {% block nav %}

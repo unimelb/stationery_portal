@@ -208,17 +208,19 @@ class Stationery extends Cgiapp2 {
 	  $phone = $row["phone"];
 	}
       }
-     catch(Exception $e) {
+    }
+    catch(Exception $e) {
       $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     }
      /* get department names */
-	$departments = new array();
+    $departments = array();
     try {
       $stmt = $this->conn->prepare($selects[1]);
-      $stmt->execute(array();
+      $stmt->execute(array());
 	while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
 	  array_push ($departments, $row);
 	}
+    }
      catch(Exception $e) {
       $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     } 

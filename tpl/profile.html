@@ -19,7 +19,7 @@
 		<label for="department">Department/Faculty</label>
 		<select>
 			{% for department in departments %}
-			<option>{{ department }}</option>
+			<option value="{{ department.department_id }}">{{ department.name }}</option>
 			{% endfor %}
 		</select>
 	</fieldset>
@@ -45,7 +45,7 @@
 	
 	<fieldset>
 		{% for department in departments %}
-		<label><input type="checkbox" name="department" />{{ department }}</label>
+		<label><input type="checkbox" name="department" value="{{ department.department_id }}"/>{{ department.name }}</label>
 		{% endfor %}
 	</fieldset>
 	

@@ -5,11 +5,9 @@
 {% if first_time == true %}
 <p><span class="important">IMPORTANT:</span> Before you start using University Stationery, you must set up a profile by completing the form below.</p>
 {% endif %}
-<p>Requires:</p>
-<ul>
-  <li>user name (from login): {{ user }}</li>
-    </ul>
+<h4>Username: <span class="username">{{ user }}</span></h4>
 <form>
+	<fieldset class="personal-details">
   <label for="firstname">First name</label>
   <input id="firstname" required="required" value="{{ first_name }}" />
   <label for="lastname">Last name</label>
@@ -24,6 +22,7 @@
     <option>{{ department }}</option>
     {% endfor %}
   </select>
+	</fieldset>
 
 <fieldset class="address">
   <h3>Delivery Address</h3>

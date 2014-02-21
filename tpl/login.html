@@ -2,18 +2,16 @@
 {% block title %}University Stationery login{% endblock %}
 {% block content %}
 {{ notice | raw }}
-<hr><br />
-<form method="post" action="checkin.php" id="login_form_login_prompt">
-  
-	<fieldset class="col-6 first">
-		<p>If LDAP isn't working, or for testing, user godzilla; pass monster</p>
-		<legend>Please login using your Unimelb staff credentials</legend>
-		<p><label for="userName" class="col-2">Username</label>: <span class="col-3"><input id="userName" name="userName" type="text" size="30" /></span></p>
-		<p><label for="pw" class="col-2">Password</label>: <span class="col-3"><input id="pw" name="pw" type="password" size="30" value="" /></span></p>
-		<hr>
-		<p><span class="push-2 col-3"><input type="submit" value="Login" id="log_in_out_button" /></span></p>
-	</fieldset>
-</form>
+	<form method="post" action="checkin.php" id="login_form_login_prompt">
+		<fieldset>
+			<h3>If LDAP isn't working, or for testing, user godzilla; pass monster</h3>
+			<legend>Please login using your Unimelb staff credentials</legend>
+			<label for="userName" class="col-2">Username</label> <span class="col-3"><input id="userName" name="userName" type="text" size="30" /></span>
+			<label for="pw" class="col-2">Password</label> <span class="col-3"><input id="pw" name="pw" type="password" size="30" value="" /></span>
+			<hr>
+			<span class="push-2 col-3"><input type="submit" value="Login" id="log_in_out_button" /></span>
+		</fieldset>
+	</form>
 {% endblock %}
 
 

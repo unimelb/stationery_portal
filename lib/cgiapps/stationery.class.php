@@ -51,6 +51,11 @@ class Stationery extends Cgiapp2 {
    * error messages
    */
   private $error;
+  /** 
+   * @var action
+   * default action for forms
+   */
+  private $action;
 
   function setup() {
     /** 
@@ -105,6 +110,7 @@ class Stationery extends Cgiapp2 {
     $this->run_modes(array(
 			   'start' => 'showStart',
 			   'profile' => 'showProfile',
+			   'new_profile' => 'createProfile',
 			   'template' => 'selectTemplate',
 			   'edit' => 'editTemplate',
 			   'history' => 'showHistory',
@@ -180,6 +186,18 @@ class Stationery extends Cgiapp2 {
 			       ));
     return $output;
   }
+  function createProfile() {
+    if (isset($_REQUEST["submitted"])) {
+      $error = print_r($_REQUEST);
+    }
+    $t = 'base.html';
+    $t = $this->twig->loadTemplate($t);
+    $output = $t->render(array(
+			       'modes' => $this->run_modes_default_text,
+			       'error' => $error
+			       ));
+    return $output;
+  }
   function showProfile() {
     /* edit account profile
      * default if no account setup
@@ -191,6 +209,8 @@ class Stationery extends Cgiapp2 {
 		     'SELECT name, department_id FROM department'
 		     );
     /* get user details */
+    $phone = "";
+    $error = $this->error;
     try {
       $stmt = $this->conn->prepare($selects[0]);
       $stmt->execute(array('id' => $_SESSION["username"]));
@@ -222,9 +242,21 @@ class Stationery extends Cgiapp2 {
 	  array_push ($departments, $row);
 	}
     }
-     catch(Exception $e) {
-      $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
-    } 
+    catch(Exception $e) {
+       $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
+    if (isset($_REQUEST["submitted"])) {
+      /* if the form has been submitted, insert if it the first time
+       * for this user; update the record otherwise
+       */
+      $error = print_r($_REQUEST, true);
+      /*if ($first_time == true) {
+	return $this->createProfile();
+      }
+      else {
+	$error = "<p>Updating". $this->username . "&hellip;</p>";
+	}*/
+    }
     $t = 'profile.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
@@ -235,7 +267,9 @@ class Stationery extends Cgiapp2 {
 			       'surname' => $surname,
 			       'email' => $email,
 			       'phone' => $phone,
-			       'departments' => $departments
+			       'departments' => $departments,
+			       'action' => $this->action,
+			       'error' => $error
 			       ));
     return $output;
 }

@@ -39,7 +39,7 @@
 	
 	<fieldset>
 		{% for department in departments %}
-		<label class="col-6" style="text-align: left;"><input type="checkbox" name="department" value="{{ department.department_id }}"/>{{ department.name }}</label>
+		<label class="col-6" style="text-align: left;"><input type="checkbox" name="department-{{ department.department_id }}" value="{{ department.department_id }}"/>{{ department.name }}</label>
 		{% endfor %}
 	</fieldset>
 	

@@ -8,16 +8,16 @@
 <form>
 	<fieldset class="personal-details">
 		<h3>Username: <span class="username">{{ user }}</span></h3>
-		<label for="firstname">First name</label>
-		<input id="firstname" required="required" value="{{ first_name }}" />
-		<label for="lastname">Last name</label>
-		<input id="lastname" required="required" value="{{ surname }}" />
-		<label for="phone">Telephone</label>
-		<input id="telephone" required="required"/>
-		<label for="email">Email</label>
-		<input type="email" id="email" required="required" value="{{ email }}" />
-		<label for="department">Department/Faculty</label>
-		<select>
+		<label class="col-2" for="firstname">First name</label>
+		<input class="col-3" id="firstname" required="required" value="{{ first_name }}" />
+		<label class="col-2" for="lastname">Last name</label>
+		<input class="col-3" id="lastname" required="required" value="{{ surname }}" />
+		<label class="col-2" for="phone">Telephone</label>
+		<input class="col-3" id="telephone" required="required"/>
+		<label class="col-2" for="email">Email</label>
+		<input class="col-3" type="email" id="email" required="required" value="{{ email }}" />
+		<label class="col-2" for="department">Department/Faculty</label>
+		<select class="col-3">
 			{% for department in departments %}
 			<option value="{{ department.department_id }}">{{ department.name }}</option>
 			{% endfor %}
@@ -26,18 +26,18 @@
 	
 	<fieldset class="address">
 		<h3>Delivery Address</h3>
-		<label for="addressee">Addressee</label>
-		<input id="addressee">
-		<label for="location">Location</label>
-		<input id="location" placeholder="eg. level, office no, etc">
-		<label for="number">Number</label>
-		<input id="number">
-		<label for="street">Street name</label>
-		<input id="street">
-		<label for="town">Town/Campus</label>
-		<input id="town">
-		<label for="postcode">Postcode</label>
-		<input id="postcode">
+		<label class="col-2" for="addressee">Addressee</label>
+		<input class="col-3" id="addressee">
+		<label class="col-2" for="location">Location</label>
+		<input class="col-3" id="location" placeholder="eg. level, office no, etc">
+		<label class="col-2" for="number">Number</label>
+		<input class="col-3" id="number">
+		<label class="col-2" for="street">Street name</label>
+		<input class="col-3" id="street">
+		<label class="col-2" for="town">Town/Campus</label>
+		<input class="col-3" id="town">
+		<label class="col-2" for="postcode">Postcode</label>
+		<input class="col-3" id="postcode">
 		<!-- note that 2-letter country code is a field in the database, but deliveries are assumed to be in Australia for now 2014-02-07 -->
 	</fieldset>
 	
@@ -45,7 +45,7 @@
 	
 	<fieldset>
 		{% for department in departments %}
-		<label><input type="checkbox" name="department" value="{{ department.department_id }}"/>{{ department.name }}</label>
+		<label class="col-6" style="text-align: left;"><input type="checkbox" name="department" value="{{ department.department_id }}"/>{{ department.name }}</label>
 		{% endfor %}
 	</fieldset>
 	

@@ -64,6 +64,7 @@ class Stationery extends Cgiapp2 {
     }
     catch(PDOException $e) {
       $this->error = 'ERROR: ' . $e->getMessage();
+      $this->conn = null;
     }
     /** 
      * template
@@ -141,7 +142,7 @@ class Stationery extends Cgiapp2 {
    */
   function teardown() {
     // close database connection
-    $this->conn = null;
+      $this->conn = null;
   }  
   /**
    * error handling

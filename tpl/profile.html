@@ -16,12 +16,6 @@
 		<input class="col-3" id="telephone" required="required"/>
 		<label class="col-2" for="email">Email</label>
 		<input class="col-3" type="email" id="email" required="required" value="{{ email }}" />
-		<label class="col-2" for="department">Department/Faculty</label>
-		<select class="col-3">
-			{% for department in departments %}
-			<option value="{{ department.department_id }}">{{ department.name }}</option>
-			{% endfor %}
-		</select>
 	</fieldset>
 	
 	<fieldset class="address">

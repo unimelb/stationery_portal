@@ -9,13 +9,13 @@
 	<fieldset class="personal-details">
 		<h3>Username: <span class="username">{{ user }}</span></h3>
 		<label class="col-2" for="firstname">First name</label>
-		<input class="col-3" id="firstname" required="required" value="{{ first_name }}" />
+		<input class="col-3" name="firstname" id="firstname" required="required" value="{{ first_name }}" />
 		<label class="col-2" for="lastname">Last name</label>
-		<input class="col-3" id="lastname" required="required" value="{{ surname }}" />
+		<input class="col-3" name="lastname" id="lastname" required="required" value="{{ surname }}" />
 		<label class="col-2" for="phone">Telephone</label>
-		<input class="col-3" id="telephone" required="required"/>
+		<input class="col-3" name="telephone" id="telephone" required="required"/>
 		<label class="col-2" for="email">Email</label>
-		<input class="col-3" type="email" id="email" required="required" value="{{ email }}" />
+		<input class="col-3" type="email" name="email" id="email" required="required" value="{{ email }}" />
 		<label class="col-2" for="department">Department/Faculty</label>
 		<select class="col-3">
 			{% for department in departments %}
@@ -27,17 +27,17 @@
 	<fieldset class="address">
 		<h3>Delivery Address</h3>
 		<label class="col-2" for="addressee">Addressee</label>
-		<input class="col-3" id="addressee">
+		<input class="col-3" name="addressee" id="addressee">
 		<label class="col-2" for="location">Location</label>
-		<input class="col-3" id="location" placeholder="eg. level, office no, etc">
+		<input class="col-3" name="location" id="location" placeholder="eg. level, office no, etc">
 		<label class="col-2" for="number">Number</label>
-		<input class="col-3" id="number">
+		<input class="col-3" name="number" id="number">
 		<label class="col-2" for="street">Street name</label>
-		<input class="col-3" id="street">
+		<input class="col-3" name="street" id="street">
 		<label class="col-2" for="town">Town/Campus</label>
-		<input class="col-3" id="town">
+		<input class="col-3" name="town" id="town">
 		<label class="col-2" for="postcode">Postcode</label>
-		<input class="col-3" id="postcode">
+		<input class="col-3" name="postcode" id="postcode">
 		<!-- note that 2-letter country code is a field in the database, but deliveries are assumed to be in Australia for now 2014-02-07 -->
 	</fieldset>
 	

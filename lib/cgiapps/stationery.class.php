@@ -187,6 +187,7 @@ class Stationery extends Cgiapp2 {
     return $output;
   }
   function createProfile() {
+    /* not sure if this is necessary PMGM 22/2/2014 */
     if (isset($_REQUEST["submitted"])) {
       $error = print_r($_REQUEST);
     }
@@ -206,7 +207,7 @@ class Stationery extends Cgiapp2 {
     $first_time = false;
     $selects = array(
 		     'SELECT * FROM user WHERE username = :id',
-		     'SELECT name, department_id FROM department'
+		     'SELECT name, acronym, department_id FROM department'
 		     );
     /* get user details */
     $phone = "";
@@ -245,6 +246,10 @@ class Stationery extends Cgiapp2 {
     catch(Exception $e) {
        $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     }
+    /* divide department list into 2 for styling */
+    $list1_length = ceil(count($departments)/2);
+    $departments1 = array_slice($departments, 0, $list1_length );
+    $departments2 = array_slice($departments, -1 * ($list1_length-1));
     if (isset($_REQUEST["submitted"])) {
       /* if the form has been submitted, insert if it the first time
        * for this user; update the record otherwise
@@ -267,7 +272,8 @@ class Stationery extends Cgiapp2 {
 			       'surname' => $surname,
 			       'email' => $email,
 			       'phone' => $phone,
-			       'departments' => $departments,
+			       'departments1'=> $departments1,
+			       'departments2'=> $departments2,
 			       'action' => $this->action,
 			       'error' => $error
 			       ));

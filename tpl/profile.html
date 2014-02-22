@@ -36,13 +36,25 @@
 	</fieldset>
 	
 	<p>The system automatically grants access to the approved University of Melbourne corporate style for stationery. If you require access to other templates, such as those for Faculties or Graduate Schools, please select from the list below:</p>
-	
 	<fieldset>
-		{% for department in departments %}
-		<label class="col-6" style="text-align: left;"><input type="checkbox" name="department-{{ department.department_id }}" value="{{ department.department_id }}"/>{{ department.name }}</label>
+<div class = "col-3 first">
+		{% for department in departments1 %}
+<label class="col-6" style="text-align: left;"><input type="checkbox" name="department-{{ department.department_id }}" value="{{ department.department_id }}"/>
+		{% if department.acronym is not empty %}<abbr title="{{ department.name }}">{{ department.acronym }}</abbr>{% else %}{{ department.name }}
+		{% endif %}
+</label>
 		{% endfor %}
+</div>
+<div class = "col-3">
+{% for department in departments2 %}
+<label class="col-6" style="text-align: left;"><input type="checkbox" name="department-{{ department.department_id }}" value="{{ department.department_id }}"/>
+		{% if department.acronym is not empty %}<abbr title="{{ department.name }}">{{ department.acronym }}</abbr>{% else %}{{ department.name }}
+		{% endif %}
+</label>
+		{% endfor %}
+</div>
 	</fieldset>
-	
+
 	<label><input name="submitted" type="submit" value="Update details"></label>
 </form>
 {% endblock %}

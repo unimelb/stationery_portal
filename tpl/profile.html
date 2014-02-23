@@ -39,7 +39,7 @@
 	<fieldset>
 <div class = "col-3 first">
 		{% for department in departments1 %}
-<label class="col-6" style="text-align: left;"><input type="checkbox" name="department-{{ department.department_id }}" value="{{ department.department_id }}"/>
+<label class="col-3" style="text-align: left;"><input type="checkbox" name="department-{{ department.department_id }}" value="{{ department.department_id }}"/>
 		{% if department.acronym is not empty %}<abbr title="{{ department.name }}">{{ department.acronym }}</abbr>{% else %}{{ department.name }}
 		{% endif %}
 </label>
@@ -47,7 +47,7 @@
 </div>
 <div class = "col-3">
 {% for department in departments2 %}
-<label class="col-6" style="text-align: left;"><input type="checkbox" name="department-{{ department.department_id }}" value="{{ department.department_id }}"/>
+<label class="col-3" style="text-align: left;"><input type="checkbox" name="department-{{ department.department_id }}" value="{{ department.department_id }}"/>
 		{% if department.acronym is not empty %}<abbr title="{{ department.name }}">{{ department.acronym }}</abbr>{% else %}{{ department.name }}
 		{% endif %}
 </label>

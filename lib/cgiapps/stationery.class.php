@@ -56,7 +56,11 @@ class Stationery extends Cgiapp2 {
    * default action for forms
    */
   private $action;
-
+  /** 
+   * @var first_time
+   * sets to true if a user has not set up a profile
+   */
+  private $first_time;
   function setup() {
     /** 
      * database
@@ -65,6 +69,7 @@ class Stationery extends Cgiapp2 {
     /* should put some error catching here */
     try {
       $this->conn = new PDO(DBCONNECT, DBUSER, DBPASS);
+      $this->conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
       $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
     catch(PDOException $e) {
@@ -173,7 +178,7 @@ class Stationery extends Cgiapp2 {
       $stmt->execute(array('id' => $_SESSION["username"]));
       if ($stmt->rowCount() == 0) {
 	// go to profile page
-	return $this->showProfile();
+	return $this->createProfile();
       }
     } catch(Exception $e) {
       $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
@@ -188,80 +193,53 @@ class Stationery extends Cgiapp2 {
   }
   function createProfile() {
     /* not sure if this is necessary PMGM 22/2/2014 */
-    if (isset($_REQUEST["submitted"])) {
-      $error = print_r($_REQUEST);
-    }
-    $t = 'base.html';
-    $t = $this->twig->loadTemplate($t);
-    $output = $t->render(array(
-			       'modes' => $this->run_modes_default_text,
-			       'error' => $error
-			       ));
-    return $output;
-  }
-  function showProfile() {
-    /* edit account profile
-     * default if no account setup
-     * save profile in database
-     */
-    $first_time = false;
-    $selects = array(
+    $first_time = true;
+    $inserts = array(
+		     'INSERT INTO user VALUES(:username, :firstname, :lastname, :telephone, :email);',
+		     'INSERT INTO user_department VALUES(:username, :department_id)'
+		     );
+$selects = array(
 		     'SELECT * FROM user WHERE username = :id',
 		     'SELECT name, acronym, department_id FROM department'
 		     );
-    /* get user details */
-    $phone = "";
-    $error = $this->error;
+    if (isset($_REQUEST["submitted"])) {
+      $error = print_r($_REQUEST);
+      try {
+	$stmt = $pdo->prepare($inserts[0]);
+	/*$stmt2 = $pdo->prepare($inserts[1]);*/
+	$stmt->execute(array(
+			     'username' => $_SESSION["username"],
+			     'firstname' => $_REQUEST['firstname'],
+			     'lastname' => $_REQUEST['lastname'],
+			     'telephone' => $_REQUEST['telephone'],
+			     'email' => $_REQUEST['email']
+			     ));
+	$error .= "<p>Adding details for ". $this->username . ".</p>";
+	return $this->showProfile();
+      }
+      catch(PDOException $e) {
+	$error .= $e->getMessage();
+      }
+    }
+    $first_name = $_SESSION["given_names"];
+    $surname = $_SESSION["family_name"];
+    $email = $_SESSION["email"];
+/* get department names */
+    $departments = array();
     try {
-      $stmt = $this->conn->prepare($selects[0]);
-      $stmt->execute(array('id' => $_SESSION["username"]));
-      if ($stmt->rowCount() == 0) {
-	/* Show an introductory message for first-time users */
-	$first_time = true;
-	$first_name = $_SESSION["given_names"];
-	$surname = $_SESSION["family_name"];
-	$email = $_SESSION["email"];
-       }
-      else {
-	while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-	  $first_name = $row["given_name"];
-	  $surname = $row["family_name"];
-	  $email = $row["email"];
-	  $phone = $row["phone"];
-	}
+      $stmt = $this->conn->prepare($selects[1]);
+      $stmt->execute(array());
+      while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
+	array_push ($departments, $row);
       }
     }
     catch(Exception $e) {
       $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     }
-     /* get department names */
-    $departments = array();
-    try {
-      $stmt = $this->conn->prepare($selects[1]);
-      $stmt->execute(array());
-	while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
-	  array_push ($departments, $row);
-	}
-    }
-    catch(Exception $e) {
-       $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
-    }
     /* divide department list into 2 for styling */
     $list1_length = ceil(count($departments)/2);
     $departments1 = array_slice($departments, 0, $list1_length );
     $departments2 = array_slice($departments, -1 * ($list1_length-1));
-    if (isset($_REQUEST["submitted"])) {
-      /* if the form has been submitted, insert if it the first time
-       * for this user; update the record otherwise
-       */
-      $error = print_r($_REQUEST, true);
-      /*if ($first_time == true) {
-	return $this->createProfile();
-      }
-      else {
-	$error = "<p>Updating". $this->username . "&hellip;</p>";
-	}*/
-    }
     $t = 'profile.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
@@ -278,7 +256,83 @@ class Stationery extends Cgiapp2 {
 			       'error' => $error
 			       ));
     return $output;
-}
+  }
+  function showProfile() {
+    /* edit account profile
+     * default if no account setup
+     * save profile in database
+     */
+    $selects = array(
+		     'SELECT * FROM user WHERE username = :id',
+		     'SELECT name, acronym, department_id FROM department'
+		     );
+    $updates = array(
+		     'UPDATE user SET firstname = :firstname, lastname = :lastname, telephone = :telephone, email = :email WHERE username = :id',
+		     );
+    $deletes = array(
+		     'DELETE FROM user_department WHERE username = :id AND department_id = :department_id)'
+		     );
+    /* check for form submission first */
+    if (isset($_REQUEST["submitted"])) {
+      /* if the form has been submitted, insert if it the first time
+       * for this user; update the record otherwise
+       */
+      $error = print_r($_REQUEST, true) . " username: ". $_SESSION["username"];
+
+      $error .= "<p>Updated ". $this->username . ".</p>";
+    }
+    /* get user details */
+    $phone = "";
+    /* get info for form */
+    try {
+      $stmt = $this->conn->prepare($selects[0]);
+      $stmt->execute(array('id' => $_SESSION["username"]));
+      
+      while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+	$first_name = $row["given_name"];
+	$surname = $row["family_name"];
+	$email = $row["email"];
+	$phone = $row["phone"];
+
+      }
+    }
+    catch(Exception $e) {
+      $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
+    /* get department names */
+    $departments = array();
+    try {
+      $stmt = $this->conn->prepare($selects[1]);
+      $stmt->execute(array());
+      while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
+	array_push ($departments, $row);
+      }
+    }
+    catch(Exception $e) {
+      $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
+    /* divide department list into 2 for styling */
+    $list1_length = ceil(count($departments)/2);
+    $departments1 = array_slice($departments, 0, $list1_length );
+    $departments2 = array_slice($departments, -1 * ($list1_length-1));
+ 
+    $t = 'profile.html';
+    $t = $this->twig->loadTemplate($t);
+    $output = $t->render(array(
+			       'modes' => $this->run_modes_default_text,
+			       'user' => $this->username,
+			       'first_time' => $first_time,
+			       'first_name' => $first_name,
+			       'surname' => $surname,
+			       'email' => $email,
+			       'phone' => $phone,
+			       'departments1'=> $departments1,
+			       'departments2'=> $departments2,
+			       'action' => $this->action,
+			       'error' => $error
+			       ));
+    return $output;
+  }
 function selectTemplate() {
   /* choose from one of the available CHILI templates */
     $t = 'template.html';

@@ -171,6 +171,7 @@ class Stationery extends Cgiapp2 {
    */
   function showStart() {
     /* check database for user name */
+    $error = "";
     try {
       //$conn = new PDO(DBCONNECT, DBUSER, DBPASS);
       //$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -192,10 +193,10 @@ class Stationery extends Cgiapp2 {
     return $output;
   }
   function createProfile() {
-    /* not sure if this is necessary PMGM 22/2/2014 */
     $first_time = true;
+    $error = "";
     $inserts = array(
-		     'INSERT INTO user VALUES(:username, :firstname, :lastname, :telephone, :email);',
+		     'INSERT INTO user VALUES(:username, :firstname, :lastname, :telephone, :email, DEFAULT);',
 		     'INSERT INTO user_department VALUES(:username, :department_id)'
 		     );
 $selects = array(
@@ -205,16 +206,27 @@ $selects = array(
     if (isset($_REQUEST["submitted"])) {
       $error = print_r($_REQUEST);
       try {
-	$stmt = $pdo->prepare($inserts[0]);
-	/*$stmt2 = $pdo->prepare($inserts[1]);*/
+	$stmt = $this->conn->prepare($inserts[0]);
+	/* first add user */
 	$stmt->execute(array(
 			     'username' => $_SESSION["username"],
 			     'firstname' => $_REQUEST['firstname'],
 			     'lastname' => $_REQUEST['lastname'],
-			     'telephone' => $_REQUEST['telephone'],
+			     'telephone' => $_REQUEST['phone'],
 			     'email' => $_REQUEST['email']
 			     ));
-	$error .= "<p>Adding details for ". $this->username . ".</p>";
+	
+	$stmt2 = $this->conn->prepare($inserts[1]);
+	$stmt2->bindParam(':username', $username);
+	$stmt2->bindParam(':department_id', $department_id);
+	$department_keys = array_keys($_REQUEST, "department");
+	foreach($department_keys as $dept) {
+	  $username = $_SESSION["username"];
+	  $department_id = $_REQUEST[$dept];
+	  $stmt2->execute();
+	}
+	$this->error .= "<p>Adding details for ". $this->username . ".</p>";
+	
 	return $this->showProfile();
       }
       catch(PDOException $e) {
@@ -224,6 +236,7 @@ $selects = array(
     $first_name = $_SESSION["given_names"];
     $surname = $_SESSION["family_name"];
     $email = $_SESSION["email"];
+    $phone = "";
 /* get department names */
     $departments = array();
     try {
@@ -262,6 +275,8 @@ $selects = array(
      * default if no account setup
      * save profile in database
      */
+    $first_time = false;
+    $error = $this->error;
     $selects = array(
 		     'SELECT * FROM user WHERE username = :id',
 		     'SELECT name, acronym, department_id FROM department'
@@ -282,18 +297,16 @@ $selects = array(
       $error .= "<p>Updated ". $this->username . ".</p>";
     }
     /* get user details */
-    $phone = "";
+    //$phone = "";
     /* get info for form */
     try {
       $stmt = $this->conn->prepare($selects[0]);
       $stmt->execute(array('id' => $_SESSION["username"]));
-      
       while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 	$first_name = $row["given_name"];
 	$surname = $row["family_name"];
 	$email = $row["email"];
 	$phone = $row["phone"];
-
       }
     }
     catch(Exception $e) {

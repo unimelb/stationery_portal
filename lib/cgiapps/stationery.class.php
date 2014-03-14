@@ -62,6 +62,15 @@ class Stationery extends Cgiapp2 {
    * sets to true if a user has not set up a profile
    */
   private $first_time;
+  /**
+   * @var $select, $insert, $update, $delete
+   * arrays to store prepared sql statements used by the program
+   */
+   private $select;
+   private $insert;
+   private $update;
+   private $delete;
+
   function setup() {
     /** 
      * database
@@ -80,23 +89,8 @@ class Stationery extends Cgiapp2 {
     /** 
      * template
      */
-    /*
-      if ($this->param('template_path') and $this->param('template_params')) {
-      $tpl_params = $this->param('template_params');
-      $this->template_path = $this->param('template_path');
-      $this->template_filename = $tpl_params['filename'];
-      // initialise template
-      if (! empty($this->template_filename)) {
-      $this->tmpl_path($this->template_path, $this->param('template_params'));
-      }
-      foreach ($tpl_params as $param => $value) {
-      if ($param != 'filename') {
-      $this->tmpl_assign($param, $value);
-      }
-      }
-    
-      }*/
-    /*prepare Twig environment */
+ 
+   /*prepare Twig environment */
     Twig_Autoloader::register();
     if ($this->param('template_path')) {
 	$this->template_path = $this->param('template_path');
@@ -125,7 +119,6 @@ class Stationery extends Cgiapp2 {
 			   'thanks' => 'showFinal'
 			   ));
     // should be an entry for each of the run modes above
-    /* not yet used 2013-12-13 */
     $this->run_modes_default_text = array(
 					  'start' => 'University Stationery home',
 					  'profile' => 'Edit your Profile',
@@ -148,6 +141,30 @@ class Stationery extends Cgiapp2 {
       {
 	$this->username = "bobmadjr"; // test username only
       }
+    $this->sqlstatements();
+  }
+  /**
+   * setup PDO prepared sql statements for use by the program
+   * arrays of SELECT, INSERT, UPDATE and DELETE statements
+   * this function is a convenient holder for all the SQL 
+   * to prevent duplication
+   */
+  private function sqlstatements() {
+    $this->select = array(
+			  'SELECT * FROM user WHERE username = :id',
+			  'SELECT name, acronym, department_id FROM department',
+			  'SELECT department_id from user_department where username = :id'
+			  );
+    $this->insert = array(
+			  'INSERT INTO user VALUES(:username, :firstname, :lastname, :telephone, :email, DEFAULT);',
+			  'INSERT INTO user_department VALUES(:username, :department_id)'
+			  );
+    $this->update = array(
+			  'UPDATE user SET given_name = :firstname, family_name = :lastname, phone = :phone, email = :email WHERE username = :id'
+			  );
+    $this->delete = array(
+			  'DELETE FROM user_department WHERE username = :username AND department_id = :department_id'
+			  );
   }
   /**
    * function to shut everything down after the app has run
@@ -176,7 +193,7 @@ class Stationery extends Cgiapp2 {
     try {
       //$conn = new PDO(DBCONNECT, DBUSER, DBPASS);
       //$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-      $stmt = $this->conn->prepare('SELECT * FROM user WHERE username = :id');
+      $stmt = $this->conn->prepare($this->select[0]);
       $stmt->execute(array('id' => $_SESSION["username"]));
       if ($stmt->rowCount() == 0) {
 	// go to profile page
@@ -193,21 +210,20 @@ class Stationery extends Cgiapp2 {
 			       ));
     return $output;
   }
+  private function isDepartment($string) {
+    $isDept = false;
+    if(strpos($string, "department")!== false) {
+      $isDept = true;
+    }
+    return $isDept;
+  }
   function createProfile() {
     $first_time = true;
     $error = "";
-    $inserts = array(
-		     'INSERT INTO user VALUES(:username, :firstname, :lastname, :telephone, :email, DEFAULT);',
-		     'INSERT INTO user_department VALUES(:username, :department_id)'
-		     );
-$selects = array(
-		     'SELECT * FROM user WHERE username = :id',
-		     'SELECT name, acronym, department_id FROM department'
-		     );
     if (isset($_REQUEST["submitted"])) {
-      $error = print_r($_REQUEST);
+      //$error = print_r($_REQUEST);
       try {
-	$stmt = $this->conn->prepare($inserts[0]);
+	$stmt = $this->conn->prepare($this->insert[0]);
 	/* first add user */
 	$stmt->execute(array(
 			     'username' => $_SESSION["username"],
@@ -217,17 +233,22 @@ $selects = array(
 			     'email' => $_REQUEST['email']
 			     ));
 	
-	$stmt2 = $this->conn->prepare($inserts[1]);
+	$stmt2 = $this->conn->prepare($this->insert[1]);
 	$stmt2->bindParam(':username', $username);
 	$stmt2->bindParam(':department_id', $department_id);
-	$department_keys = array_keys($_REQUEST, "department");
-	foreach($department_keys as $dept) {
+	$department_keys = array();
+	foreach(array_keys($_REQUEST) as $key) {
+	  if ($this->isDepartment($key)) {
+	    $department_keys[$key] = $_REQUEST[$key];
+	  }
+	}
+	foreach($department_keys as $dept => $value) {
 	  $username = $_SESSION["username"];
-	  $department_id = $_REQUEST[$dept];
+	  $department_id = $value;
 	  $stmt2->execute();
 	}
 	$this->error .= "<p>Adding details for ". $this->username . ".</p>";
-	
+	$error = print_r($department_keys);
 	return $this->showProfile();
       }
       catch(PDOException $e) {
@@ -241,7 +262,7 @@ $selects = array(
 /* get department names */
     $departments = array();
     try {
-      $stmt = $this->conn->prepare($selects[1]);
+      $stmt = $this->conn->prepare($this->select[1]);
       $stmt->execute(array());
       while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
 	array_push ($departments, $row);
@@ -254,6 +275,7 @@ $selects = array(
     $list1_length = ceil(count($departments)/2);
     $departments1 = array_slice($departments, 0, $list1_length );
     $departments2 = array_slice($departments, -1 * ($list1_length-1));
+    /* output */
     $t = 'profile.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
@@ -276,32 +298,96 @@ $selects = array(
      * default if no account setup
      * save profile in database
      */
+    $action = $this->action . "?mode=" . "profile";
     $first_time = false;
     $error = $this->error;
-    $selects = array(
-		     'SELECT * FROM user WHERE username = :id',
-		     'SELECT name, acronym, department_id FROM department'
-		     );
-    $updates = array(
-		     'UPDATE user SET firstname = :firstname, lastname = :lastname, telephone = :telephone, email = :email WHERE username = :id',
-		     );
-    $deletes = array(
-		     'DELETE FROM user_department WHERE username = :id AND department_id = :department_id)'
-		     );
     /* check for form submission first */
     if (isset($_REQUEST["submitted"])) {
-      /* if the form has been submitted, insert if it the first time
-       * for this user; update the record otherwise
-       */
-      $error = print_r($_REQUEST, true) . " username: ". $_SESSION["username"];
-
+      /* if the form has been submitted, update the record */
+      /* modify update statement depending on what has changed */
+      $form_keywords = array("firstname", "lastname", "phone", "email");
+      $used_keywords = array();
+      $update_string = "";
+      foreach ($form_keywords as $keyword) {
+	if (array_key_exists($keyword, $_REQUEST)) {
+	  $update_string .= $keyword . " = :" . $keyword . " ";
+	  $used_keywords[$keyword] = $_REQUEST[$keyword];
+	}
+      }
+      if (count($form_keywords) == count($used_keywords)) {
+	$statement = $this->update[0];
+      }
+      else {
+	$statement = substr_replace($this->update[0], $update_string, 16,80); 
+      }
+      $used_keywords["id"] = $_SESSION["username"];
+      try {
+	$stmt = $this->conn->prepare($statement);
+	$stmt->execute($used_keywords);
+      }
+      catch(Exception $e) {
+	$error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+      }
+      /* update departments */
+      $old_depts = array(); /* the previously selected departments */
+      $new_depts = array(); /* the newly selected departments */
+      foreach(array_keys($_REQUEST) as $key) {
+	if ($this->isDepartment($key)) {
+	  $new_depts[] = $_REQUEST[$key];
+	}
+      }
+      try {
+	$stmt_depts = $this->conn->prepare($this->select[2]);
+	$stmt_depts->execute(array('id' => $_SESSION["username"]));
+	while($row = $stmt_depts->fetch(PDO::FETCH_ASSOC)) {
+	  array_push ($old_depts, $row["department_id"]);
+	}
+      }
+      catch(Exception $e) {
+	$error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+      }
+      $common_depts = array_intersect($old_depts, $new_depts);
+      $to_insert = array_diff($new_depts, $common_depts, $old_depts );
+      $to_delete = array_diff($old_depts, $common_depts, $new_depts );
+      try {
+	$stmt = $this->conn->prepare($this->insert[1]);
+	$stmt->bindParam(':username', $username);
+	$stmt->bindParam(':department_id', $department_id);
+	$stmt2 = $this->conn->prepare($this->delete[0]);
+	$stmt2->bindParam(':username', $username);
+	$stmt2->bindParam(':department_id', $department_id);
+	if (count($to_insert) > 0){
+	  foreach ($to_insert as $dept_id) {
+	    $username = $_SESSION["username"];
+	    $department_id = $dept_id;
+	    $stmt->execute(array(
+				 'username' => $username,
+				 'department_id' => $department_id
+				 ));
+	  }
+	}
+	if (count($to_delete) > 0) {
+	  foreach ($to_delete as $dept_id) {
+	    $username = $_SESSION["username"];
+	    $department_id = $dept_id;
+	    $stmt2->execute(array(
+				  'username' => $username,
+				  'department_id' => $department_id
+				  ));
+	  }
+	}	
+      }
+      catch(Exception $e) {
+	$error = print_r($to_delete, true) . '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+      }
+      print_r($to_insert);
+      print_r($to_delete);
       $error .= "<p>Updated ". $this->username . ".</p>";
     }
     /* get user details */
-    //$phone = "";
     /* get info for form */
     try {
-      $stmt = $this->conn->prepare($selects[0]);
+      $stmt = $this->conn->prepare($this->select[0]);
       $stmt->execute(array('id' => $_SESSION["username"]));
       while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 	$first_name = $row["given_name"];
@@ -313,10 +399,22 @@ $selects = array(
     catch(Exception $e) {
       $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     }
+    /* find active departments */
+    $active_depts = array();
+    try {
+      $stmt = $this->conn->prepare($this->select[2]);
+      $stmt->execute(array('id' => $_SESSION["username"]));
+      while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+	array_push ($active_depts, $row["department_id"]);
+      }
+    }
+    catch(Exception $e) {
+      $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
     /* get department names */
     $departments = array();
     try {
-      $stmt = $this->conn->prepare($selects[1]);
+      $stmt = $this->conn->prepare($this->select[1]);
       $stmt->execute(array());
       while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
 	array_push ($departments, $row);
@@ -329,7 +427,7 @@ $selects = array(
     $list1_length = ceil(count($departments)/2);
     $departments1 = array_slice($departments, 0, $list1_length );
     $departments2 = array_slice($departments, -1 * ($list1_length-1));
- 
+    /* output */
     $t = 'profile.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
@@ -342,8 +440,9 @@ $selects = array(
 			       'phone' => $phone,
 			       'departments1'=> $departments1,
 			       'departments2'=> $departments2,
-			       'action' => $this->action,
-			       'error' => $error
+			       'action' => $action,
+			       'error' => $error,
+			       'active_depts' => $active_depts
 			       ));
     return $output;
   }

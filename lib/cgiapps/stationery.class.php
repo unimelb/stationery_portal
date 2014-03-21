@@ -483,7 +483,11 @@ function selectTemplate() {
     catch(Exception $e) {
       $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     }
-
+    $basic_url = 'index.php?mode=edit';
+    foreach ($buscards as $buscard) {
+      $buscard->url = $basic_url . '&id=' . $buscard->chili_id;
+      $buscard->short = $buscard->short_name;
+    }
     $t = 'template.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(

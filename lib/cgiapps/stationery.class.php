@@ -19,6 +19,7 @@ require_once(dirname(__FILE__) . "/../../lib/find_path.inc.php");
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/addons/Cgiapp2-2.0.0/Cgiapp2.class.php");
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/addons/Twig/lib/Twig/Autoloader.php");
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/dbconnect.inc.php");
+include_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/addons/chili/CHILIService.php");
 class Stationery extends Cgiapp2 {
   /**
    * @var string $username
@@ -70,8 +71,12 @@ class Stationery extends Cgiapp2 {
    private $insert;
    private $update;
    private $delete;
-
-  function setup() {
+   /**
+    * @var chili_apikey
+    * object to connect to chili server
+    */
+   private $chili_apikey;
+   function setup() {
     /** 
      * database
      */
@@ -464,17 +469,18 @@ function selectTemplate() {
   }
   catch(Exception $e) {
     $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
-  }
- 
+  } 
+  $department_list = implode(",", $dept_ids);
   /* get category ids and names into $categories */
   /* get templates */
-    try {
-      $stmt = $this->conn->prepare($this->select[3]);
+     try {
+       $statement1 = $this->select[3];
+       // repace :department with $department_list
+       $statement = str_replace(":departments", $department_list, $statement1);
+      $stmt = $this->conn->prepare($statement);
       $stmt->bindParam(':category', $category_id);
-      $stmt->bindParam(':departments', $department_list);
       /* for each category, just 1 here now */
       $category_id = 1;
-      $department_list = implode(",", $dept_ids);
       $stmt->execute(array());
       while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
 	array_push ($buscards, $row);
@@ -497,13 +503,20 @@ function selectTemplate() {
 			       'withcomps'=> $withcomps,
 			       'letheads'=> $letheads
 			       ));
+    print_r($buscards);
     return $output;
   }
 function editTemplate() {
   /* embed the CHILI editor and submit button */
+  /* if no template_id in url, arbort and return to select a template
+  /* create new job
+   * get new chili job id based on template_id
+   * open iframe with chili_job for editing
+  /* submit button goes to confirm screen */ 
     $t = 'edit.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
+			       'error' => $error,
 			       'modes' => $this->run_modes_default_text
 			       ));
     return $output;

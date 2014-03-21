@@ -20,3 +20,22 @@ INSERT into department VALUES(DEFAULT,'Melbourne Institute of Applied Economic a
 INSERT into department VALUES(DEFAULT,'Bio21 Molecular Science and Biotechnology Institute',NULL);
 INSERT into department VALUES(DEFAULT,'The Nossal Institute for Global Health',NULL);
 INSERT into department VALUES(DEFAULT,'Centre for the Study of Higher Education','CSHE');
+-- <2014-03-21 Fri>
+-- categories
+INSERT into category VALUES(DEFAULT, 'Business Card');
+INSERT into category VALUES(DEFAULT, 'Letterhead');
+INSERT into category VALUES(DEFAULT, 'With Compliments');
+-- templates
+INSERT into template VALUES(DEFAULT, 
+'a0fab416-cd5f-4240-91a1-500649f63f41', 
+'01.UoM',
+'01.UoM_BC_SS',
+1,
+NULL);
+INSERT into template_price VALUES(1,200,110.0000);
+INSERT into template_price VALUES(1,400,150.0000);
+INSERT into template_price VALUES(1,600,190.0000);
+INSERT into template_price VALUES(1,800,225.0000);
+INSERT into template_price VALUES(1,1000,265.0000);
+INSERT into template_price VALUES(1,1200,305.0000);
+INSERT into template_price VALUES(1,1400,340.0000);

@@ -153,7 +153,8 @@ class Stationery extends Cgiapp2 {
     $this->select = array(
 			  'SELECT * FROM user WHERE username = :id',
 			  'SELECT name, acronym, department_id FROM department',
-			  'SELECT department_id from user_department where username = :id'
+			  'SELECT department_id from user_department where username = :id',
+			  'SELECT * FROM template WHERE category_id = :category AND department_id in ( :departments ) OR department_id IS NULL ORDER BY department_id'
 			  );
     $this->insert = array(
 			  'INSERT INTO user VALUES(:username, :firstname, :lastname, :telephone, :email, DEFAULT);',
@@ -448,10 +449,49 @@ class Stationery extends Cgiapp2 {
   }
 function selectTemplate() {
   /* choose from one of the available CHILI templates */
+  /* get categories */
+  $withcomps = array();
+  $letheads = array();
+  $buscards = array();
+  $dept_ids = array();
+  /* get department ids into comma separated string */
+  try {
+    $stmt_depts = $this->conn->prepare($this->select[2]);
+    $stmt_depts->execute(array('id' => $_SESSION["username"]));
+    while($row = $stmt_depts->fetch(PDO::FETCH_ASSOC)) {
+      array_push ($dept_ids, $row["department_id"]);
+    }
+  }
+  catch(Exception $e) {
+    $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+  }
+ 
+  /* get category ids and names into $categories */
+  /* get templates */
+    try {
+      $stmt = $this->conn->prepare($this->select[3]);
+      $stmt->bindParam(':category', $category_id);
+      $stmt->bindParam(':departments', $department_list);
+      /* for each category, just 1 here now */
+      $category_id = 1;
+      $department_list = implode(",", $dept_ids);
+      $stmt->execute(array());
+      while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
+	array_push ($buscards, $row);
+      }
+    }
+    catch(Exception $e) {
+      $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
+
     $t = 'template.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
-			       'modes' => $this->run_modes_default_text
+			       'error' => $error,
+			       'modes' => $this->run_modes_default_text,
+			       'buscards'=> $buscards,
+			       'withcomps'=> $withcomps,
+			       'letheads'=> $letheads
 			       ));
     return $output;
   }

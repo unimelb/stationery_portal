@@ -159,7 +159,7 @@ class Stationery extends Cgiapp2 {
 			  'SELECT * FROM user WHERE username = :id',
 			  'SELECT name, acronym, department_id FROM department',
 			  'SELECT department_id from user_department where username = :id',
-			  'SELECT * FROM template WHERE category_id = :category AND department_id in ( :departments ) OR department_id IS NULL ORDER BY department_id'
+			  "SELECT * FROM template WHERE category_id = :category_id AND department_id in ( 'jjjdepartments' ) OR department_id IS NULL ORDER BY department_id"
 			  );
     $this->insert = array(
 			  'INSERT INTO user VALUES(:username, :firstname, :lastname, :telephone, :email, DEFAULT);',
@@ -452,45 +452,56 @@ class Stationery extends Cgiapp2 {
 			       ));
     return $output;
   }
-function selectTemplate() {
-  /* choose from one of the available CHILI templates */
-  /* get categories */
-  $withcomps = array();
-  $letheads = array();
-  $buscards = array();
-  $dept_ids = array();
-  /* get department ids into comma separated string */
-  try {
-    $stmt_depts = $this->conn->prepare($this->select[2]);
-    $stmt_depts->execute(array('id' => $_SESSION["username"]));
-    while($row = $stmt_depts->fetch(PDO::FETCH_ASSOC)) {
-      array_push ($dept_ids, $row["department_id"]);
-    }
-  }
-  catch(Exception $e) {
-    $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
-  } 
-  $department_list = implode(",", $dept_ids);
-  /* get category ids and names into $categories */
-  /* get templates */
-     try {
-       $statement1 = $this->select[3];
-       // repace :department with $department_list
-       $statement = str_replace(":departments", $department_list, $statement1);
-      $stmt = $this->conn->prepare($statement);
-      $stmt->bindParam(':category', $category_id);
-      /* for each category, just 1 here now */
-      $category_id = 1;
-      $stmt->execute(array());
-      while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
-	array_push ($buscards, $row);
+  function selectTemplate() {
+    /* choose from one of the available CHILI templates */
+    /* get categories */
+    /* buscards = 1, letheads = 2, withcomps = 3 */
+    $stationery_type_list = array(
+				  array(), array(), array()
+				  );
+    $withcomps = array();
+    $letheads = array();
+    $buscards = array();
+    $dept_ids = array();
+    /* get department ids into comma separated string */
+    try {
+      $stmt_depts = $this->conn->prepare($this->select[2]);
+      $stmt_depts->execute(array('id' => $_SESSION["username"]));
+      while($row = $stmt_depts->fetch(PDO::FETCH_ASSOC)) {
+	array_push ($dept_ids, $row["department_id"]);
       }
+    }
+    catch(Exception $e) {
+      $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    } 
+    $department_list = implode(",", $dept_ids);
+    /* get category ids and names into $categories */
+    /* get templates */
+    $categories_count = 3;
+    try {
+      $statement1 = $this->select[3];
+      // repace :department with $department_list
+      $statement = str_replace("jjjdepartments", $department_list, $statement1);
+      $stmt = $this->conn->prepare($statement);
+      $category_id = 1;
+      //$stmt->bindParam(':category', $category_id);
+      /* for each category, just 1 here now */
+      for ($category_id = 1; $category_id < $categories_count +1; $category_id ++) {
+	$stmt->execute(array(':category_id' => $category_id));
+	$stmt->debugDumpParams();
+	//print_r($bob);
+	while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
+	  array_push ($stationery_type_list[$category_id-1], $row);
+	}
+
+      }
+      
     }
     catch(Exception $e) {
       $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     }
     $basic_url = 'index.php?mode=edit';
-    foreach ($buscards as $buscard) {
+    foreach ($stationery_type_list[0] as $buscard) {
       $buscard->url = $basic_url . '&id=' . $buscard->chili_id;
       $buscard->short = $buscard->short_name;
     }
@@ -499,12 +510,11 @@ function selectTemplate() {
     $output = $t->render(array(
 			       'error' => $error,
 			       'modes' => $this->run_modes_default_text,
-			       'buscards'=> $buscards,
-			       'withcomps'=> $withcomps,
-			       'letheads'=> $letheads
+			       'buscards'=> $stationery_type_list[0],
+			       'letheads'=> $stationery_type_list[1],
+			       'withcomps'=> $stationery_type_list[2]
 			       ));
-    print_r($buscards);
-    return $output;
+     return $output;
   }
 function editTemplate() {
   /* embed the CHILI editor and submit button */

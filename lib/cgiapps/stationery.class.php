@@ -125,14 +125,14 @@ class Stationery extends Cgiapp2 {
 			   ));
     // should be an entry for each of the run modes above
     $this->run_modes_default_text = array(
-					  'start' => 'University Stationery home',
-					  'profile' => 'Edit your Profile',
-					  'template' => 'Select a Template',
-					  'edit' => 'Edit your Template',
-					  'history' => 'Order history',
-					  'detail' => 'Previous job details',
-					  'confirm' => 'Confirm and Print',
-					  'thanks' => 'Thank you'
+					  'start' => 'Home',
+					  'profile' => 'Profile',
+					  'template' => 'Select Template',
+					  'edit' => 'Edit Template',
+					  'history' => 'History',
+					  'detail' => 'Previous jobs',
+					  'confirm' => 'Confirm',
+					  'thanks' => 'Thanks'
 					  );
     $this->start_mode('start');
     //$this->error_mode('handle_errors');

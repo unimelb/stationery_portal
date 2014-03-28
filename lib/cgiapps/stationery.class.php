@@ -459,9 +459,6 @@ class Stationery extends Cgiapp2 {
     $stationery_type_list = array(
 				  array(), array(), array()
 				  );
-    $withcomps = array();
-    $letheads = array();
-    $buscards = array();
     $dept_ids = array();
     /* get department ids into comma separated string */
     try {
@@ -488,8 +485,6 @@ class Stationery extends Cgiapp2 {
       /* for each category, just 1 here now */
       for ($category_id = 1; $category_id < $categories_count +1; $category_id ++) {
 	$stmt->execute(array(':category_id' => $category_id));
-	$stmt->debugDumpParams();
-	//print_r($bob);
 	while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
 	  array_push ($stationery_type_list[$category_id-1], $row);
 	}

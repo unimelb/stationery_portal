@@ -543,6 +543,28 @@ class Stationery extends Cgiapp2 {
   }
 function editTemplate() {
   $error = $this->error;
+  $src = CHILI_ENV . 'editor.aspx?';
+
+
+
+  /* desired values
+   * doc should be template_id?
+   * ws = workspace = ?
+   */
+  $doc = 'a0fab416-cd5f-4240-91a1-500649f63f41';//Uom 1 buscard
+  $ws = '149598f7-4881-4fbf-86e5-675257f7f4c3';
+  $apikey = $this->apikey;
+  $username = $this->chili_user;
+  $password = $this->chili_pass;
+  /* dummy values which currently work */
+  $doc = 'de5fa915-9376-4bf9-bc2b-fbec8195c5c1';
+  $ws = '149598f7-4881-4fbf-86e5-675257f7f4c3';
+  $apikey = 'ri6ggxyqdA5j5+xyptuoFYOP00geV025dCXweXgdPnoWgWBzMICHzC+7Z87CGpqWF2NvpcC_tdBJuYYfCsovKg';
+  $username = 'Anonymous';
+  $password = '';
+
+  $src_extra = "doc=$doc&ws=$ws&apiKey=$apikey&username=$username&password=$password";
+  //$error = $src_extra;
   /* embed the CHILI editor and submit button */
   /* if no template_id in url, arbort and return to select a template
   /* create new job
@@ -553,7 +575,8 @@ function editTemplate() {
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
 			       'error' => $error,
-			       'modes' => $this->run_modes_default_text
+			       'modes' => $this->run_modes_default_text,
+			       'iframesrc' => $src . $src_extra
 			       ));
     return $output;
   }
@@ -574,6 +597,7 @@ function showJobDetail() {
      $t = 'detail.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
+			       
 			       'modes' => $this->run_modes_default_text
 			       ));
     return $output;

@@ -19,7 +19,7 @@ require_once(dirname(__FILE__) . "/../../lib/find_path.inc.php");
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/addons/Cgiapp2-2.0.0/Cgiapp2.class.php");
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/addons/Twig/lib/Twig/Autoloader.php");
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/dbconnect.inc.php");
-include_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/addons/chili/CHILIService.php");
+include_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/chili.inc.php");
 class Stationery extends Cgiapp2 {
   /**
    * @var string $username
@@ -73,9 +73,13 @@ class Stationery extends Cgiapp2 {
    private $delete;
    /**
     * @var chili_apikey
+    * @var chiliservice
     * object to connect to chili server
     */
+   //private $chiliservice;
    private $chili_apikey;
+   private $chili_user;
+   private $chili_pass;
    function setup() {
     /** 
      * database
@@ -106,6 +110,14 @@ class Stationery extends Cgiapp2 {
 					    ));
     $tpl_params = $this->param('template_params');
     $this->template_filename = $tpl_params['filename'];
+
+    /* obtain chili api key */
+    $client = new SoapClient(CHILI_APP . "main.asmx?wsdl");
+    $this->getChiliUser();
+    $keyrequest = $client->GenerateApiKey(array("environmentNameOrURL" => CHILI_ENV,"userName" => $this->chili_user, "password" => $this->chili_pass));
+    $dom = new DOMDocument();
+    $dom->loadXML($keyrequest->GenerateApiKeyResult);
+    $this->apikey = $dom->getElementsByTagName("apiKey")->item(0)->getAttribute("key");
     /**
      * set up the legal run modes => methods table
      * note that login screen is handled outside of the app
@@ -148,6 +160,24 @@ class Stationery extends Cgiapp2 {
       }
     $this->sqlstatements();
   }
+ 
+   /* select a random user for chili api functions */
+   private function getChiliUser() {
+     // users need to be moved to databas
+     $chili_users_inc = array(
+			 array('username'=>'StatUser1', 'password'=>'cmyk011'),
+			 array('username'=>'StatUser2', 'password'=>'cmyk011'), 
+			 array('username'=>'StatUser3', 'password'=>'cmyk011'), 
+			 array('username'=>'StatUser4', 'password'=>'cmyk011'), 
+			 array('username'=>'StatUser5', 'password'=>'cmyk011'), 
+			 array('username'=>'StatUser6', 'password'=>'cmyk011')
+			 );
+     $x = mt_rand(0,count($chili_users_inc)-1);
+     $user_array = $chili_users_inc[$x];
+     $this->chili_user = $user_array['username'];
+     $this->chili_pass = $user_array['password'];
+   }
+
   /**
    * setup PDO prepared sql statements for use by the program
    * arrays of SELECT, INSERT, UPDATE and DELETE statements
@@ -512,6 +542,7 @@ class Stationery extends Cgiapp2 {
      return $output;
   }
 function editTemplate() {
+  $error = $this->error;
   /* embed the CHILI editor and submit button */
   /* if no template_id in url, arbort and return to select a template
   /* create new job

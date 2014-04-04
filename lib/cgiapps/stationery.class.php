@@ -143,10 +143,18 @@ class Stationery extends Cgiapp2 {
 					  'template' => 'Select Template',
 					  'edit' => 'Edit Template',
 					  'history' => 'History',
-					  'detail' => 'Previous jobs',
+					  'detail' => 'Detail',
 					  'confirm' => 'Confirm',
 					  'thanks' => 'Thanks'
 					  );
+    $this->user_visible_modes = array(
+			      'template' => 'Select Template',
+			      'history' => 'History',
+			      'detail' => 'Detail',
+			      'confirm' => 'Confirm',
+			      'thanks' => 'Thanks'
+			      );
+
     $this->start_mode('start');
     //$this->error_mode('handle_errors');
     $this->mode_param('mode');
@@ -190,14 +198,18 @@ class Stationery extends Cgiapp2 {
 			  'SELECT * FROM user WHERE username = :id',
 			  'SELECT name, acronym, department_id FROM department',
 			  'SELECT department_id from user_department where username = :id',
-			  "SELECT * FROM template WHERE category_id = :category_id AND department_id in ( 'jjjdepartments' ) OR department_id IS NULL ORDER BY department_id"
+			  "SELECT * FROM template WHERE category_id = :category_id AND department_id in ( 'jjjdepartments' ) OR department_id IS NULL ORDER BY department_id",
+			  'SELECT * FROM job WHERE username = :username ORDER BY job_id DESC LIMIT 1',
+			  'SELECT j.job_id, j.username, c.description FROM job j, category c, template t WHERE t.template_id = j.template_id AND t.category_id = c.category_id and j.job_id = :job_id'
 			  );
     $this->insert = array(
 			  'INSERT INTO user VALUES(:username, :firstname, :lastname, :telephone, :email, DEFAULT);',
-			  'INSERT INTO user_department VALUES(:username, :department_id)'
+			  'INSERT INTO user_department VALUES(:username, :department_id)',
+			  'INSERT INTO job (job_id, username) VALUES(DEFAULT, :username)' 
 			  );
     $this->update = array(
-			  'UPDATE user SET given_name = :firstname, family_name = :lastname, phone = :phone, email = :email WHERE username = :id'
+			  'UPDATE user SET given_name = :firstname, family_name = :lastname, phone = :phone, email = :email WHERE username = :id',
+			  'UPDATE job SET chili_id = :chili_id WHERE username = :username AND job_id = :job_id'
 			  );
     $this->delete = array(
 			  'DELETE FROM user_department WHERE username = :username AND department_id = :department_id'
@@ -242,7 +254,7 @@ class Stationery extends Cgiapp2 {
     $t = 'start.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
-			       'modes' => $this->run_modes_default_text,
+			       'modes' => $this->user_visible_modes,
 			       'error' => $error
 			       ));
     return $output;
@@ -316,7 +328,7 @@ class Stationery extends Cgiapp2 {
     $t = 'profile.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
-			       'modes' => $this->run_modes_default_text,
+			       'modes' => $this->user_visible_modes,
 			       'user' => $this->username,
 			       'first_time' => $first_time,
 			       'first_name' => $first_name,
@@ -468,7 +480,7 @@ class Stationery extends Cgiapp2 {
     $t = 'profile.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
-			       'modes' => $this->run_modes_default_text,
+			       'modes' => $this->user_visible_modes,
 			       'user' => $this->username,
 			       'first_time' => $first_time,
 			       'first_name' => $first_name,
@@ -535,7 +547,7 @@ class Stationery extends Cgiapp2 {
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
 			       'error' => $error,
-			       'modes' => $this->run_modes_default_text,
+			       'modes' => $this->user_visible_modes,
 			       'buscards'=> $stationery_type_list[0],
 			       'letheads'=> $stationery_type_list[1],
 			       'withcomps'=> $stationery_type_list[2]
@@ -545,11 +557,29 @@ class Stationery extends Cgiapp2 {
 function editTemplate() {
   $error = $this->error;
   $src = CHILI_ENV . 'interface.aspx?';
-
-
-
-  
-  
+  /* create new job locally */
+  /* $this->insert[2]
+  /* get job id for documentName below */
+  /* $this->select[4] */
+  $job_id = $this->createJob();
+  /* get the base template_id from the URL and get its name
+   * if the template is a base one, use its short name
+   * if the template is a derived one (from history), use the 2nd two fragments of its identifier
+   * if the template has no name, or if there's nothing in the URL -- go to select template screen
+   */
+  $template_name = $this->getTemplateName($job_id);
+  /* API calls:
+   * 1. DocumentCreateFromBlankDocTemplate to create new doc from template
+   * public string DocumentCreateFromBlankDocTemplate ( string apiKey, string documentName, string folderPath, string blankDocTemplateID );
+   * 2. DocumentGetEditorURL to get URL for new document
+   * public string DocumentGetEditorURL ( string apiKey, string itemID, string workSpaceID, string viewPrefsID, string constraintsID, bool viewerOnly, bool forAnonymousUser );
+   */
+  /* update job with new template_id */
+  /* $this->update[1];
+     /* get this from incoming URL */
+  $folderPath = 'Documents/';
+  $blankDocTemplateID='a0fab416-cd5f-4240-91a1-500649f63f41';//Uom 1 buscard
+  $documentName = implode('-',array($job_id, $this->username, $template_name));
   /* dummy values which currently work */
   $doc = 'de5fa915-9376-4bf9-bc2b-fbec8195c5c1';
   $ws = '149598f7-4881-4fbf-86e5-675257f7f4c3';
@@ -577,17 +607,77 @@ function editTemplate() {
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
 			       'error' => $error,
-			       'modes' => $this->run_modes_default_text,
+			       'modes' => $this->user_visible_modes,
 			       'iframesrc' => $src . $src_extra
 			       ));
     return $output;
   }
-function showHistory() {
-  /* show a list of past jobs for this user */
+/* create a new job based on the username
+ * return job_id or false if it failed
+ */
+private function createJob() {
+  /* get job id for documentName below */
+  /* $this->select[4] */
+  $job_id = 2; // obviously a dummy function
+  /* create new job locally */
+  try {
+    $stmt = $this->conn->prepare($this->insert[2]);
+    $stmt->execute(array('username' => $this->username));
+  }
+  catch (Exception $e) {
+    $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    $job_id = false;
+  }
+  /* get job id for job just created */
+  if ($job_id !== false) {
+    try {
+      $stmt2 = $this->conn->prepare($this->select[4]);
+      $stmt2->execute(array('username' => $this->username));
+      while($row = $stmt2->fetch(PDO::FETCH_ASSOC)) {
+	$job_id = $row["job_id"];
+      }
+      
+    }
+    catch (Exception $e){
+      $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+      $job_id = false;
+    }
+  }
+  return $job_id;
+}
+  /* returns a string document name in the format:
+   * job_id-username-category (no spaces)
+   * or the derived name from the job_id
+   * or false if no name is available
+   * $template_id is a string
+   */
+  private function getTemplateName($job_id) {
+    $template_name_array = array();
+    $template_name = "";
+    try {
+      $stmt = $this->conn->prepare($this->select[5]);
+      $stmt->execute(array('job_id' => $job_id));
+      while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+	$template_name_array = array(
+				$row["job_id"],
+				$row["username"],
+				$row["description"]
+				);
+      }
+    }
+    catch(Exception $e) {
+      $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+      $template_name = false;
+    }
+    $template_name = implode('-',$template_name_array);
+    return str_replace(' ', '', $template_name);
+  }
+  function showHistory() {
+    /* show a list of past jobs for this user */
     $t = 'history.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
-			       'modes' => $this->run_modes_default_text
+			       'modes' => $this->user_visible_modes
 			       ));
     return $output;
   }
@@ -600,7 +690,7 @@ function showJobDetail() {
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
 			       
-			       'modes' => $this->run_modes_default_text
+			       'modes' => $this->user_visible_modes
 			       ));
     return $output;
   }
@@ -619,7 +709,7 @@ function showConfirmation() {
     $t = 'confirm.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
-			       'modes' => $this->run_modes_default_text
+			       'modes' => $this->user_visible_modes
 			       ));
     return $output;
   }
@@ -627,7 +717,7 @@ function showFinal() {
     $t = 'final.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
-			       'modes' => $this->run_modes_default_text
+			       'modes' => $this->user_visible_modes
 			       ));
     return $output;
   }

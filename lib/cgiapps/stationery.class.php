@@ -77,9 +77,10 @@ class Stationery extends Cgiapp2 {
     * object to connect to chili server
     */
    //private $chiliservice;
-   private $chili_apikey;
+   private $apikey;
    private $chili_user;
    private $chili_pass;
+   private $client;
    function setup() {
     /** 
      * database
@@ -112,9 +113,9 @@ class Stationery extends Cgiapp2 {
     $this->template_filename = $tpl_params['filename'];
 
     /* obtain chili api key */
-    $client = new SoapClient(CHILI_APP . "main.asmx?wsdl");
+    $this->client = new SoapClient(CHILI_APP . "main.asmx?wsdl");
     $this->getChiliUser();
-    $keyrequest = $client->GenerateApiKey(array("environmentNameOrURL" => CHILI_ENV,"userName" => $this->chili_user, "password" => $this->chili_pass));
+    $keyrequest = $this->client->GenerateApiKey(array("environmentNameOrURL" => CHILI_ENV,"userName" => $this->chili_user, "password" => $this->chili_pass));
     $dom = new DOMDocument();
     $dom->loadXML($keyrequest->GenerateApiKeyResult);
     $this->apikey = $dom->getElementsByTagName("apiKey")->item(0)->getAttribute("key");
@@ -543,28 +544,29 @@ class Stationery extends Cgiapp2 {
   }
 function editTemplate() {
   $error = $this->error;
-  $src = CHILI_ENV . 'editor.aspx?';
+  $src = CHILI_ENV . 'interface.aspx?';
 
 
 
-  /* desired values
-   * doc should be template_id?
-   * ws = workspace = ?
-   */
-  $doc = 'a0fab416-cd5f-4240-91a1-500649f63f41';//Uom 1 buscard
-  $ws = '149598f7-4881-4fbf-86e5-675257f7f4c3';
-  $apikey = $this->apikey;
-  $username = $this->chili_user;
-  $password = $this->chili_pass;
+  
+  
   /* dummy values which currently work */
   $doc = 'de5fa915-9376-4bf9-bc2b-fbec8195c5c1';
   $ws = '149598f7-4881-4fbf-86e5-675257f7f4c3';
   $apikey = 'ri6ggxyqdA5j5+xyptuoFYOP00geV025dCXweXgdPnoWgWBzMICHzC+7Z87CGpqWF2NvpcC_tdBJuYYfCsovKg';
   $username = 'Anonymous';
   $password = '';
-
+/* desired values
+   * doc should be template_id?
+   * ws = workspace = ?
+   */
+  $doc = 'a0fab416-cd5f-4240-91a1-500649f63f41';//Uom 1 buscard
+  $ws = CHILI_WS;
+  $apikey = $this->apikey;
+  $username = $this->chili_user;
+  $password = $this->chili_pass;
   $src_extra = "doc=$doc&ws=$ws&apiKey=$apikey&username=$username&password=$password";
-  //$error = $src_extra;
+  $error = $src_extra;
   /* embed the CHILI editor and submit button */
   /* if no template_id in url, arbort and return to select a template
   /* create new job

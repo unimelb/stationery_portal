@@ -78,7 +78,9 @@ body.login .hgroup .subheading { display: none; }
 
 /*nav styles*/
 
-.nav-wrapper { float: right;}
+.home-profile-wrapper { position: relative; float: right; bottom: 58px; right: 0; }
+
+.nav-wrapper { position: relative; float: right; left: 163px; }
 .nav-bar { height: 30px; border-radius: 2px; -moz-border-radius: 2px; -webkit-border-radius: 2px; border: solid 1px #4c71a2;
 background: #4f86be;
 background-image: -webkit-gradient(linear, left top, left bottom, from(#4a7bba), to(#33619d)); /* Saf4+, Chrome */

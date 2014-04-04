@@ -555,19 +555,26 @@ class Stationery extends Cgiapp2 {
      return $output;
   }
 function editTemplate() {
+  $blankDocTemplateID = $_REQUEST["id"];
+  /* as a basic check */
+  /* kick them back to select if the id is not the right length */
+  if (strlen($blankDocTemplateID) != 36) {
+    return $this->selectTemplate();
+  } 
   $error = $this->error;
   $src = CHILI_ENV . 'interface.aspx?';
   /* create new job locally */
   /* $this->insert[2]
   /* get job id for documentName below */
   /* $this->select[4] */
+  
   $job_id = $this->createJob();
   /* get the base template_id from the URL and get its name
    * if the template is a base one, use its short name
    * if the template is a derived one (from history), use the 2nd two fragments of its identifier
    * if the template has no name, or if there's nothing in the URL -- go to select template screen
    */
-  $template_name = $this->getTemplateName($job_id);
+  $documentName = $this->getTemplateName($job_id);
   /* API calls:
    * 1. DocumentCreateFromBlankDocTemplate to create new doc from template
    * public string DocumentCreateFromBlankDocTemplate ( string apiKey, string documentName, string folderPath, string blankDocTemplateID );
@@ -579,7 +586,6 @@ function editTemplate() {
      /* get this from incoming URL */
   $folderPath = 'Documents/';
   $blankDocTemplateID='a0fab416-cd5f-4240-91a1-500649f63f41';//Uom 1 buscard
-  $documentName = implode('-',array($job_id, $this->username, $template_name));
   /* dummy values which currently work */
   $doc = 'de5fa915-9376-4bf9-bc2b-fbec8195c5c1';
   $ws = '149598f7-4881-4fbf-86e5-675257f7f4c3';

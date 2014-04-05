@@ -113,6 +113,7 @@ class Stationery extends Cgiapp2 {
     $this->template_filename = $tpl_params['filename'];
 
     /* obtain chili api key */
+    /* remove , array('trace' => 1) after testing */
     $this->client = new SoapClient(CHILI_APP . "main.asmx?wsdl");
     $this->getChiliUser();
     $keyrequest = $this->client->GenerateApiKey(array("environmentNameOrURL" => CHILI_ENV,"userName" => $this->chili_user, "password" => $this->chili_pass));
@@ -205,7 +206,7 @@ class Stationery extends Cgiapp2 {
     $this->insert = array(
 			  'INSERT INTO user VALUES(:username, :firstname, :lastname, :telephone, :email, DEFAULT);',
 			  'INSERT INTO user_department VALUES(:username, :department_id)',
-			  'INSERT INTO job (job_id, username) VALUES(DEFAULT, :username)' 
+			  'INSERT INTO job (job_id, username, template_id) VALUES(DEFAULT, :username, :template_id)' 
 			  );
     $this->update = array(
 			  'UPDATE user SET given_name = :firstname, family_name = :lastname, phone = :phone, email = :email WHERE username = :id',
@@ -499,6 +500,7 @@ class Stationery extends Cgiapp2 {
     /* choose from one of the available CHILI templates */
     /* get categories */
     /* buscards = 1, letheads = 2, withcomps = 3 */
+    $error = "";
     $stationery_type_list = array(
 				  array(), array(), array()
 				  );
@@ -540,7 +542,7 @@ class Stationery extends Cgiapp2 {
     }
     $basic_url = 'index.php?mode=edit';
     foreach ($stationery_type_list[0] as $buscard) {
-      $buscard->url = $basic_url . '&id=' . $buscard->chili_id;
+      $buscard->url = $basic_url . '&id=' . $buscard->chili_id . '&base=' . $buscard->template_id;
       $buscard->short = $buscard->short_name;
     }
     $t = 'template.html';
@@ -556,19 +558,20 @@ class Stationery extends Cgiapp2 {
   }
 function editTemplate() {
   $blankDocTemplateID = $_REQUEST["id"];
+  $base = $_REQUEST["base"];
   /* as a basic check */
   /* kick them back to select if the id is not the right length */
   if (strlen($blankDocTemplateID) != 36) {
     return $this->selectTemplate();
-  } 
+  }
   $error = $this->error;
-  $src = CHILI_ENV . 'interface.aspx?';
+  //$src = CHILI_ENV . 'interface.aspx?';
   /* create new job locally */
   /* $this->insert[2]
   /* get job id for documentName below */
   /* $this->select[4] */
   
-  $job_id = $this->createJob();
+  $job_id = $this->createJob($base);
   /* get the base template_id from the URL and get its name
    * if the template is a base one, use its short name
    * if the template is a derived one (from history), use the 2nd two fragments of its identifier
@@ -576,33 +579,61 @@ function editTemplate() {
    */
   $documentName = $this->getTemplateName($job_id);
   /* API calls:
-   * 1. DocumentCreateFromBlankDocTemplate to create new doc from template
-   * public string DocumentCreateFromBlankDocTemplate ( string apiKey, string documentName, string folderPath, string blankDocTemplateID );
+   * 1. ResourceItemCopy to create new doc from template
+   * public string ResourceItemCopy ( string apiKey, string resourceName, string itemID, string newName, string folderPath );
    * 2. DocumentGetEditorURL to get URL for new document
    * public string DocumentGetEditorURL ( string apiKey, string itemID, string workSpaceID, string viewPrefsID, string constraintsID, bool viewerOnly, bool forAnonymousUser );
    */
   /* update job with new template_id */
   /* $this->update[1];
      /* get this from incoming URL */
-  $folderPath = 'Documents/';
-  $blankDocTemplateID='a0fab416-cd5f-4240-91a1-500649f63f41';//Uom 1 buscard
+  $folderPath = 'USERFILES/';
+  //$blankDocTemplateID='a0fab416-cd5f-4240-91a1-500649f63f41';//Uom 1 buscard
+  $soap_params = array(
+		       "apiKey" => $this->apikey,
+		       "resourceName" => "Documents",
+		       "itemID" => $blankDocTemplateID,
+		       "newName" => $documentName,
+		       "folderPath" =>  $folderPath,
+		       );
+  $resourceItemXML = $this->client->ResourceItemCopy($soap_params);
+$dom = new DOMDocument();
+$dom->loadXML($resourceItemXML->ResourceItemCopyResult);
+$itemID = $dom->getElementsByTagName("item")->item(0)->getAttribute("id");
+$this->updateJob($job_id, $itemID);
+
   /* dummy values which currently work */
-  $doc = 'de5fa915-9376-4bf9-bc2b-fbec8195c5c1';
+  /*  $doc = 'de5fa915-9376-4bf9-bc2b-fbec8195c5c1';
   $ws = '149598f7-4881-4fbf-86e5-675257f7f4c3';
   $apikey = 'ri6ggxyqdA5j5+xyptuoFYOP00geV025dCXweXgdPnoWgWBzMICHzC+7Z87CGpqWF2NvpcC_tdBJuYYfCsovKg';
   $username = 'Anonymous';
-  $password = '';
+  $password = '';*/
 /* desired values
    * doc should be template_id?
    * ws = workspace = ?
    */
-  $doc = 'a0fab416-cd5f-4240-91a1-500649f63f41';//Uom 1 buscard
+  /*$doc = 'a0fab416-cd5f-4240-91a1-500649f63f41';//Uom 1 buscard*/
+  $doc = $itemID;
   $ws = CHILI_WS;
   $apikey = $this->apikey;
   $username = $this->chili_user;
   $password = $this->chili_pass;
-  $src_extra = "doc=$doc&ws=$ws&apiKey=$apikey&username=$username&password=$password";
-  $error = $src_extra;
+  $DocumentGetEditorURL_params = array(
+				     "apiKey" => $this->apikey,
+				     "itemID" => $itemID,
+				     "workSpaceID" => $ws,
+				     "viewPrefsID" => "",
+				     "constraintsID" => "",
+				     "viewerOnly" => false,
+				     "forAnonymousUser" => false
+);
+$urlinfo = $this->client->DocumentGetEditorURL($DocumentGetEditorURL_params);
+print_r($urlinfo);
+$dom = new DOMDocument();
+$dom->loadXML($urlinfo->DocumentGetEditorURLResult);
+$src = $dom->getElementsByTagName("urlInfo")->item(0)->getAttribute("url");
+$src_extra = "&username=$username&password=$password";
+  $error = $itemID;
   /* embed the CHILI editor and submit button */
   /* if no template_id in url, arbort and return to select a template
   /* create new job
@@ -621,14 +652,14 @@ function editTemplate() {
 /* create a new job based on the username
  * return job_id or false if it failed
  */
-private function createJob() {
+private function createJob($base_template_id) {
   /* get job id for documentName below */
   /* $this->select[4] */
   $job_id = 2; // obviously a dummy function
   /* create new job locally */
   try {
     $stmt = $this->conn->prepare($this->insert[2]);
-    $stmt->execute(array('username' => $this->username));
+    $stmt->execute(array('username' => $this->username, 'template_id' => $base_template_id));
   }
   catch (Exception $e) {
     $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
@@ -651,6 +682,21 @@ private function createJob() {
   }
   return $job_id;
 }
+/* add chili id to job
+ * yeah, could be more general */
+private function updateJob($job_id, $chili_id) {
+  try {
+    $stmt = $this->conn->prepare($this->update[1]);
+    $stmt->execute(array(
+			 'chili_id' => $chili_id,
+			 'username' => $this->username,
+			 'job_id' => $job_id
+			 ));
+  }
+  catch (Exception $e) {
+    $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+  }
+}
   /* returns a string document name in the format:
    * job_id-username-category (no spaces)
    * or the derived name from the job_id
@@ -665,7 +711,7 @@ private function createJob() {
       $stmt->execute(array('job_id' => $job_id));
       while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 	$template_name_array = array(
-				$row["job_id"],
+				     str_pad($row["job_id"], 4, "0", STR_PAD_LEFT),
 				$row["username"],
 				$row["description"]
 				);
@@ -692,6 +738,7 @@ function showJobDetail() {
    * include a 're-order' button which defines
    * a new job with the parameters of this one
    */
+  /* remember to include base template in 're-order' url */
      $t = 'detail.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(

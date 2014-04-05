@@ -556,90 +556,72 @@ class Stationery extends Cgiapp2 {
 			       ));
      return $output;
   }
-function editTemplate() {
-  $blankDocTemplateID = $_REQUEST["id"];
-  $base = $_REQUEST["base"];
-  /* as a basic check */
-  /* kick them back to select if the id is not the right length */
-  if (strlen($blankDocTemplateID) != 36) {
-    return $this->selectTemplate();
-  }
-  $error = $this->error;
-  //$src = CHILI_ENV . 'interface.aspx?';
-  /* create new job locally */
-  /* $this->insert[2]
-  /* get job id for documentName below */
-  /* $this->select[4] */
-  
-  $job_id = $this->createJob($base);
-  /* get the base template_id from the URL and get its name
-   * if the template is a base one, use its short name
-   * if the template is a derived one (from history), use the 2nd two fragments of its identifier
-   * if the template has no name, or if there's nothing in the URL -- go to select template screen
-   */
-  $documentName = $this->getTemplateName($job_id);
+ /* embed the CHILI editor and submit button */
+  /* if no template_id in url, arbort and return to select a template
+  /* create new job
+   * get new chili job id based on template_id
+   * open iframe with chili_job for editing
+  /* submit button goes to confirm screen */ 
   /* API calls:
    * 1. ResourceItemCopy to create new doc from template
    * public string ResourceItemCopy ( string apiKey, string resourceName, string itemID, string newName, string folderPath );
    * 2. DocumentGetEditorURL to get URL for new document
    * public string DocumentGetEditorURL ( string apiKey, string itemID, string workSpaceID, string viewPrefsID, string constraintsID, bool viewerOnly, bool forAnonymousUser );
    */
-  /* update job with new template_id */
-  /* $this->update[1];
-     /* get this from incoming URL */
-  $folderPath = 'USERFILES/';
-  //$blankDocTemplateID='a0fab416-cd5f-4240-91a1-500649f63f41';//Uom 1 buscard
-  $soap_params = array(
-		       "apiKey" => $this->apikey,
-		       "resourceName" => "Documents",
-		       "itemID" => $blankDocTemplateID,
-		       "newName" => $documentName,
-		       "folderPath" =>  $folderPath,
-		       );
-  $resourceItemXML = $this->client->ResourceItemCopy($soap_params);
-$dom = new DOMDocument();
-$dom->loadXML($resourceItemXML->ResourceItemCopyResult);
-$itemID = $dom->getElementsByTagName("item")->item(0)->getAttribute("id");
-$this->updateJob($job_id, $itemID);
+  function editTemplate() {
+    $blankDocTemplateID = $_REQUEST["id"];
+    $base = $_REQUEST["base"];
+    /* as a basic check */
+    /* kick them back to select if the id is not the right length */
+    if (strlen($blankDocTemplateID) != 36) {
+      return $this->selectTemplate();
+    }
+    /* check for $_REQUEST["proof"] --> generate proof pdf, load samesame page
+     * check for $_REQUEST["submit"] --> go to confirm screen
+     * check for $_REQUEST["samesame"] --> use job_id directly instead of copy
+     * proof will also have samesame by default
+     */
+    $error = $this->error;
+    /* create new job locally */
+    $job_id = $this->createJob($base);
+    $documentName = $this->getTemplateName($job_id);
+    $folderPath = 'USERFILES/';
+    $soap_params = array(
+			 "apiKey" => $this->apikey,
+			 "resourceName" => "Documents",
+			 "itemID" => $blankDocTemplateID,
+			 "newName" => $documentName,
+			 "folderPath" =>  $folderPath,
+			 );
+    $resourceItemXML = $this->client->ResourceItemCopy($soap_params);
+    $dom = new DOMDocument();
+    $dom->loadXML($resourceItemXML->ResourceItemCopyResult);
+    $itemID = $dom->getElementsByTagName("item")->item(0)->getAttribute("id");
+    /* update job with new template_id */
+    $this->updateJob($job_id, $itemID);
 
-  /* dummy values which currently work */
-  /*  $doc = 'de5fa915-9376-4bf9-bc2b-fbec8195c5c1';
-  $ws = '149598f7-4881-4fbf-86e5-675257f7f4c3';
-  $apikey = 'ri6ggxyqdA5j5+xyptuoFYOP00geV025dCXweXgdPnoWgWBzMICHzC+7Z87CGpqWF2NvpcC_tdBJuYYfCsovKg';
-  $username = 'Anonymous';
-  $password = '';*/
-/* desired values
-   * doc should be template_id?
-   * ws = workspace = ?
-   */
-  /*$doc = 'a0fab416-cd5f-4240-91a1-500649f63f41';//Uom 1 buscard*/
-  $doc = $itemID;
-  $ws = CHILI_WS;
-  $apikey = $this->apikey;
-  $username = $this->chili_user;
-  $password = $this->chili_pass;
-  $DocumentGetEditorURL_params = array(
-				     "apiKey" => $this->apikey,
-				     "itemID" => $itemID,
-				     "workSpaceID" => $ws,
-				     "viewPrefsID" => "",
-				     "constraintsID" => "",
-				     "viewerOnly" => false,
-				     "forAnonymousUser" => false
-);
-$urlinfo = $this->client->DocumentGetEditorURL($DocumentGetEditorURL_params);
-print_r($urlinfo);
-$dom = new DOMDocument();
-$dom->loadXML($urlinfo->DocumentGetEditorURLResult);
-$src = $dom->getElementsByTagName("urlInfo")->item(0)->getAttribute("url");
-$src_extra = "&username=$username&password=$password";
-  $error = $itemID;
-  /* embed the CHILI editor and submit button */
-  /* if no template_id in url, arbort and return to select a template
-  /* create new job
-   * get new chili job id based on template_id
-   * open iframe with chili_job for editing
-  /* submit button goes to confirm screen */ 
+    $doc = $itemID;
+    $ws = CHILI_WS;
+    $apikey = $this->apikey;
+    $username = $this->chili_user;
+    $password = $this->chili_pass;
+    $DocumentGetEditorURL_params = array(
+					 "apiKey" => $this->apikey,
+					 "itemID" => $itemID,
+					 "workSpaceID" => $ws,
+					 "viewPrefsID" => "",
+					 "constraintsID" => "",
+					 "viewerOnly" => false,
+					 "forAnonymousUser" => false
+					 );
+    $urlinfo = $this->client->DocumentGetEditorURL($DocumentGetEditorURL_params);
+    print_r($urlinfo);
+    $dom = new DOMDocument();
+    $dom->loadXML($urlinfo->DocumentGetEditorURLResult);
+    $src = $dom->getElementsByTagName("urlInfo")->item(0)->getAttribute("url");
+    $src_extra = "&username=$username&password=$password";
+    $error = "";
+ 
     $t = 'edit.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
@@ -649,54 +631,56 @@ $src_extra = "&username=$username&password=$password";
 			       ));
     return $output;
   }
-/* create a new job based on the username
- * return job_id or false if it failed
- */
-private function createJob($base_template_id) {
-  /* get job id for documentName below */
-  /* $this->select[4] */
-  $job_id = 2; // obviously a dummy function
-  /* create new job locally */
-  try {
-    $stmt = $this->conn->prepare($this->insert[2]);
-    $stmt->execute(array('username' => $this->username, 'template_id' => $base_template_id));
-  }
-  catch (Exception $e) {
-    $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
-    $job_id = false;
-  }
-  /* get job id for job just created */
-  if ($job_id !== false) {
+  /* create a new job based on the username
+   * return job_id or false if it failed
+   */
+  private function createJob($base_template_id) {
+    /* get job id for documentName below */
+    /* $this->select[4] */
+    $job_id = 2; // obviously a dummy function
+    /* create new job locally */
     try {
-      $stmt2 = $this->conn->prepare($this->select[4]);
-      $stmt2->execute(array('username' => $this->username));
-      while($row = $stmt2->fetch(PDO::FETCH_ASSOC)) {
-	$job_id = $row["job_id"];
-      }
-      
+      $stmt = $this->conn->prepare($this->insert[2]);
+      $stmt->execute(array('username' => $this->username, 'template_id' => $base_template_id));
     }
-    catch (Exception $e){
+    catch (Exception $e) {
       $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
       $job_id = false;
     }
+    /* get job id for job just created */
+    if ($job_id !== false) {
+      try {
+	$stmt2 = $this->conn->prepare($this->select[4]);
+	$stmt2->execute(array('username' => $this->username));
+	while($row = $stmt2->fetch(PDO::FETCH_ASSOC)) {
+	  $job_id = $row["job_id"];
+	}
+      
+      }
+      catch (Exception $e){
+	$this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+	$job_id = false;
+      }
+    }
+    return $job_id;
   }
-  return $job_id;
-}
-/* add chili id to job
- * yeah, could be more general */
-private function updateJob($job_id, $chili_id) {
-  try {
-    $stmt = $this->conn->prepare($this->update[1]);
-    $stmt->execute(array(
-			 'chili_id' => $chili_id,
-			 'username' => $this->username,
-			 'job_id' => $job_id
-			 ));
+
+  /* add chili id to job
+   * yeah, could be more general */
+  private function updateJob($job_id, $chili_id) {
+    try {
+      $stmt = $this->conn->prepare($this->update[1]);
+      $stmt->execute(array(
+			   'chili_id' => $chili_id,
+			   'username' => $this->username,
+			   'job_id' => $job_id
+			   ));
+    }
+    catch (Exception $e) {
+      $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
   }
-  catch (Exception $e) {
-    $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
-  }
-}
+  
   /* returns a string document name in the format:
    * job_id-username-category (no spaces)
    * or the derived name from the job_id

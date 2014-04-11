@@ -132,6 +132,7 @@ class Stationery extends Cgiapp2 {
 			   'new_profile' => 'createProfile',
 			   'template' => 'selectTemplate',
 			   'edit' => 'editTemplate',
+			   'proof' => 'showProof',
 			   'history' => 'showHistory',
 			   'detail' => 'showJobDetail',
 			   'confirm' => 'showConfirmation',
@@ -143,6 +144,7 @@ class Stationery extends Cgiapp2 {
 					  'profile' => 'Profile',
 					  'template' => 'Select Template',
 					  'edit' => 'Edit Template',
+					  'proof' => 'Show Proof',
 					  'history' => 'History',
 					  'detail' => 'Detail',
 					  'confirm' => 'Confirm',
@@ -201,7 +203,8 @@ class Stationery extends Cgiapp2 {
 			  'SELECT department_id from user_department where username = :id',
 			  "SELECT * FROM template WHERE category_id = :category_id AND department_id in ( 'jjjdepartments' ) OR department_id IS NULL ORDER BY department_id",
 			  'SELECT * FROM job WHERE username = :username ORDER BY job_id DESC LIMIT 1',
-			  'SELECT j.job_id, j.username, c.description FROM job j, category c, template t WHERE t.template_id = j.template_id AND t.category_id = c.category_id and j.job_id = :job_id'
+			  'SELECT j.job_id, j.username, c.description FROM job j, category c, template t WHERE t.template_id = j.template_id AND t.category_id = c.category_id and j.job_id = :job_id',
+			  'SELECT id FROM template WHERE template_id = :template_id AND chili_id = :chili_id'
 			  );
     $this->insert = array(
 			  'INSERT INTO user VALUES(:username, :firstname, :lastname, :telephone, :email, DEFAULT);',
@@ -571,34 +574,56 @@ class Stationery extends Cgiapp2 {
   function editTemplate() {
     $blankDocTemplateID = $_REQUEST["id"];
     $base = $_REQUEST["base"];
+    $error = $this->error;
+    $folderPath = 'USERFILES/';
     /* as a basic check */
     /* kick them back to select if the id is not the right length */
     if (strlen($blankDocTemplateID) != 36) {
       return $this->selectTemplate();
     }
+    
     /* check for $_REQUEST["proof"] --> generate proof pdf, load samesame page
+
      * check for $_REQUEST["submit"] --> go to confirm screen
      * check for $_REQUEST["samesame"] --> use job_id directly instead of copy
      * proof will also have samesame by default
+     * non-submitted should also be samesame
      */
-    $error = $this->error;
-    /* create new job locally */
-    $job_id = $this->createJob($base);
-    $documentName = $this->getTemplateName($job_id);
-    $folderPath = 'USERFILES/';
-    $soap_params = array(
-			 "apiKey" => $this->apikey,
-			 "resourceName" => "Documents",
-			 "itemID" => $blankDocTemplateID,
-			 "newName" => $documentName,
-			 "folderPath" =>  $folderPath,
-			 );
-    $resourceItemXML = $this->client->ResourceItemCopy($soap_params);
-    $dom = new DOMDocument();
-    $dom->loadXML($resourceItemXML->ResourceItemCopyResult);
-    $itemID = $dom->getElementsByTagName("item")->item(0)->getAttribute("id");
-    /* update job with new template_id */
-    $this->updateJob($job_id, $itemID);
+    if (isset($_REQUEST["samesame"])) {
+	if ($_REQUEST["samesame"]=="same" and isset($_REQUEST["job"])) {
+	  /* use job_id directly instead of copy */
+	  /* unless base + id  is one of the base templates */
+	  /*if (! $this->isBaseTemplate($blankDocTemplateID, $base)) {
+
+	    }*/
+	  $job_id = $_REQUEST["job"];
+	  $itemID = $this->getChiliId($job_id);
+	  /*else {
+	    /* create new job locally 
+	    $job_id = $this->createJob($base);
+	  }*/
+	 
+	}
+      }
+    else {
+      /* create new job locally */
+      $job_id = $this->createJob($base);
+      $documentName = $this->getTemplateName($job_id);
+      $soap_params = array(
+			   "apiKey" => $this->apikey,
+			   "resourceName" => "Documents",
+			   "itemID" => $blankDocTemplateID,
+			   "newName" => $documentName,
+			   "folderPath" =>  $folderPath,
+			   );
+      $resourceItemXML = $this->client->ResourceItemCopy($soap_params);
+      $dom = new DOMDocument();
+      $dom->loadXML($resourceItemXML->ResourceItemCopyResult);
+      $itemID = $dom->getElementsByTagName("item")->item(0)->getAttribute("id");
+      /* update job with new template_id */
+      $this->updateJob($job_id, $itemID);
+    }
+    $proofurl = $this->action . "?mode=proof&base=$base&proof=true&samesame=same&job=$job_id";
 
     $doc = $itemID;
     $ws = CHILI_WS;
@@ -615,7 +640,6 @@ class Stationery extends Cgiapp2 {
 					 "forAnonymousUser" => false
 					 );
     $urlinfo = $this->client->DocumentGetEditorURL($DocumentGetEditorURL_params);
-    print_r($urlinfo);
     $dom = new DOMDocument();
     $dom->loadXML($urlinfo->DocumentGetEditorURLResult);
     $src = $dom->getElementsByTagName("urlInfo")->item(0)->getAttribute("url");
@@ -625,12 +649,33 @@ class Stationery extends Cgiapp2 {
     $t = 'edit.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
+			       'proofurl' => $proofurl,
 			       'error' => $error,
 			       'modes' => $this->user_visible_modes,
 			       'iframesrc' => $src . $src_extra
 			       ));
     return $output;
   }
+  /* returns a chili id for a particular job */
+  private function getChiliId($job_id) {
+    $chili_id = "";
+    $statement = $this->select[4];
+    $replaced = str_replace(":username", ":username and job_id = :job_id", $statement);
+    try {
+      $stmt = $this->conn->prepare($replaced);
+      $stmt->execute(array('username' => $this->username,
+			   'job_id' => $job_id));
+      while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+	$chili_id = $row["chili_id"];
+      }
+      
+    }
+    catch (Exception $e){
+      $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
+    return $chili_id;
+  }
+
   /* create a new job based on the username
    * return job_id or false if it failed
    */
@@ -664,6 +709,30 @@ class Stationery extends Cgiapp2 {
     }
     return $job_id;
   }
+
+  /* returns true if the combination of base template id and chili id 
+   * is one of the chili base templates
+   */
+  private function isBaseTemplate($base_template_id, $chili_id) {
+    $isBaseTemplate = false;
+    $template_id = -1;
+    try {
+      $stmt = $this->conn->prepare($this->select[6]);
+      $stmt->execute(array('template_id' => $base_template_id,
+			   'chili_id' => $chili_id));
+      while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+	$template_id = $row["template_id"];
+      }
+      if ($template_id != -1) {
+	$isBaseTemplate = true;
+      }
+    }
+    catch (Exception $e){
+      $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
+    return $isBaseTemplate;
+  }
+
 
   /* add chili id to job
    * yeah, could be more general */
@@ -707,6 +776,44 @@ class Stationery extends Cgiapp2 {
     }
     $template_name = implode('-',$template_name_array);
     return str_replace(' ', '', $template_name);
+  }
+  function showProof() {
+    /* display proof PDF and allow user to return to editing or sumbit to print */
+    $base = $_REQUEST["base"];
+    $error = $this->error;
+    $job_id = $_REQUEST["job"];
+    $itemID = $this->getChiliId($job_id);
+    $editurl = $this->action . "?mode=edit&base=$base&id=$itemID&samesame=same&job=$job_id";
+    $pdfurl = "";
+    if (isset($_REQUEST["proof"])) {
+      /* get settingsXML for PDF settings resource PROOF */
+      /* public string ResourceItemGetXML ( string apiKey, string resourceName, string itemID ); */
+      $pdf_resource_params = array(
+				   "apiKey" => $this->apikey,
+				   "resourceName" => "PDFExportSettings",
+				   "itemID" => CHILI_PROOF
+				   );
+      $settingsXML = $this->client->ResourceItemGetXML($pdf_resource_params);
+      print_r($settingsXML);
+      /*generate pdf with api */
+      /* public string DocumentCreatePDF ( string apiKey, string itemID, string settingsXML, int taskPriority ); */
+      $soap_params = array(
+			   "apiKey" => $this->apikey,
+			   "itemID" => $itemID,
+			   "settingsXML" => $settingsXML->ResourceItemGetXMLResult,
+			   "taskPriority" =>  8
+			   );
+      $taskXML = $this->client->DocumentCreatePDF($soap_params);
+      print_r($taskXML);
+    }
+   
+    $t = 'showproof.html';
+    $t = $this->twig->loadTemplate($t);
+    $output = $t->render(array(
+			       'modes' => $this->user_visible_modes,
+			       'editurl' => $editurl
+			       ));
+    return $output;
   }
   function showHistory() {
     /* show a list of past jobs for this user */

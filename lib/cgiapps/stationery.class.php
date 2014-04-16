@@ -806,14 +806,42 @@ class Stationery extends Cgiapp2 {
 			   "taskPriority" => 1
 			   );
       $taskXML = $this->client->DocumentCreatePDF($soap_params);
-      print_r($taskXML);
+      $dom = new DOMDocument();
+      $dom->loadXML($taskXML->DocumentCreatePDFResult);
+      $task_id = $dom->getElementsByTagName("task")->item(0)->getAttribute("id");
+      print_r($task_id);
     }
-   
+    // check task status until task is finished, then get URL
+    $task_params = array(
+			 "apiKey" => $this->apikey,
+			 "taskID" => $task_id
+			 );
+    $status = "";
+    try{
+      do {
+	$task_statusXML =  $this->client->TaskGetStatus($task_params);
+	$dom = new DOMDocument();
+	$dom->loadXML($task_statusXML->TaskGetStatusResult);
+	$status = $dom->getElementsByTagName("task")->item(0)->getAttribute("finished");
+      } while ($status != "True");
+      print_r($task_statusXML);
+      $result = $dom->getElementsByTagName("task")->item(0)->getAttribute("result");
+      $dom2 = new DOMDocument();
+      $dom2->loadXML($result);
+      $relativeURL = $dom2->getElementsByTagName("result")->item(0)->getAttribute("relativeURL");
+      $pdfurl = CHILI_APP . $relativeURL; 
+      //print_r($status);
+    }
+    catch (Exception $e) {
+      $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
+
     $t = 'showproof.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
 			       'modes' => $this->user_visible_modes,
-			       'editurl' => $editurl
+			       'editurl' => $editurl,
+			       'pdfurl' => $pdfurl
 			       ));
     return $output;
   }

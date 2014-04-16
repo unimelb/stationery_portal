@@ -803,7 +803,7 @@ class Stationery extends Cgiapp2 {
 			   "apiKey" => $this->apikey,
 			   "itemID" => $itemID,
 			   "settingsXML" => $settingsXML->ResourceItemGetDefinitionXMLResult,
-			   "taskPriority" =>  1
+			   "taskPriority" => 1
 			   );
       $taskXML = $this->client->DocumentCreatePDF($soap_params);
       print_r($taskXML);

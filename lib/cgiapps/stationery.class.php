@@ -787,21 +787,23 @@ class Stationery extends Cgiapp2 {
     $pdfurl = "";
     if (isset($_REQUEST["proof"])) {
       /* get settingsXML for PDF settings resource PROOF */
+      /* ResourceItemGetDefinitionXML used in API sample:
+       * public string ResourceItemGetDefinitionXML ( string apiKey, string resourceName, string itemID );
       /* public string ResourceItemGetXML ( string apiKey, string resourceName, string itemID ); */
       $pdf_resource_params = array(
 				   "apiKey" => $this->apikey,
 				   "resourceName" => "PDFExportSettings",
 				   "itemID" => CHILI_PROOF
 				   );
-      $settingsXML = $this->client->ResourceItemGetXML($pdf_resource_params);
+      $settingsXML = $this->client->ResourceItemGetDefinitionXML($pdf_resource_params);
       print_r($settingsXML);
       /*generate pdf with api */
       /* public string DocumentCreatePDF ( string apiKey, string itemID, string settingsXML, int taskPriority ); */
       $soap_params = array(
 			   "apiKey" => $this->apikey,
 			   "itemID" => $itemID,
-			   "settingsXML" => $settingsXML->ResourceItemGetXMLResult,
-			   "taskPriority" =>  8
+			   "settingsXML" => $settingsXML->ResourceItemGetDefinitionXMLResult,
+			   "taskPriority" =>  1
 			   );
       $taskXML = $this->client->DocumentCreatePDF($soap_params);
       print_r($taskXML);

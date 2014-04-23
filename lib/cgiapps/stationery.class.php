@@ -204,7 +204,9 @@ class Stationery extends Cgiapp2 {
 			  "SELECT * FROM template WHERE category_id = :category_id AND department_id in ( 'jjjdepartments' ) OR category_id = :category_id2 AND department_id IS NULL ORDER BY department_id ASC",
 			  'SELECT * FROM job WHERE username = :username ORDER BY job_id DESC LIMIT 1',
 			  'SELECT j.job_id, j.username, c.description FROM job j, category c, template t WHERE t.template_id = j.template_id AND t.category_id = c.category_id and j.job_id = :job_id',
-			  'SELECT id FROM template WHERE template_id = :template_id AND chili_id = :chili_id'
+			  'SELECT id FROM template WHERE template_id = :template_id AND chili_id = :chili_id',
+			  'SELECT t.full_name FROM template t, job j WHERE j.job_id= :job_id and j.template_id = t.template_id',
+			  'select quantity, price_AUD from template_price where category_id = :category_id'
 			  );
     $this->insert = array(
 			  'INSERT INTO user VALUES(:username, :firstname, :lastname, :telephone, :email, DEFAULT);',
@@ -274,7 +276,6 @@ class Stationery extends Cgiapp2 {
     $first_time = true;
     $error = "";
     if (isset($_REQUEST["submitted"])) {
-      //$error = print_r($_REQUEST);
       try {
 	$stmt = $this->conn->prepare($this->insert[0]);
 	/* first add user */
@@ -301,7 +302,6 @@ class Stationery extends Cgiapp2 {
 	  $stmt2->execute();
 	}
 	$this->error .= "<p>Adding details for ". $this->username . ".</p>";
-	$error = print_r($department_keys);
 	return $this->showProfile();
       }
       catch(PDOException $e) {
@@ -433,8 +433,6 @@ class Stationery extends Cgiapp2 {
       catch(Exception $e) {
 	$error = print_r($to_delete, true) . '<pre>ERROR: ' . $e->getMessage() . '</pre>';
       }
-      print_r($to_insert);
-      print_r($to_delete);
       $error .= "<p>Updated ". $this->username . ".</p>";
     }
     /* get user details */
@@ -636,6 +634,7 @@ class Stationery extends Cgiapp2 {
       $this->updateJob($job_id, $itemID);
     }
     $proofurl = $this->action . "?mode=proof&base=$base&proof=true&samesame=same&job=$job_id";
+    $submiturl = $this->action . "?mode=confirm&job=$job_id";
 
     $doc = $itemID;
     $ws = CHILI_WS;
@@ -662,6 +661,7 @@ class Stationery extends Cgiapp2 {
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
 			       'proofurl' => $proofurl,
+			       'submiturl' => $submiturl,
 			       'error' => $error,
 			       'modes' => $this->user_visible_modes,
 			       'iframesrc' => $src . $src_extra
@@ -808,7 +808,7 @@ class Stationery extends Cgiapp2 {
 				   "itemID" => CHILI_PROOF
 				   );
       $settingsXML = $this->client->ResourceItemGetDefinitionXML($pdf_resource_params);
-      print_r($settingsXML);
+
       /*generate pdf with api */
       /* public string DocumentCreatePDF ( string apiKey, string itemID, string settingsXML, int taskPriority ); */
       $soap_params = array(
@@ -821,7 +821,6 @@ class Stationery extends Cgiapp2 {
       $dom = new DOMDocument();
       $dom->loadXML($taskXML->DocumentCreatePDFResult);
       $task_id = $dom->getElementsByTagName("task")->item(0)->getAttribute("id");
-      print_r($task_id);
     }
     // check task status until task is finished, then get URL
     $task_params = array(
@@ -836,13 +835,11 @@ class Stationery extends Cgiapp2 {
 	$dom->loadXML($task_statusXML->TaskGetStatusResult);
 	$status = $dom->getElementsByTagName("task")->item(0)->getAttribute("finished");
       } while ($status != "True");
-      print_r($task_statusXML);
       $result = $dom->getElementsByTagName("task")->item(0)->getAttribute("result");
       $dom2 = new DOMDocument();
       $dom2->loadXML($result);
       $relativeURL = $dom2->getElementsByTagName("result")->item(0)->getAttribute("relativeURL");
       $pdfurl = CHILI_APP . $relativeURL; 
-      //print_r($status);
     }
     catch (Exception $e) {
       $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
@@ -891,15 +888,69 @@ function showConfirmation() {
    * prints job as proof pdf
    * sends proof and job data to temporary storage area
    * redirect to showFinal 
-   */ 
-    $t = 'confirm.html';
-    $t = $this->twig->loadTemplate($t);
-    $output = $t->render(array(
-			       'modes' => $this->user_visible_modes
+   */
+  $action = $this->action . "?mode=thanks";
+  $job_id = $_REQUEST["job"];
+  $stationery_type = $this->getTemplateNameFromJob($job_id);
+  $quantities = $this->getPricelistFromJob($job_id);
+  $stationery_title = "To print: " . $stationery_type;
+  $t = 'confirm.html';
+  $t = $this->twig->loadTemplate($t);
+  $output = $t->render(array(
+			       'modes' => $this->user_visible_modes,
+			       'action' => $action,
+			       'job_id' => $job_id,
+			       'stationery' => $stationery_title,
+			       'quantities' => $quantities
 			       ));
     return $output;
   }
+/* takes a job id and returns the base template name string*/
+private function getTemplateNameFromJob($job_id) {
+  $template_name = "None";
+  try {
+    $stmt = $this->conn->prepare($this->select[7]);
+    $stmt->execute(array('job_id' => $job_id));
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $template_name = $row["full_name"];
+    }
+  }
+  catch (Exception $e){
+    $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+  }
+  return $template_name;
+}
+private function getPricelistFromJob($job_id) {
+  $category_id=0;
+  $pricelist = array();
+   $statement = $this->select[7];
+   $statement2 = str_replace("t.full_name", "t.category_id", $statement);
+   $statement3 = $this->select[8];
+  try {
+    $stmt = $this->conn->prepare($statement2);
+    $stmt->execute(array('job_id' => $job_id));
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $category_id = $row["category_id"];
+    }
+  }
+  catch (Exception $e){
+    $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+  }
+  try {
+    $stmt2 = $this->conn->prepare($statement3);
+    $stmt2->execute(array('category_id' => $category_id));
+    while($row = $stmt2->fetch(PDO::FETCH_OBJ)) {
+      array_push($pricelist, $row);
+    }
+  }
+ 
+  catch (Exception $e){
+    $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+  }
+  return $pricelist;
+}
 function showFinal() {
+  print_r($_REQUEST);
     $t = 'final.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(

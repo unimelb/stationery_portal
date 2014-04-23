@@ -14,11 +14,20 @@
 <p>prints job as proof pdf</p>
 <p>sends proof and job data to temporary storage area</p>
 <p>redirect to <a href="index.php?mode=final">final screen</a></p>
+<h3>{{ stationery }}</h3>
 <form action="{{ action }}" method="POST">
+<label for="quantity">Quantity and price
+<select name ="quantity">
+{% for item in quantities %}
+<option value="{{ item.quantity }}@{{ item.price_AUD|number_format(2, '.', ',') }}">{{ item.quantity }} --> ${{ item.price_AUD|number_format(2, '.', ',') }}</option>
+{% endfor %}
+</select>
+</label>
+<label for="themis">THEMIS code<input name="themis" size="27" maxlength="27" placeholer="xx-xxxx-xx-000000-GEN-xx-01" required = "required"></label>
 <fieldset class="address">
 		<h3>Delivery Address</h3>
 		<label class="col-2" for="addressee">Addressee</label>
-		<input class="col-3" name="addressee" id="addressee">
+		<input class="col-3" name="addressee" id="addressee" required = "required">
 		<label class="col-2" for="location">Location</label>
 		<input class="col-3" name="location" id="location" placeholder="eg. level, office no, etc">
 		<label class="col-2" for="number">Number</label>
@@ -26,13 +35,17 @@
 		<label class="col-2" for="street">Street name</label>
 		<input class="col-3" name="street" id="street">
 		<label class="col-2" for="town">Town/Campus</label>
-		<input class="col-3" name="town" id="town">
+		<input class="col-3" name="town" id="town" required = "required" >
 		<label class="col-2" for="postcode">Postcode</label>
-		<input class="col-3" name="postcode" id="postcode">
+		<input class="col-3" name="postcode" id="postcode" required = "required">
 		<!-- note that 2-letter country code is a field in the database, but deliveries are assumed to be in Australia for now 2014-02-07 -->
-
 	</fieldset>
+<label for="comments">Additional information</label><br />
+<textarea name="comments"></textarea>
+<hr>
+<input id="job" name="job" type="hidden" value="{{ job_id }}" />
 <label><input name="submitted" type="submit" value="Confirm details and PRINT"></label>
+
 </form>
 {% endblock %}
 {% block nav %}

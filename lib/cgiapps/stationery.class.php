@@ -201,7 +201,7 @@ class Stationery extends Cgiapp2 {
 			  'SELECT * FROM user WHERE username = :id',
 			  'SELECT name, acronym, department_id FROM department',
 			  'SELECT department_id from user_department where username = :id',
-			  "SELECT * FROM template WHERE category_id = :category_id AND department_id in ( 'jjjdepartments' ) OR department_id IS NULL ORDER BY department_id",
+			  "SELECT * FROM template WHERE category_id = :category_id AND department_id in ( 'jjjdepartments' ) OR category_id = :category_id2 AND department_id IS NULL ORDER BY department_id ASC",
 			  'SELECT * FROM job WHERE username = :username ORDER BY job_id DESC LIMIT 1',
 			  'SELECT j.job_id, j.username, c.description FROM job j, category c, template t WHERE t.template_id = j.template_id AND t.category_id = c.category_id and j.job_id = :job_id',
 			  'SELECT id FROM template WHERE template_id = :template_id AND chili_id = :chili_id'
@@ -502,7 +502,8 @@ class Stationery extends Cgiapp2 {
   function selectTemplate() {
     /* choose from one of the available CHILI templates */
     /* get categories */
-    /* buscards = 1, letheads = 2, withcomps = 3 */
+    /* buscards = 1, letheads = 2, withcomps = 3, buscards_DS = 4, 
+     *  Envelopes = 5 (unused)*/
     $error = "";
     $stationery_type_list = array(
 				  array(), array(), array()
@@ -521,19 +522,26 @@ class Stationery extends Cgiapp2 {
     } 
     $department_list = implode(",", $dept_ids);
     /* get category ids and names into $categories */
+    
     /* get templates */
-    $categories_count = 3;
+    $categories_count = 4;
+    $basic_url = 'index.php?mode=edit';
     try {
       $statement1 = $this->select[3];
-      // repace :department with $department_list
+      // replace :department with $department_list
       $statement = str_replace("jjjdepartments", $department_list, $statement1);
       $stmt = $this->conn->prepare($statement);
       $category_id = 1;
-      //$stmt->bindParam(':category', $category_id);
-      /* for each category, just 1 here now */
+       /* for each category, just 1 here now */
       for ($category_id = 1; $category_id < $categories_count +1; $category_id ++) {
-	$stmt->execute(array(':category_id' => $category_id));
+	$stmt->execute(array(':category_id' => $category_id,
+			     ':category_id2' => $category_id)
+		       );
 	while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
+	  $row->url = $basic_url . '&id=' . $row->chili_id . '&base=' . $row->template_id;
+	  if ($category_id == 4) {
+	    array_push ($stationery_type_list[0], $row);
+	  }
 	  array_push ($stationery_type_list[$category_id-1], $row);
 	}
 
@@ -543,11 +551,15 @@ class Stationery extends Cgiapp2 {
     catch(Exception $e) {
       $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     }
-    $basic_url = 'index.php?mode=edit';
-    foreach ($stationery_type_list[0] as $buscard) {
+    /* sort business cards so that double sided and single sided are together */
+    usort($stationery_type_list[0], function($a, $b)
+	  {
+	    return strcmp($a->short_name, $b->short_name);
+	  });
+    /*    foreach ($stationery_type_list[0] as $buscard) {
       $buscard->url = $basic_url . '&id=' . $buscard->chili_id . '&base=' . $buscard->template_id;
-      $buscard->short = $buscard->short_name;
-    }
+      $buscard->short = $buscard->full_name;
+      }*/
     $t = 'template.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(

@@ -207,7 +207,7 @@ class Stationery extends Cgiapp2 {
 			  'SELECT id FROM template WHERE template_id = :template_id AND chili_id = :chili_id',
 			  'SELECT t.full_name FROM template t, job j WHERE j.job_id= :job_id and j.template_id = t.template_id',
 			  'SELECT quantity, price_AUD FROM template_price WHERE category_id = :category_id',
-			  'SELECT * FROM address ORDER BY address_id DESC LIMIT 1'
+			  'SELECT * FROM address where address_id = :address_id'
 			  );
     $this->insert = array(
 			  'INSERT INTO user VALUES(:username, :firstname, :lastname, :telephone, :email, DEFAULT);',
@@ -1094,6 +1094,59 @@ Array
   /*
  *** generate print pdf
  Like proof only print
+  */
+
+  /* get settingsXML for PDF settings resource PROOF */
+  /* ResourceItemGetDefinitionXML used in API sample:
+   * public string ResourceItemGetDefinitionXML ( string apiKey, string resourceName, string itemID );
+   /* public string ResourceItemGetXML ( string apiKey, string resourceName, string itemID ); */
+  $pdf_resource_params = array(
+			       "apiKey" => $this->apikey,
+			       "resourceName" => "PDFExportSettings",
+			       "itemID" => CHILI_PRINT
+			       );
+  $settingsXML = $this->client->ResourceItemGetDefinitionXML($pdf_resource_params);
+
+  /*generate pdf with api */
+  /* public string DocumentCreatePDF ( string apiKey, string itemID, string settingsXML, int taskPriority ); */
+  $chili_id = $this->getChiliId($job_id);
+  $soap_params = array(
+		       "apiKey" => $this->apikey,
+		       "itemID" => $chili_id,
+		       "settingsXML" => $settingsXML->ResourceItemGetDefinitionXMLResult,
+		       "taskPriority" => 4
+		       );
+  $taskXML = $this->client->DocumentCreatePDF($soap_params);
+  /*  $dom = new DOMDocument();
+  $dom->loadXML($taskXML->DocumentCreatePDFResult);
+  $task_id = $dom->getElementsByTagName("task")->item(0)->getAttribute("id");
+}
+// check task status until task is finished, then get URL
+/* no need for end user to view print pdf
+$task_params = array(
+		     "apiKey" => $this->apikey,
+		     "taskID" => $task_id
+		     );
+$status = "";
+try{
+  do {
+    $task_statusXML =  $this->client->TaskGetStatus($task_params);
+    $dom = new DOMDocument();
+    $dom->loadXML($task_statusXML->TaskGetStatusResult);
+    $status = $dom->getElementsByTagName("task")->item(0)->getAttribute("finished");
+  } while ($status != "True");
+  $result = $dom->getElementsByTagName("task")->item(0)->getAttribute("result");
+  $dom2 = new DOMDocument();
+  $dom2->loadXML($result);
+  $relativeURL = $dom2->getElementsByTagName("result")->item(0)->getAttribute("relativeURL");
+  $pdfurl = CHILI_APP . $relativeURL; 
+}
+catch (Exception $e) {
+  $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+}
+*/
+
+  /*
  *** generate text file
  probably in YAML (see php yaml_emit_file)
  **** details
@@ -1104,6 +1157,9 @@ Array
  + price
  + comments
  + date generated
+  */
+
+  /*
  *** zip text and print pdf
  */
     $t = 'final.html';

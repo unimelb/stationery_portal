@@ -1149,7 +1149,7 @@ function showFinal() {
   $textfilename = FILESTORE . $job_name . ".txt";
   $file = fopen($textfilename,'w');
   if ($file === FALSE) {
-    $this->error = "Can’t open file!";
+    $this->error = "Can’t open file! " . $textfilename;
   }
   foreach($yaml_array as $key=>$value){
     fwrite($file, $key . ": " . $value . PHP_EOL);

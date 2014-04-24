@@ -206,12 +206,14 @@ class Stationery extends Cgiapp2 {
 			  'SELECT j.job_id, j.username, c.description FROM job j, category c, template t WHERE t.template_id = j.template_id AND t.category_id = c.category_id and j.job_id = :job_id',
 			  'SELECT id FROM template WHERE template_id = :template_id AND chili_id = :chili_id',
 			  'SELECT t.full_name FROM template t, job j WHERE j.job_id= :job_id and j.template_id = t.template_id',
-			  'select quantity, price_AUD from template_price where category_id = :category_id'
+			  'SELECT quantity, price_AUD FROM template_price WHERE category_id = :category_id',
+			  'SELECT * FROM address ORDER BY address_id DESC LIMIT 1'
 			  );
     $this->insert = array(
 			  'INSERT INTO user VALUES(:username, :firstname, :lastname, :telephone, :email, DEFAULT);',
 			  'INSERT INTO user_department VALUES(:username, :department_id)',
-			  'INSERT INTO job (job_id, username, template_id) VALUES(DEFAULT, :username, :template_id)' 
+			  'INSERT INTO job (job_id, username, template_id) VALUES(DEFAULT, :username, :template_id)',
+			  'INSERT INTO address(address_id, addressee, location, street_number, street, town, postcode) VALUES (DEFAULT, :addressee, :location, :street_number, :street, :town, :postcode)'
 			  );
     $this->update = array(
 			  'UPDATE user SET given_name = :firstname, family_name = :lastname, phone = :phone, email = :email WHERE username = :id',
@@ -540,7 +542,9 @@ class Stationery extends Cgiapp2 {
 	  if ($category_id == 4) {
 	    array_push ($stationery_type_list[0], $row);
 	  }
-	  array_push ($stationery_type_list[$category_id-1], $row);
+	  else {
+	    array_push ($stationery_type_list[$category_id-1], $row);
+	  }
 	}
 
       }
@@ -631,7 +635,8 @@ class Stationery extends Cgiapp2 {
       $dom->loadXML($resourceItemXML->ResourceItemCopyResult);
       $itemID = $dom->getElementsByTagName("item")->item(0)->getAttribute("id");
       /* update job with new template_id */
-      $this->updateJob($job_id, $itemID);
+      $var_array = array('chili_id' => $itemID);
+      $this->updateJob($job_id, $var_array);
     }
     $proofurl = $this->action . "?mode=proof&base=$base&proof=true&samesame=same&job=$job_id";
     $submiturl = $this->action . "?mode=confirm&job=$job_id";
@@ -747,15 +752,46 @@ class Stationery extends Cgiapp2 {
 
 
   /* add chili id to job
-   * yeah, could be more general */
-  private function updateJob($job_id, $chili_id) {
+   * yeah, could be more general 
+   * $var_array is array of variables to change
+   */
+  private function updateJob($job_id, $var_array) {
+    /* create statement from $var_array */
+    //$var_array = array('chili_id' => $chili_id);
+
+    /* this part can be abstracted out */
+    $settings = array();
+    $statement = "";
+    $key_conditions = array();
+    foreach ($var_array as $key => $value) {
+      if (is_string($value))
+	{
+	  $value = trim($value);
+	  if (strlen($value) == 0)
+	    {
+	      $value === null;
+	    }
+	}
+      $lcasekey = strtolower($key);
+      $settings[] = $lcasekey . " = " . ":" . $lcasekey;
+    }
+    $settext = implode(", ", $settings);
+    $primary_key = 'job_id'; //this would be find primary column
+    $keytext = $primary_key . " = :" . $primary_key;
+    $statement = "update job set " . $settext . " where " . $keytext;
+    /* to here */
+    $var_array["job_id"] = $job_id;
     try {
-      $stmt = $this->conn->prepare($this->update[1]);
-      $stmt->execute(array(
+      /*$this->update[1]*/
+      /*array(
 			   'chili_id' => $chili_id,
 			   'username' => $this->username,
 			   'job_id' => $job_id
-			   ));
+			   )
+      */
+      $stmt = $this->conn->prepare($statement);
+      print_r($var_array);
+      $stmt->execute($var_array);
     }
     catch (Exception $e) {
       $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
@@ -949,14 +985,153 @@ private function getPricelistFromJob($job_id) {
   }
   return $pricelist;
 }
+/* Takes an array of address details
+("addressee", "location", "street_number", "street", "town", "postcode")
+[and optional "country_code"]
+and adds an address to the database. Returns the (integer) address_id if successful;
+false otherwise
+*/
+private function addAddress($address_details) {
+  //$address_id = false;
+  $address_id = -1;
+try {
+      $stmt = $this->conn->prepare($this->insert[3]);
+      $stmt->execute(array(
+			   "addressee" => $address_details["addressee"],
+			   "location" => $address_details["location"],
+			   "street_number" => $address_details["street_number"],
+			   "street" => $address_details["street"],
+			   "town" => $address_details["town"],
+			   "postcode" => $address_details["postcode"]
+			   ));
+}
+    catch (Exception $e) {
+      $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+      $address_id = false;
+    }
+    /* get address id for address just created */
+    if ($address_id !== false) {
+      /*  try {
+	  $stmt2 = $this->conn->prepare($this->select[9]);
+	  $stmt2->execute();
+	  while($row = $stmt2->fetch(PDO::FETCH_ASSOC)) {
+	  $address_id = $row["address_id"];
+	  }
+      
+	  }
+	  catch (Exception $e){
+	  $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+	  $address_id = false;
+	  }*/
+      $address_id = $this->conn->lastInsertId();
+    }
+    print_r($address_id);
+    return $address_id;  
+}
 function showFinal() {
-  print_r($_REQUEST);
+  /*
+ *** add address to address table
+ */
+  $address_info = array(
+			"addressee" => $_REQUEST["addressee"],
+			"location" => $_REQUEST["location"],
+			"street_number" => $_REQUEST["number"],
+			"street" => $_REQUEST["street"],
+			"town" => $_REQUEST["town"],
+			"postcode" => $_REQUEST["postcode"]
+			); 
+  $address_id = $this->addAddress($address_info);
+  /*
+ *** update job entity with address and other details
+Array
+(
+    [mode] => thanks
+    [quantity] => 3000@620.00 Job
+    [themis] => 1212122 Job
+    [addressee] => 1212 Address
+    [location] => Address
+    [number] => Address
+    [street] => Address
+    [town] => 1212 Address
+    [postcode] => 1212 Address
+    [comments] => Job
+    [job] => 34 Job
+    [submitted] => Confirm details and PRINT
+)
+  */
+
+  if(isset($_REQUEST['job'])) {
+    $job_id = $_REQUEST['job'];
+  }
+    else {
+    /* no job, no confirmation! */
+    return $this->selectTemplate();
+  }
+  /*if (!$address_id) {
+    /* need a delivery address 
+    return $this->showConfirmation();
+    }*/
+  $quantity = 0;
+  if(isset($_REQUEST['quantity'])) {
+    $quantityprice = $_REQUEST['quantity'];
+    $quantity = substr($_REQUEST["quantity"], 0, (strlen($quantityprice) - strpos($quantityprice, '@')));
+  }
+ 
+  $instructions = null;
+  if(isset($_REQUEST["comments"])) {
+    $instructions = $_REQUEST["comments"];
+  }
+
+  $today = date("Y-m-d H:i:s");
+  $var_array = array(
+		     'quantity' => $quantity,
+		     'themis_code' => $_REQUEST["themis"],
+		     'instructions' => $instructions,
+		     'address_id' => $address_id,
+		     'ordered' => $today
+		     );
+  $this->updateJob($job_id, $var_array);
+  /*
+ *** generate print pdf
+ Like proof only print
+ *** generate text file
+ probably in YAML (see php yaml_emit_file)
+ **** details
+ + delivery address
+ + THEMIS code
+ + print pdf cross-reference
+ + quantity
+ + price
+ + comments
+ + date generated
+ *** zip text and print pdf
+ */
     $t = 'final.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
-			       'modes' => $this->user_visible_modes
+			       'modes' => $this->user_visible_modes,
+			       'error' => $this->error
 			       ));
     return $output;
-  }
 }
+/* construct a statement to update a table via PDO
+ * based on the meid_sqlserver_dao::updateTableItem
+ * the table ($table) must have a primary key ($id)
+ * and an array of variables to update ($var_array)
+ */
+private function updateTableItemStatetement($table, $id, $var_array) {
+  $statement = "";
+  return $statement;
+}
+/* 
+ * This function returns the column name of the primary key for a given table. 
+ * Cross-platform, SQL compliant.
+ */
+private function getPrimaryColumn($table) {
+  $tablename = strtolower($table);
+  $column_name = "";
+  return $column_name;
+}
+}
+
 ?>

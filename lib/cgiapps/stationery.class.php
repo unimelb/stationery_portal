@@ -172,6 +172,7 @@ class Stationery extends Cgiapp2 {
 	$this->username = "bobmadjr"; // test username only
       }
     $this->sqlstatements();
+    //$this->upload_dir = $_SERVER["DOCUMENT_ROOT"] . LIBPATH . FILESTORE;
   }
  
    /* select a random user for chili api functions */
@@ -880,13 +881,14 @@ class Stationery extends Cgiapp2 {
     catch (Exception $e) {
       $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     }
-
+    $submiturl = $this->action . "?mode=confirm&job=$job_id";
     $t = 'showproof.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
 			       'modes' => $this->user_visible_modes,
 			       'editurl' => $editurl,
-			       'pdfurl' => $pdfurl
+			       'pdfurl' => $pdfurl,
+			       'submiturl' => $submiturl
 			       ));
     return $output;
   }
@@ -1073,8 +1075,8 @@ function showFinal() {
   $quantity = 0;
   if(isset($_REQUEST['quantity'])) {
     $quantityprice = $_REQUEST['quantity'];
-    $quantity = substr($_REQUEST["quantity"], 0, (strlen($quantityprice) - strpos($quantityprice, '@')));
-    $price = substr($quantityprice, (strlen($quantityprice) - strpos($quantityprice, '@') +1));
+    $quantity = substr($_REQUEST["quantity"], 0, strpos($quantityprice, '@'));
+    $price = substr($_REQUEST['quantity'], strpos($quantityprice, '@')+1);
   }
  
   $instructions = null;
@@ -1154,7 +1156,7 @@ function showFinal() {
   foreach($yaml_array as $key=>$value){
     fwrite($file, $key . ": " . $value . PHP_EOL);
   }
-  fwrite($file, "Delivery address" . PHP_EOL);
+  fwrite($file, "DELIVERY ADDRESS" . PHP_EOL);
   foreach($address_info as $key=>$value) {
     fwrite($file, $key . ": " . $value . PHP_EOL);
   }

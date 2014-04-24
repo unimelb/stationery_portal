@@ -20,6 +20,7 @@ require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/addons/Cgiapp2-2.0.0/Cg
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/addons/Twig/lib/Twig/Autoloader.php");
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/dbconnect.inc.php");
 include_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/chili.inc.php");
+include_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/storage.inc.php");
 class Stationery extends Cgiapp2 {
   /**
    * @var string $username
@@ -790,7 +791,6 @@ class Stationery extends Cgiapp2 {
 			   )
       */
       $stmt = $this->conn->prepare($statement);
-      print_r($var_array);
       $stmt->execute($var_array);
     }
     catch (Exception $e) {
@@ -1025,7 +1025,6 @@ try {
 	  }*/
       $address_id = $this->conn->lastInsertId();
     }
-    print_r($address_id);
     return $address_id;  
 }
 function showFinal() {
@@ -1043,27 +1042,27 @@ function showFinal() {
   $address_id = $this->addAddress($address_info);
   /*
  *** update job entity with address and other details
-Array
-(
-    [mode] => thanks
-    [quantity] => 3000@620.00 Job
-    [themis] => 1212122 Job
-    [addressee] => 1212 Address
-    [location] => Address
-    [number] => Address
-    [street] => Address
-    [town] => 1212 Address
-    [postcode] => 1212 Address
-    [comments] => Job
-    [job] => 34 Job
-    [submitted] => Confirm details and PRINT
-)
+ Array
+ (
+ [mode] => thanks
+ [quantity] => 3000@620.00 Job
+ [themis] => 1212122 Job
+ [addressee] => 1212 Address
+ [location] => Address
+ [number] => Address
+ [street] => Address
+ [town] => 1212 Address
+ [postcode] => 1212 Address
+ [comments] => Job
+ [job] => 34 Job
+ [submitted] => Confirm details and PRINT
+ )
   */
 
   if(isset($_REQUEST['job'])) {
     $job_id = $_REQUEST['job'];
   }
-    else {
+  else {
     /* no job, no confirmation! */
     return $this->selectTemplate();
   }
@@ -1075,6 +1074,7 @@ Array
   if(isset($_REQUEST['quantity'])) {
     $quantityprice = $_REQUEST['quantity'];
     $quantity = substr($_REQUEST["quantity"], 0, (strlen($quantityprice) - strpos($quantityprice, '@')));
+    $price = substr($quantityprice, (strlen($quantityprice) - strpos($quantityprice, '@') +1));
   }
  
   $instructions = null;
@@ -1117,77 +1117,60 @@ Array
 		       "taskPriority" => 4
 		       );
   $taskXML = $this->client->DocumentCreatePDF($soap_params);
-  /*  $dom = new DOMDocument();
-  $dom->loadXML($taskXML->DocumentCreatePDFResult);
-  $task_id = $dom->getElementsByTagName("task")->item(0)->getAttribute("id");
-}
-// check task status until task is finished, then get URL
-/* no need for end user to view print pdf
-$task_params = array(
-		     "apiKey" => $this->apikey,
-		     "taskID" => $task_id
-		     );
-$status = "";
-try{
-  do {
-    $task_statusXML =  $this->client->TaskGetStatus($task_params);
-    $dom = new DOMDocument();
-    $dom->loadXML($task_statusXML->TaskGetStatusResult);
-    $status = $dom->getElementsByTagName("task")->item(0)->getAttribute("finished");
-  } while ($status != "True");
-  $result = $dom->getElementsByTagName("task")->item(0)->getAttribute("result");
-  $dom2 = new DOMDocument();
-  $dom2->loadXML($result);
-  $relativeURL = $dom2->getElementsByTagName("result")->item(0)->getAttribute("relativeURL");
-  $pdfurl = CHILI_APP . $relativeURL; 
-}
-catch (Exception $e) {
-  $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
-}
-*/
-
   /*
  *** generate text file
  probably in YAML (see php yaml_emit_file)
  **** details
- + delivery address
- + THEMIS code
- + print pdf cross-reference
++ print pdf cross-reference
  + quantity
- + price
- + comments
- + date generated
+ + price 
++ delivery address
+ - addressee
+ - location
+ - street_number . street
+ - town
+ - postcode
++ date generated 
++ THEMIS code
++ comments 
   */
-
-  /*
- *** zip text and print pdf
- */
+  $job_name = $this->getTemplateName($job_id);
+  /* db query needed here */
+  $yaml_array =  array(
+		       'job information' => $job_name . "-print.pdf",
+		       'quantity' => $quantity,
+		       'price' => $price,
+		       'date' => $today,
+		       'THEMIS code' => $_REQUEST["themis"],
+		       'comments' => $instructions
+		       );
+  /*$yaml_dump = yaml_emit($yaml_array);
+    print_r($yaml_dump);*/
+  $textfilename = FILESTORE . $job_name . ".txt";
+  $file = fopen($textfilename,'w');
+  if ($file === FALSE) {
+    $this->error = "Can’t open file!";
+  }
+  foreach($yaml_array as $key=>$value){
+    fwrite($file, $key . ": " . $value . PHP_EOL);
+  }
+  fwrite($file, "Delivery address" . PHP_EOL);
+  foreach($address_info as $key=>$value) {
+    fwrite($file, $key . ": " . $value . PHP_EOL);
+  }
+  fclose($file);
+    /*
+   *** zip text and print pdf
+   */
     $t = 'final.html';
-    $t = $this->twig->loadTemplate($t);
-    $output = $t->render(array(
-			       'modes' => $this->user_visible_modes,
-			       'error' => $this->error
-			       ));
-    return $output;
+  $t = $this->twig->loadTemplate($t);
+  $output = $t->render(array(
+			     'modes' => $this->user_visible_modes,
+			     'error' => $this->error
+			     ));
+  return $output;
 }
-/* construct a statement to update a table via PDO
- * based on the meid_sqlserver_dao::updateTableItem
- * the table ($table) must have a primary key ($id)
- * and an array of variables to update ($var_array)
- */
-private function updateTableItemStatetement($table, $id, $var_array) {
-  $statement = "";
-  return $statement;
-}
-/* 
- * This function returns the column name of the primary key for a given table. 
- * Cross-platform, SQL compliant.
- */
-private function getPrimaryColumn($table) {
-  $tablename = strtolower($table);
-  $column_name = "";
-  return $column_name;
-}
+
 }
 
 ?>

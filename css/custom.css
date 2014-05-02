@@ -13,6 +13,7 @@ form { overflow: visible;}
 
 .wrapper { margin-bottom: 100px; }
 .wrapper.white { background: #fff; padding: 20px 40px 40px 20px; margin-left: -30px; margin-bottom: 40px; }
+.wrapper.short { margin-bottom: 40px; }
 
 .header .hgroup h1 { padding-top: 32px; padding-bottom: 0; }
 .header .hgroup h1 a { text-decoration: none;}

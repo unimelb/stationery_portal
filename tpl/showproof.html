@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Show Proof{% endblock %}
+{% block content %}
+<p>Shows pdf proof, plus return to edit or submit to print buttons</p>
+<div id="buttons">
+					<a class="button" href="{{ pdfurl }}">Show PDF</a> <a class="button" href="{{ editurl }} ">Return to editing</a>  <a class="button" href="{{ submiturl }}">Submit Order</a>
+				</div>
+{% endblock %}
+{% block nav %}
+{% include 'nav.html' %}
+{% endblock nav %}

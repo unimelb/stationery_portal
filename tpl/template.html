@@ -10,7 +10,7 @@
 		<p><strong>Business Card (SS and DS)</strong></p>
 		<ul id="buscard">
 			{% for buscard in buscards %}
-			<li><a href="{{ buscard.url }}">{{ buscard.short }}</a></li>
+			<li><a href="{{ buscard.url }}">{{ buscard.full_name }}</a></li>
 			{% endfor %}
 		</ul>
 	</div>
@@ -19,7 +19,7 @@
 		<p><strong>Letterhead</strong></p>
 		<ul id="lethead">
 			{% for lethead in letheads %}
-			<li><a href="{{ lethead.url }}">{{ lethead.short }}</a></li>
+			<li><a href="{{ lethead.url }}">{{ lethead.full_name }}</a></li>
 			{% endfor %}
 		</ul>
 	</div>
@@ -28,7 +28,7 @@
 		<p><strong>With Compliments Slips</strong></p>
 		<ul id="withcomp">
 			{% for withcomp in withcomps %}
-			<li><a href="{{ withcomp.url }}">{{ withcomp.short }}</a></li>
+			<li><a href="{{ withcomp.url }}">{{ withcomp.full_name }}</a></li>
 			{% endfor %}
 		</ul>
 	</div>

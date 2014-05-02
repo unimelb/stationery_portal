@@ -20,6 +20,7 @@ require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/addons/Cgiapp2-2.0.0/Cg
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/addons/Twig/lib/Twig/Autoloader.php");
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/dbconnect.inc.php");
 include_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/chili.inc.php");
+include_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/storage.inc.php");
 class Stationery extends Cgiapp2 {
   /**
    * @var string $username
@@ -132,6 +133,7 @@ class Stationery extends Cgiapp2 {
 			   'new_profile' => 'createProfile',
 			   'template' => 'selectTemplate',
 			   'edit' => 'editTemplate',
+			   'proof' => 'showProof',
 			   'history' => 'showHistory',
 			   'detail' => 'showJobDetail',
 			   'confirm' => 'showConfirmation',
@@ -143,6 +145,7 @@ class Stationery extends Cgiapp2 {
 					  'profile' => 'Profile',
 					  'template' => 'Select Template',
 					  'edit' => 'Edit Template',
+					  'proof' => 'Show Proof',
 					  'history' => 'History',
 					  'detail' => 'Detail',
 					  'confirm' => 'Confirm',
@@ -199,14 +202,19 @@ class Stationery extends Cgiapp2 {
 			  'SELECT * FROM user WHERE username = :id',
 			  'SELECT name, acronym, department_id FROM department',
 			  'SELECT department_id from user_department where username = :id',
-			  "SELECT * FROM template WHERE category_id = :category_id AND department_id in ( 'jjjdepartments' ) OR department_id IS NULL ORDER BY department_id",
+			  "SELECT * FROM template WHERE category_id = :category_id AND department_id in ( 'jjjdepartments' ) OR category_id = :category_id2 AND department_id IS NULL ORDER BY department_id ASC",
 			  'SELECT * FROM job WHERE username = :username ORDER BY job_id DESC LIMIT 1',
-			  'SELECT j.job_id, j.username, c.description FROM job j, category c, template t WHERE t.template_id = j.template_id AND t.category_id = c.category_id and j.job_id = :job_id'
+			  'SELECT j.job_id, j.username, c.description FROM job j, category c, template t WHERE t.template_id = j.template_id AND t.category_id = c.category_id and j.job_id = :job_id',
+			  'SELECT id FROM template WHERE template_id = :template_id AND chili_id = :chili_id',
+			  'SELECT t.full_name FROM template t, job j WHERE j.job_id= :job_id and j.template_id = t.template_id',
+			  'SELECT quantity, price_AUD FROM template_price WHERE category_id = :category_id',
+			  'SELECT * FROM address where address_id = :address_id'
 			  );
     $this->insert = array(
 			  'INSERT INTO user VALUES(:username, :firstname, :lastname, :telephone, :email, DEFAULT);',
 			  'INSERT INTO user_department VALUES(:username, :department_id)',
-			  'INSERT INTO job (job_id, username, template_id) VALUES(DEFAULT, :username, :template_id)' 
+			  'INSERT INTO job (job_id, username, template_id) VALUES(DEFAULT, :username, :template_id)',
+			  'INSERT INTO address(address_id, addressee, location, street_number, street, town, postcode) VALUES (DEFAULT, :addressee, :location, :street_number, :street, :town, :postcode)'
 			  );
     $this->update = array(
 			  'UPDATE user SET given_name = :firstname, family_name = :lastname, phone = :phone, email = :email WHERE username = :id',
@@ -271,7 +279,6 @@ class Stationery extends Cgiapp2 {
     $first_time = true;
     $error = "";
     if (isset($_REQUEST["submitted"])) {
-      //$error = print_r($_REQUEST);
       try {
 	$stmt = $this->conn->prepare($this->insert[0]);
 	/* first add user */
@@ -298,7 +305,6 @@ class Stationery extends Cgiapp2 {
 	  $stmt2->execute();
 	}
 	$this->error .= "<p>Adding details for ". $this->username . ".</p>";
-	$error = print_r($department_keys);
 	return $this->showProfile();
       }
       catch(PDOException $e) {
@@ -430,8 +436,6 @@ class Stationery extends Cgiapp2 {
       catch(Exception $e) {
 	$error = print_r($to_delete, true) . '<pre>ERROR: ' . $e->getMessage() . '</pre>';
       }
-      print_r($to_insert);
-      print_r($to_delete);
       $error .= "<p>Updated ". $this->username . ".</p>";
     }
     /* get user details */
@@ -499,7 +503,8 @@ class Stationery extends Cgiapp2 {
   function selectTemplate() {
     /* choose from one of the available CHILI templates */
     /* get categories */
-    /* buscards = 1, letheads = 2, withcomps = 3 */
+    /* buscards = 1, letheads = 2, withcomps = 3, buscards_DS = 4, 
+     *  Envelopes = 5 (unused)*/
     $error = "";
     $stationery_type_list = array(
 				  array(), array(), array()
@@ -518,20 +523,29 @@ class Stationery extends Cgiapp2 {
     } 
     $department_list = implode(",", $dept_ids);
     /* get category ids and names into $categories */
+    
     /* get templates */
-    $categories_count = 3;
+    $categories_count = 4;
+    $basic_url = 'index.php?mode=edit';
     try {
       $statement1 = $this->select[3];
-      // repace :department with $department_list
+      // replace :department with $department_list
       $statement = str_replace("jjjdepartments", $department_list, $statement1);
       $stmt = $this->conn->prepare($statement);
       $category_id = 1;
-      //$stmt->bindParam(':category', $category_id);
-      /* for each category, just 1 here now */
+       /* for each category, just 1 here now */
       for ($category_id = 1; $category_id < $categories_count +1; $category_id ++) {
-	$stmt->execute(array(':category_id' => $category_id));
+	$stmt->execute(array(':category_id' => $category_id,
+			     ':category_id2' => $category_id)
+		       );
 	while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
-	  array_push ($stationery_type_list[$category_id-1], $row);
+	  $row->url = $basic_url . '&id=' . $row->chili_id . '&base=' . $row->template_id;
+	  if ($category_id == 4) {
+	    array_push ($stationery_type_list[0], $row);
+	  }
+	  else {
+	    array_push ($stationery_type_list[$category_id-1], $row);
+	  }
 	}
 
       }
@@ -540,11 +554,15 @@ class Stationery extends Cgiapp2 {
     catch(Exception $e) {
       $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     }
-    $basic_url = 'index.php?mode=edit';
-    foreach ($stationery_type_list[0] as $buscard) {
+    /* sort business cards so that double sided and single sided are together */
+    usort($stationery_type_list[0], function($a, $b)
+	  {
+	    return strcmp($a->short_name, $b->short_name);
+	  });
+    /*    foreach ($stationery_type_list[0] as $buscard) {
       $buscard->url = $basic_url . '&id=' . $buscard->chili_id . '&base=' . $buscard->template_id;
-      $buscard->short = $buscard->short_name;
-    }
+      $buscard->short = $buscard->full_name;
+      }*/
     $t = 'template.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
@@ -571,34 +589,58 @@ class Stationery extends Cgiapp2 {
   function editTemplate() {
     $blankDocTemplateID = $_REQUEST["id"];
     $base = $_REQUEST["base"];
+    $error = $this->error;
+    $folderPath = 'USERFILES/';
     /* as a basic check */
     /* kick them back to select if the id is not the right length */
     if (strlen($blankDocTemplateID) != 36) {
       return $this->selectTemplate();
     }
+    
     /* check for $_REQUEST["proof"] --> generate proof pdf, load samesame page
+
      * check for $_REQUEST["submit"] --> go to confirm screen
      * check for $_REQUEST["samesame"] --> use job_id directly instead of copy
      * proof will also have samesame by default
+     * non-submitted should also be samesame
      */
-    $error = $this->error;
-    /* create new job locally */
-    $job_id = $this->createJob($base);
-    $documentName = $this->getTemplateName($job_id);
-    $folderPath = 'USERFILES/';
-    $soap_params = array(
-			 "apiKey" => $this->apikey,
-			 "resourceName" => "Documents",
-			 "itemID" => $blankDocTemplateID,
-			 "newName" => $documentName,
-			 "folderPath" =>  $folderPath,
-			 );
-    $resourceItemXML = $this->client->ResourceItemCopy($soap_params);
-    $dom = new DOMDocument();
-    $dom->loadXML($resourceItemXML->ResourceItemCopyResult);
-    $itemID = $dom->getElementsByTagName("item")->item(0)->getAttribute("id");
-    /* update job with new template_id */
-    $this->updateJob($job_id, $itemID);
+    if (isset($_REQUEST["samesame"])) {
+	if ($_REQUEST["samesame"]=="same" and isset($_REQUEST["job"])) {
+	  /* use job_id directly instead of copy */
+	  /* unless base + id  is one of the base templates */
+	  /*if (! $this->isBaseTemplate($blankDocTemplateID, $base)) {
+
+	    }*/
+	  $job_id = $_REQUEST["job"];
+	  $itemID = $this->getChiliId($job_id);
+	  /*else {
+	    /* create new job locally 
+	    $job_id = $this->createJob($base);
+	  }*/
+	 
+	}
+      }
+    else {
+      /* create new job locally */
+      $job_id = $this->createJob($base);
+      $documentName = $this->getTemplateName($job_id);
+      $soap_params = array(
+			   "apiKey" => $this->apikey,
+			   "resourceName" => "Documents",
+			   "itemID" => $blankDocTemplateID,
+			   "newName" => $documentName,
+			   "folderPath" =>  $folderPath,
+			   );
+      $resourceItemXML = $this->client->ResourceItemCopy($soap_params);
+      $dom = new DOMDocument();
+      $dom->loadXML($resourceItemXML->ResourceItemCopyResult);
+      $itemID = $dom->getElementsByTagName("item")->item(0)->getAttribute("id");
+      /* update job with new template_id */
+      $var_array = array('chili_id' => $itemID);
+      $this->updateJob($job_id, $var_array);
+    }
+    $proofurl = $this->action . "?mode=proof&base=$base&proof=true&samesame=same&job=$job_id";
+    $submiturl = $this->action . "?mode=confirm&job=$job_id";
 
     $doc = $itemID;
     $ws = CHILI_WS;
@@ -615,7 +657,6 @@ class Stationery extends Cgiapp2 {
 					 "forAnonymousUser" => false
 					 );
     $urlinfo = $this->client->DocumentGetEditorURL($DocumentGetEditorURL_params);
-    print_r($urlinfo);
     $dom = new DOMDocument();
     $dom->loadXML($urlinfo->DocumentGetEditorURLResult);
     $src = $dom->getElementsByTagName("urlInfo")->item(0)->getAttribute("url");
@@ -631,6 +672,26 @@ class Stationery extends Cgiapp2 {
 			       ));
     return $output;
   }
+  /* returns a chili id for a particular job */
+  private function getChiliId($job_id) {
+    $chili_id = "";
+    $statement = $this->select[4];
+    $replaced = str_replace(":username", ":username and job_id = :job_id", $statement);
+    try {
+      $stmt = $this->conn->prepare($replaced);
+      $stmt->execute(array('username' => $this->username,
+			   'job_id' => $job_id));
+      while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+	$chili_id = $row["chili_id"];
+      }
+      
+    }
+    catch (Exception $e){
+      $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
+    return $chili_id;
+  }
+
   /* create a new job based on the username
    * return job_id or false if it failed
    */
@@ -665,16 +726,70 @@ class Stationery extends Cgiapp2 {
     return $job_id;
   }
 
-  /* add chili id to job
-   * yeah, could be more general */
-  private function updateJob($job_id, $chili_id) {
+  /* returns true if the combination of base template id and chili id 
+   * is one of the chili base templates
+   */
+  private function isBaseTemplate($base_template_id, $chili_id) {
+    $isBaseTemplate = false;
+    $template_id = -1;
     try {
-      $stmt = $this->conn->prepare($this->update[1]);
-      $stmt->execute(array(
+      $stmt = $this->conn->prepare($this->select[6]);
+      $stmt->execute(array('template_id' => $base_template_id,
+			   'chili_id' => $chili_id));
+      while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+	$template_id = $row["template_id"];
+      }
+      if ($template_id != -1) {
+	$isBaseTemplate = true;
+      }
+    }
+    catch (Exception $e){
+      $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
+    return $isBaseTemplate;
+  }
+
+
+  /* add chili id to job
+   * yeah, could be more general 
+   * $var_array is array of variables to change
+   */
+  private function updateJob($job_id, $var_array) {
+    /* create statement from $var_array */
+    //$var_array = array('chili_id' => $chili_id);
+
+    /* this part can be abstracted out */
+    $settings = array();
+    $statement = "";
+    $key_conditions = array();
+    foreach ($var_array as $key => $value) {
+      if (is_string($value))
+	{
+	  $value = trim($value);
+	  if (strlen($value) == 0)
+	    {
+	      $value === null;
+	    }
+	}
+      $lcasekey = strtolower($key);
+      $settings[] = $lcasekey . " = " . ":" . $lcasekey;
+    }
+    $settext = implode(", ", $settings);
+    $primary_key = 'job_id'; //this would be find primary column
+    $keytext = $primary_key . " = :" . $primary_key;
+    $statement = "update job set " . $settext . " where " . $keytext;
+    /* to here */
+    $var_array["job_id"] = $job_id;
+    try {
+      /*$this->update[1]*/
+      /*array(
 			   'chili_id' => $chili_id,
 			   'username' => $this->username,
 			   'job_id' => $job_id
-			   ));
+			   )
+      */
+      $stmt = $this->conn->prepare($statement);
+      $stmt->execute($var_array);
     }
     catch (Exception $e) {
       $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
@@ -707,6 +822,72 @@ class Stationery extends Cgiapp2 {
     }
     $template_name = implode('-',$template_name_array);
     return str_replace(' ', '', $template_name);
+  }
+  function showProof() {
+    /* display proof PDF and allow user to return to editing or sumbit to print */
+    $base = $_REQUEST["base"];
+    $error = $this->error;
+    $job_id = $_REQUEST["job"];
+    $itemID = $this->getChiliId($job_id);
+    $editurl = $this->action . "?mode=edit&base=$base&id=$itemID&samesame=same&job=$job_id";
+    $pdfurl = "";
+    if (isset($_REQUEST["proof"])) {
+      /* get settingsXML for PDF settings resource PROOF */
+      /* ResourceItemGetDefinitionXML used in API sample:
+       * public string ResourceItemGetDefinitionXML ( string apiKey, string resourceName, string itemID );
+      /* public string ResourceItemGetXML ( string apiKey, string resourceName, string itemID ); */
+      $pdf_resource_params = array(
+				   "apiKey" => $this->apikey,
+				   "resourceName" => "PDFExportSettings",
+				   "itemID" => CHILI_PROOF
+				   );
+      $settingsXML = $this->client->ResourceItemGetDefinitionXML($pdf_resource_params);
+
+      /*generate pdf with api */
+      /* public string DocumentCreatePDF ( string apiKey, string itemID, string settingsXML, int taskPriority ); */
+      $soap_params = array(
+			   "apiKey" => $this->apikey,
+			   "itemID" => $itemID,
+			   "settingsXML" => $settingsXML->ResourceItemGetDefinitionXMLResult,
+			   "taskPriority" => 1
+			   );
+      $taskXML = $this->client->DocumentCreatePDF($soap_params);
+      $dom = new DOMDocument();
+      $dom->loadXML($taskXML->DocumentCreatePDFResult);
+      $task_id = $dom->getElementsByTagName("task")->item(0)->getAttribute("id");
+    }
+    // check task status until task is finished, then get URL
+    $task_params = array(
+			 "apiKey" => $this->apikey,
+			 "taskID" => $task_id
+			 );
+    $status = "";
+    try{
+      do {
+	$task_statusXML =  $this->client->TaskGetStatus($task_params);
+	$dom = new DOMDocument();
+	$dom->loadXML($task_statusXML->TaskGetStatusResult);
+	$status = $dom->getElementsByTagName("task")->item(0)->getAttribute("finished");
+      } while ($status != "True");
+      $result = $dom->getElementsByTagName("task")->item(0)->getAttribute("result");
+      $dom2 = new DOMDocument();
+      $dom2->loadXML($result);
+      $relativeURL = $dom2->getElementsByTagName("result")->item(0)->getAttribute("relativeURL");
+      $pdfurl = CHILI_APP . $relativeURL; 
+    }
+    catch (Exception $e) {
+      $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
+    $submiturl = $this->action . "?mode=confirm&job=$job_id";
+    $t = 'showproof.html';
+    $t = $this->twig->loadTemplate($t);
+    $output = $t->render(array(
+			       'modes' => $this->user_visible_modes,
+			       'editurl' => $editurl,
+			       'pdfurl' => $pdfurl,
+			       'submiturl' => $submiturl
+			       ));
+    return $output;
   }
   function showHistory() {
     /* show a list of past jobs for this user */
@@ -742,21 +923,253 @@ function showConfirmation() {
    * prints job as proof pdf
    * sends proof and job data to temporary storage area
    * redirect to showFinal 
-   */ 
-    $t = 'confirm.html';
-    $t = $this->twig->loadTemplate($t);
-    $output = $t->render(array(
-			       'modes' => $this->user_visible_modes
+   */
+  $action = $this->action . "?mode=thanks";
+  $job_id = $_REQUEST["job"];
+  $stationery_type = $this->getTemplateNameFromJob($job_id);
+  $quantities = $this->getPricelistFromJob($job_id);
+  $stationery_title = "To print: " . $stationery_type;
+  $t = 'confirm.html';
+  $t = $this->twig->loadTemplate($t);
+  $output = $t->render(array(
+			       'modes' => $this->user_visible_modes,
+			       'action' => $action,
+			       'job_id' => $job_id,
+			       'stationery' => $stationery_title,
+			       'quantities' => $quantities
 			       ));
     return $output;
   }
-function showFinal() {
-    $t = 'final.html';
-    $t = $this->twig->loadTemplate($t);
-    $output = $t->render(array(
-			       'modes' => $this->user_visible_modes
-			       ));
-    return $output;
+/* takes a job id and returns the base template name string*/
+private function getTemplateNameFromJob($job_id) {
+  $template_name = "None";
+  try {
+    $stmt = $this->conn->prepare($this->select[7]);
+    $stmt->execute(array('job_id' => $job_id));
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $template_name = $row["full_name"];
+    }
   }
+  catch (Exception $e){
+    $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+  }
+  return $template_name;
 }
+private function getPricelistFromJob($job_id) {
+  $category_id=0;
+  $pricelist = array();
+   $statement = $this->select[7];
+   $statement2 = str_replace("t.full_name", "t.category_id", $statement);
+   $statement3 = $this->select[8];
+  try {
+    $stmt = $this->conn->prepare($statement2);
+    $stmt->execute(array('job_id' => $job_id));
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $category_id = $row["category_id"];
+    }
+  }
+  catch (Exception $e){
+    $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+  }
+  try {
+    $stmt2 = $this->conn->prepare($statement3);
+    $stmt2->execute(array('category_id' => $category_id));
+    while($row = $stmt2->fetch(PDO::FETCH_OBJ)) {
+      array_push($pricelist, $row);
+    }
+  }
+ 
+  catch (Exception $e){
+    $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+  }
+  return $pricelist;
+}
+/* Takes an array of address details
+("addressee", "location", "street_number", "street", "town", "postcode")
+[and optional "country_code"]
+and adds an address to the database. Returns the (integer) address_id if successful;
+false otherwise
+*/
+private function addAddress($address_details) {
+  //$address_id = false;
+  $address_id = -1;
+try {
+      $stmt = $this->conn->prepare($this->insert[3]);
+      $stmt->execute(array(
+			   "addressee" => $address_details["addressee"],
+			   "location" => $address_details["location"],
+			   "street_number" => $address_details["street_number"],
+			   "street" => $address_details["street"],
+			   "town" => $address_details["town"],
+			   "postcode" => $address_details["postcode"]
+			   ));
+}
+    catch (Exception $e) {
+      $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+      $address_id = false;
+    }
+    /* get address id for address just created */
+    if ($address_id !== false) {
+      /*  try {
+	  $stmt2 = $this->conn->prepare($this->select[9]);
+	  $stmt2->execute();
+	  while($row = $stmt2->fetch(PDO::FETCH_ASSOC)) {
+	  $address_id = $row["address_id"];
+	  }
+      
+	  }
+	  catch (Exception $e){
+	  $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+	  $address_id = false;
+	  }*/
+      $address_id = $this->conn->lastInsertId();
+    }
+    return $address_id;  
+}
+function showFinal() {
+  /*
+ *** add address to address table
+ */
+  $address_info = array(
+			"addressee" => $_REQUEST["addressee"],
+			"location" => $_REQUEST["location"],
+			"street_number" => $_REQUEST["number"],
+			"street" => $_REQUEST["street"],
+			"town" => $_REQUEST["town"],
+			"postcode" => $_REQUEST["postcode"]
+			); 
+  $address_id = $this->addAddress($address_info);
+  /*
+ *** update job entity with address and other details
+ Array
+ (
+ [mode] => thanks
+ [quantity] => 3000@620.00 Job
+ [themis] => 1212122 Job
+ [addressee] => 1212 Address
+ [location] => Address
+ [number] => Address
+ [street] => Address
+ [town] => 1212 Address
+ [postcode] => 1212 Address
+ [comments] => Job
+ [job] => 34 Job
+ [submitted] => Confirm details and PRINT
+ )
+  */
+
+  if(isset($_REQUEST['job'])) {
+    $job_id = $_REQUEST['job'];
+  }
+  else {
+    /* no job, no confirmation! */
+    return $this->selectTemplate();
+  }
+  /*if (!$address_id) {
+    /* need a delivery address 
+    return $this->showConfirmation();
+    }*/
+  $quantity = 0;
+  if(isset($_REQUEST['quantity'])) {
+    $quantityprice = $_REQUEST['quantity'];
+    $quantity = substr($_REQUEST["quantity"], 0, strpos($quantityprice, '@'));
+    $price = substr($_REQUEST['quantity'], strpos($quantityprice, '@')+1);
+  }
+ 
+  $instructions = null;
+  if(isset($_REQUEST["comments"])) {
+    $instructions = $_REQUEST["comments"];
+  }
+
+  $today = date("Y-m-d H:i:s");
+  $var_array = array(
+		     'quantity' => $quantity,
+		     'themis_code' => $_REQUEST["themis"],
+		     'instructions' => $instructions,
+		     'address_id' => $address_id,
+		     'ordered' => $today
+		     );
+  $this->updateJob($job_id, $var_array);
+  /*
+ *** generate print pdf
+ Like proof only print
+  */
+
+  /* get settingsXML for PDF settings resource PROOF */
+  /* ResourceItemGetDefinitionXML used in API sample:
+   * public string ResourceItemGetDefinitionXML ( string apiKey, string resourceName, string itemID );
+   /* public string ResourceItemGetXML ( string apiKey, string resourceName, string itemID ); */
+  $pdf_resource_params = array(
+			       "apiKey" => $this->apikey,
+			       "resourceName" => "PDFExportSettings",
+			       "itemID" => CHILI_PRINT
+			       );
+  $settingsXML = $this->client->ResourceItemGetDefinitionXML($pdf_resource_params);
+
+  /*generate pdf with api */
+  /* public string DocumentCreatePDF ( string apiKey, string itemID, string settingsXML, int taskPriority ); */
+  $chili_id = $this->getChiliId($job_id);
+  $soap_params = array(
+		       "apiKey" => $this->apikey,
+		       "itemID" => $chili_id,
+		       "settingsXML" => $settingsXML->ResourceItemGetDefinitionXMLResult,
+		       "taskPriority" => 4
+		       );
+  $taskXML = $this->client->DocumentCreatePDF($soap_params);
+  /*
+ *** generate text file
+ probably in YAML (see php yaml_emit_file)
+ **** details
++ print pdf cross-reference
+ + quantity
+ + price 
++ delivery address
+ - addressee
+ - location
+ - street_number . street
+ - town
+ - postcode
++ date generated 
++ THEMIS code
++ comments 
+  */
+  $job_name = $this->getTemplateName($job_id);
+  /* db query needed here */
+  $yaml_array =  array(
+		       'job information' => $job_name . "-print.pdf",
+		       'quantity' => $quantity,
+		       'price' => $price,
+		       'date' => $today,
+		       'THEMIS code' => $_REQUEST["themis"],
+		       'comments' => $instructions
+		       );
+  /*$yaml_dump = yaml_emit($yaml_array);
+    print_r($yaml_dump);*/
+  $textfilename = FILESTORE . $job_name . ".txt";
+  $file = fopen($textfilename,'w');
+  if ($file === FALSE) {
+    $this->error = "Can’t open file! " . $textfilename;
+  }
+  foreach($yaml_array as $key=>$value){
+    fwrite($file, $key . ": " . $value . PHP_EOL);
+  }
+  fwrite($file, "DELIVERY ADDRESS" . PHP_EOL);
+  foreach($address_info as $key=>$value) {
+    fwrite($file, $key . ": " . $value . PHP_EOL);
+  }
+  fclose($file);
+    /*
+   *** zip text and print pdf
+   */
+    $t = 'final.html';
+  $t = $this->twig->loadTemplate($t);
+  $output = $t->render(array(
+			     'modes' => $this->user_visible_modes,
+			     'error' => $this->error
+			     ));
+  return $output;
+}
+
+}
+
 ?>

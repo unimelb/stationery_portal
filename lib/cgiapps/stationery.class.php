@@ -172,6 +172,7 @@ class Stationery extends Cgiapp2 {
 	$this->username = "bobmadjr"; // test username only
       }
     $this->sqlstatements();
+    //$this->upload_dir = $_SERVER["DOCUMENT_ROOT"] . LIBPATH . FILESTORE;
   }
  
    /* select a random user for chili api functions */
@@ -666,6 +667,8 @@ class Stationery extends Cgiapp2 {
     $t = 'edit.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
+			       'proofurl' => $proofurl,
+			       'submiturl' => $submiturl,
 			       'error' => $error,
 			       'modes' => $this->user_visible_modes,
 			       'iframesrc' => $src . $src_extra

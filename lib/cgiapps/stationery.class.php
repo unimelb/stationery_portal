@@ -1193,10 +1193,14 @@ function showFinal() {
   }    
   /* copy the pdf to the output folder */
   /* use php copy */
-  $copysuccess = copy($pdfurl, $pdffilename);
-  if($copysuccess === false) {
-    $this->error .= "pdf could not be copied";
-  }
+if(!@copy($pdfurl,$pdffilename))
+{
+    $errors= error_get_last();
+    $this->error .= "pdf could not be copied due to $errors";
+} else {
+  /* or else pass */
+    $error .= "File copied successfully";
+}
   /*
  *** zip text and print pdf
  remove the original files, keep only the zip if possible

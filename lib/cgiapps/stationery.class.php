@@ -1148,7 +1148,10 @@ function showFinal() {
 		       );
   /*$yaml_dump = yaml_emit($yaml_array);
     print_r($yaml_dump);*/
+  /* yaml would be nice but not enabled on server */
   $textfilename = FILESTORE . $job_name . ".txt";
+  $pdffilename = FILESTORE . $job_name . ".pdf";
+  $zipfilename = FILESTORE . $job_name . ".zip";
   $file = fopen($textfilename,'w');
   if ($file === FALSE) {
     $this->error = "Can’t open file! " . $textfilename;
@@ -1161,10 +1164,59 @@ function showFinal() {
     fwrite($file, $key . ": " . $value . PHP_EOL);
   }
   fclose($file);
-    /*
-   *** zip text and print pdf
-   */
-    $t = 'final.html';
+  /* get task id for the pdf creation*/
+  $dom = new DOMDocument();
+  $dom->loadXML($taskXML->DocumentCreatePDFResult);
+  $task_id = $dom->getElementsByTagName("task")->item(0)->getAttribute("id");
+
+  // check task status until task is finished, then get URL
+  $task_params = array(
+		       "apiKey" => $this->apikey,
+		       "taskID" => $task_id
+		       );
+  $status = "";
+  try{
+    do {
+      $task_statusXML =  $this->client->TaskGetStatus($task_params);
+      $dom = new DOMDocument();
+      $dom->loadXML($task_statusXML->TaskGetStatusResult);
+      $status = $dom->getElementsByTagName("task")->item(0)->getAttribute("finished");
+    } while ($status != "True");
+    $result = $dom->getElementsByTagName("task")->item(0)->getAttribute("result");
+    $dom2 = new DOMDocument();
+    $dom2->loadXML($result);
+    $relativeURL = $dom2->getElementsByTagName("result")->item(0)->getAttribute("relativeURL");
+    $pdfurl = CHILI_APP . $relativeURL; 
+  }
+  catch (Exception $e) {
+    $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+  }    
+  /* copy the pdf to the output folder */
+  /* use php copy */
+  $copysuccess = copy($pdfurl, $pdffilename);
+  if($copysuccess === false) {
+    $this->error .= "pdf could not be copied";
+  }
+  /*
+ *** zip text and print pdf
+ remove the original files, keep only the zip if possible
+  */
+  $zip = new ZipArchive;
+$res = $zip->open($zipfilename, ZipArchive::CREATE);
+if ($res === TRUE){
+  try {
+    $zip->addFile($textfilename);
+    $zip->addFile($pdffilename);
+    $zip->close();
+    /* finally, remove the textfile and pdffile */
+    unlink($textfilename);
+    unlink($pdffilename);
+  } catch(Exception $e) {
+    $this->error .= 'zip creation failed because of' . $e->getMessage();
+  }
+}
+
+  $t = 'final.html';
   $t = $this->twig->loadTemplate($t);
   $output = $t->render(array(
 			     'modes' => $this->user_visible_modes,

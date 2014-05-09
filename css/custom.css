@@ -11,6 +11,8 @@ a { text-decoration: underline;}
 
 form { overflow: visible;}
 
+note { font-size: 12px; color: #003366; font-weight: bold; }
+
 .wrapper { margin-bottom: 100px; }
 .wrapper.white { background: #fff; padding: 20px 40px 40px 20px; margin-left: -30px; margin-bottom: 40px; }
 .wrapper.short { margin-bottom: 40px; }
@@ -20,6 +22,9 @@ form { overflow: visible;}
 
 .aside { padding: 0; margin-top: 0;}
 .aside span { font-size: 12px;}
+
+.align-left { text-align: left; }
+.align-center { text-align: center; padding-top: 15px; }
 
 .pullquote { font-size: 20px; line-height: 1.3em;}
 span.normalp { font-size: 14px; color: #000; line-height: 16px; }
@@ -227,7 +232,8 @@ ul.favourites li { list-style-image:url("../images/star.png")}
 
 /* Form Styles */
 label.stationery-form { padding-left: 20px; }
-input { font-size: 10px; }
+input { font-size: 14px; }
+input.button-text { font-size: 18px; }
 
 @media screen and (max-width: 480px) {
 

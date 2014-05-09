@@ -1,0 +1,14 @@
+Options -Indexes +FollowSymLinks +Includes
+#RewriteEngine on
+AuthLDAPUrl "ldaps://centaur.unimelb.edu.au:636/ou=people,o=unimelb?uid?sub?(&(objectClass=*)(auEduPersonType=staff))"
+AuthName "University central password"
+AuthType Basic
+AuthBasicProvider ldap
+Require user gilesng johnvb ejvf bhider ebeltsos kevinrc winniet
+AuthzLDAPAuthoritative Off
+
+order deny,allow
+deny from all
+
+Satisfy Any
+

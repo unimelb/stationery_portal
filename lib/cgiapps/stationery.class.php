@@ -833,6 +833,13 @@ class Stationery extends Cgiapp2 {
     $job_id = $_REQUEST["job"];
     $itemID = $this->getChiliId($job_id);
     $editurl = $this->action . "?mode=edit&base=$base&id=$itemID&samesame=same&job=$job_id";
+    /*check for samesame */
+    /* if not present, take it out of $editurl */
+    if (isset($_REQUEST["samesame"])) {
+      if($_REQUEST["samesame"] != "same") {
+	$editurl = str_replace('&samesame=same', '', $editurl);
+      }
+    }
     $pdfurl = "";
     if (isset($_REQUEST["proof"])) {
       /* get settingsXML for PDF settings resource PROOF */
@@ -906,9 +913,11 @@ class Stationery extends Cgiapp2 {
 	$row->template_name = $this->getTemplateNameFromJob($row->job_id);
 	if (is_null($row->ordered))
 	  {
+	    $row->url = $this->action . "?mode=proof&base=" .$row->template_id . "&proof=true&samesame=same&job=" . $row->job_id;
 	    array_push($incomplete, $row);
 	  }
 	else {
+	  $row->url = $this->action . "?mode=proof&base=" .$row->template_id . "&proof=true&samesame=noway&job=" . $row->job_id;
 	  $row->ordered = substr($row->ordered, 0, 10);
 	  array_push ($jobslist, $row);
 	}
@@ -1059,6 +1068,7 @@ function showFinal() {
   /*
  *** add address to address table
  */
+  $error = "";
   $address_info = array(
 			"addressee" => $_REQUEST["addressee"],
 			"location" => $_REQUEST["location"],

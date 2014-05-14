@@ -894,10 +894,36 @@ class Stationery extends Cgiapp2 {
   }
   function showHistory() {
     /* show a list of past jobs for this user */
+    /* get the jobs */
+    $jobslist = array();
+    $incomplete = array();
+    $statement1 = $this->select[4];
+    $statement = str_replace('ORDER BY job_id DESC LIMIT 1', 'ORDER BY ordered', $statement1);
+    try {
+      $stmt = $this->conn->prepare($statement);
+      $stmt->execute(array('username' => $this->username));
+      while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
+	$row->template_name = $this->getTemplateNameFromJob($row->job_id);
+	if (is_null($row->ordered))
+	  {
+	    array_push($incomplete, $row);
+	  }
+	else {
+	  $row->ordered = substr($row->ordered, 0, 10);
+	  array_push ($jobslist, $row);
+	}
+      }
+    }
+    catch(Exception $e) {
+      $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
     $t = 'history.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
-			       'modes' => $this->user_visible_modes
+			       'modes' => $this->user_visible_modes,
+			       'error' => $this->error,
+			       'jobs' => $jobslist,
+			       'incomplete' => $incomplete
 			       ));
     return $output;
   }

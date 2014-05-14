@@ -2,16 +2,17 @@
 
 {% block title %}Show History{% endblock %}
 {% block content %}
-<p>Shows history of user's jobs</p>
-<p>Requires:</p>
+<h2>Previous jobs</h2>
+{% if jobs|length >0 %}
 <ul>
-  <li>user infor</li>
+{% for job in jobs %}
+<li>{{ job.job_id }}. {{ job.ordered }}: {{ job.quantity }} x {{ job.template_name }}</li>
+{% endfor %} 
     </ul>
-<p>Yields:</p>
-<ul>
-  <li>Job id for detail page</li>
-    </ul>
-{% endblock %}
+{% else %}
+<p>No previous jobs</p>
+{% endif %}
+{% endblock content %}
 {% block nav %}
 {% include 'nav.html' %}
 {% endblock nav %}

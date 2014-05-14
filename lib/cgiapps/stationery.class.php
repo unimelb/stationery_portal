@@ -1195,8 +1195,9 @@ function showFinal() {
   /* use php copy */
 if(!@copy($pdfurl,$pdffilename))
 {
-    $errors= error_get_last();
-    $this->error .= "pdf could not be copied due to $errors";
+  $errors= error_get_last();
+    
+  $this->error .= "pdf could not be copied due to " . print_r($errors);
 } else {
   /* or else pass */
     $error .= "File copied successfully";

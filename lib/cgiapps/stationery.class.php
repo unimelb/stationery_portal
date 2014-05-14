@@ -838,6 +838,7 @@ class Stationery extends Cgiapp2 {
     if (isset($_REQUEST["samesame"])) {
       if($_REQUEST["samesame"] != "same") {
 	$editurl = str_replace('&samesame=same', '', $editurl);
+	/* submiturl needs to be updated too */
       }
     }
     $pdfurl = "";

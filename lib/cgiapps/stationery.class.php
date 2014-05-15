@@ -624,6 +624,7 @@ class Stationery extends Cgiapp2 {
     else {
       /* create new job locally */
       $job_id = $this->createJob($base);
+      /*
       $documentName = $this->getTemplateName($job_id);
       $soap_params = array(
 			   "apiKey" => $this->apikey,
@@ -636,6 +637,8 @@ class Stationery extends Cgiapp2 {
       $dom = new DOMDocument();
       $dom->loadXML($resourceItemXML->ResourceItemCopyResult);
       $itemID = $dom->getElementsByTagName("item")->item(0)->getAttribute("id");
+      */
+      $itemID = $this->duplicateTemplate($job_id, $blankDocTemplateID);
       /* update job with new template_id */
       $var_array = array('chili_id' => $itemID);
       $this->updateJob($job_id, $var_array);
@@ -826,21 +829,50 @@ class Stationery extends Cgiapp2 {
     $template_name = implode('-',$template_name_array);
     return str_replace(' ', '', $template_name);
   }
+  /* copies a CHILI template, returns the chili_id of the duplicate */
+  /* requires $blankDocTemplateID, the chili id of the template to copy */
+  private function duplicateTemplate($job_id, $blankDocTemplateID) {
+    $folderPath = 'USERFILES/'; //make it an include?
+    $documentName = $this->getTemplateName($job_id);
+    $soap_params = array(
+			 "apiKey" => $this->apikey,
+			 "resourceName" => "Documents",
+			 "itemID" => $blankDocTemplateID,
+			 "newName" => $documentName,
+			 "folderPath" =>  $folderPath,
+			 );
+    $resourceItemXML = $this->client->ResourceItemCopy($soap_params);
+    $dom = new DOMDocument();
+    $dom->loadXML($resourceItemXML->ResourceItemCopyResult);
+    $itemID = $dom->getElementsByTagName("item")->item(0)->getAttribute("id");
+    return $itemID;
+  }
   function showProof() {
     /* display proof PDF and allow user to return to editing or sumbit to print */
     $base = $_REQUEST["base"];
     $error = $this->error;
     $job_id = $_REQUEST["job"];
     $itemID = $this->getChiliId($job_id);
-    $editurl = $this->action . "?mode=edit&base=$base&id=$itemID&samesame=same&job=$job_id";
+
+    $submiturl = $this->action . "?mode=confirm&job=$job_id";
     /*check for samesame */
     /* if not present, take it out of $editurl */
     if (isset($_REQUEST["samesame"])) {
       if($_REQUEST["samesame"] != "same") {
-	$editurl = str_replace('&samesame=same', '', $editurl);
+	//$editurl = str_replace('&samesame=same', '', $editurl);
+	/* duplicate and update job, as in edit page */
+	$job_id_new = $this->createJob($base);
+	$itemID_new = $this->duplicateTemplate($job_id_new, $itemID);
+	/* update job with new template_id */
+	$var_array = array('chili_id' => $itemID_new);
+	$this->updateJob($job_id_new, $var_array);
 	/* submiturl needs to be updated too */
+	$submiturl = $this->action . "?mode=confirm&job=$job_id_new";
+	$job_id = $job_id_new;
+	$itemID = $itemID_new;
       }
     }
+    $editurl = $this->action . "?mode=edit&base=$base&id=$itemID&samesame=same&job=$job_id";
     $pdfurl = "";
     if (isset($_REQUEST["proof"])) {
       /* get settingsXML for PDF settings resource PROOF */
@@ -889,7 +921,7 @@ class Stationery extends Cgiapp2 {
     catch (Exception $e) {
       $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     }
-    $submiturl = $this->action . "?mode=confirm&job=$job_id";
+
     $t = 'showproof.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(

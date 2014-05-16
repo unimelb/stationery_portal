@@ -2,7 +2,6 @@
 
 {% block title %}Order History{% endblock %}
 {% block content %}
-
 <h3>Previous Orders</h3>
 {% if jobs|length >0 %}
 <div id="order-history">
@@ -12,10 +11,6 @@
 		{% endfor %} 
 	</ul>
 </div>
-{% else %}
-<p><em>None</em></p>
-{% endif %}
-{% if incomplete|length >0 %}
 <h3>Unsubmitted Orders</h3>
 <div id="order-history">
 	<ul class="order">

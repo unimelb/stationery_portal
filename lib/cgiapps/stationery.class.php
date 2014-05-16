@@ -1251,15 +1251,29 @@ $file = fopen($textfilename,'w');
   
   /* copy the pdf to the output folder */
   /* use php copy */
-if(!@copy($pdfurl,$pdffilename))
+  /*if(!@copy($pdfurl,$pdffilename))
 {
   $errors= error_get_last();
     
   $this->error .= "pdf could not be copied due to " . print_r($errors);
 } else {
   /* or else pass */
+  /*
     $error .= "File copied successfully";
 }
+  */
+$ch = curl_init();
+$timeout = 0;
+curl_setopt ($ch, CURLOPT_URL, $pdfurl);
+curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+
+// Getting binary data
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
+
+$pdf = curl_exec($ch);
+curl_close($ch);
+file_put_contents( $pdffilename, $pdf );
   /*
  *** zip text and print pdf
  remove the original files, keep only the zip if possible

@@ -951,7 +951,9 @@ class Stationery extends Cgiapp2 {
 	  }
 	else {
 	  $row->url = $this->action . "?mode=proof&base=" .$row->template_id . "&proof=true&samesame=noway&job=" . $row->job_id;
-	  $row->ordered = substr($row->ordered, 0, 10);
+	  $date = date_create_from_format('Y-m-d H:i:s', $row->ordered);
+	  //$row->ordered = substr($row->ordered, 0, 10);
+	  $row->ordered = date_format($date, 'd F Y');
 	  array_push ($jobslist, $row);
 	}
       }

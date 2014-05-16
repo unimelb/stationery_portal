@@ -203,7 +203,7 @@ class Stationery extends Cgiapp2 {
 			  'SELECT * FROM user WHERE username = :id',
 			  'SELECT name, acronym, department_id FROM department',
 			  'SELECT department_id from user_department where username = :id',
-			  "SELECT * FROM template WHERE category_id = :category_id AND department_id in ( 'jjjdepartments' ) OR category_id = :category_id2 AND department_id IS NULL ORDER BY department_id ASC",
+			  "SELECT * FROM template WHERE category_id = :category_id AND department_id in ( jjjdepartments ) OR category_id = :category_id2 AND department_id IS NULL ORDER BY department_id ASC",
 			  'SELECT * FROM job WHERE username = :username ORDER BY job_id DESC LIMIT 1',
 			  'SELECT j.job_id, j.username, c.description FROM job j, category c, template t WHERE t.template_id = j.template_id AND t.category_id = c.category_id and j.job_id = :job_id',
 			  'SELECT id FROM template WHERE template_id = :template_id AND chili_id = :chili_id',

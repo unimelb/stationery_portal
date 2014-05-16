@@ -1272,8 +1272,8 @@ if ($res === TRUE){
     $zip->addFile($pdffilename);
     $zip->close();
     /* finally, remove the textfile and pdffile */
-    unlink($textfilename);
-    unlink($pdffilename);
+    // unlink($textfilename);
+    // unlink($pdffilename);
   } catch(Exception $e) {
     $this->error .= 'zip creation failed because of' . $e->getMessage();
   }

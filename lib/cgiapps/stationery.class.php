@@ -1249,7 +1249,7 @@ $file = fopen($textfilename,'w');
   }
   fclose($file);
   
-  /* copy the pdf to the output folder */
+
   /* use php copy */
   /*if(!@copy($pdfurl,$pdffilename))
 {
@@ -1262,6 +1262,7 @@ $file = fopen($textfilename,'w');
     $error .= "File copied successfully";
 }
   */
+  /* copy the pdf to the output folder */
 $ch = curl_init();
 $timeout = 0;
 curl_setopt ($ch, CURLOPT_URL, $pdfurl);
@@ -1282,12 +1283,12 @@ file_put_contents( $pdffilename, $pdf );
 $res = $zip->open($zipfilename, ZipArchive::CREATE);
 if ($res === TRUE){
   try {
-    $zip->addFile($textfilename);
-    $zip->addFile($pdffilename);
+    $zip->addFile($textfilename, str_replace(FILESTORE, '', $textfilename));
+    $zip->addFile($pdffilename, str_replace(FILESTORE, '', $pdffilename));
     $zip->close();
     /* finally, remove the textfile and pdffile */
-    // unlink($textfilename);
-    // unlink($pdffilename);
+    unlink($textfilename);
+    unlink($pdffilename);
   } catch(Exception $e) {
     $this->error .= 'zip creation failed because of' . $e->getMessage();
   }

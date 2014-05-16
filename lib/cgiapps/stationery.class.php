@@ -135,7 +135,6 @@ class Stationery extends Cgiapp2 {
 			   'edit' => 'editTemplate',
 			   'proof' => 'showProof',
 			   'history' => 'showHistory',
-			   'detail' => 'showJobDetail',
 			   'confirm' => 'showConfirmation',
 			   'thanks' => 'showFinal'
 			   ));
@@ -147,14 +146,12 @@ class Stationery extends Cgiapp2 {
 					  'edit' => 'Edit Template',
 					  'proof' => 'Show Proof',
 					  'history' => 'History',
-					  'detail' => 'Detail',
 					  'confirm' => 'Confirm',
 					  'thanks' => 'Thanks'
 					  );
     $this->user_visible_modes = array(
 			      'template' => 'Select Template',
 			      'history' => 'History',
-			      'detail' => 'Detail',
 			      'confirm' => 'Confirm',
 			      'thanks' => 'Thanks'
 			      );
@@ -971,20 +968,6 @@ class Stationery extends Cgiapp2 {
 			       ));
     return $output;
   }
-function showJobDetail() {
-  /* show details of a specific past job
-   * include a 're-order' button which defines
-   * a new job with the parameters of this one
-   */
-  /* remember to include base template in 're-order' url */
-     $t = 'detail.html';
-    $t = $this->twig->loadTemplate($t);
-    $output = $t->render(array(
-			       
-			       'modes' => $this->user_visible_modes
-			       ));
-    return $output;
-  }
 function showConfirmation() {
   /* confirmation screen requires
    * THEMIS code
@@ -1209,33 +1192,13 @@ function showFinal() {
   */
   $job_name = $this->getTemplateName($job_id);
   /* db query needed here */
-  $yaml_array =  array(
-		       'job information' => $job_name . "-print.pdf",
-		       'quantity' => $quantity,
-		       'price' => $price,
-		       'date' => $today,
-		       'THEMIS code' => $_REQUEST["themis"],
-		       'comments' => $instructions
-		       );
   /*$yaml_dump = yaml_emit($yaml_array);
     print_r($yaml_dump);*/
   /* yaml would be nice but not enabled on server */
   $textfilename = FILESTORE . $job_name . ".txt";
   $pdffilename = FILESTORE . $job_name . ".pdf";
   $zipfilename = FILESTORE . $job_name . ".zip";
-  $file = fopen($textfilename,'w');
-  if ($file === FALSE) {
-    $this->error = "Can’t open file! " . $textfilename;
-  }
-  foreach($yaml_array as $key=>$value){
-    fwrite($file, $key . ": " . $value . PHP_EOL);
-  }
-  fwrite($file, "DELIVERY ADDRESS" . PHP_EOL);
-  foreach($address_info as $key=>$value) {
-    fwrite($file, $key . ": " . $value . PHP_EOL);
-  }
-  fclose($file);
-  /* get task id for the pdf creation*/
+    /* get task id for the pdf creation*/
   $dom = new DOMDocument();
   $dom->loadXML($taskXML->DocumentCreatePDFResult);
   $task_id = $dom->getElementsByTagName("task")->item(0)->getAttribute("id");
@@ -1261,7 +1224,31 @@ function showFinal() {
   }
   catch (Exception $e) {
     $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
-  }    
+    $pdfurl = "";
+  }
+$yaml_array =  array(
+		       'job information' => $job_name . "-print.pdf",
+		       'url' => $pdfurl,
+		       'quantity' => $quantity,
+		       'price' => $price,
+		       'date' => $today,
+		       'THEMIS code' => $_REQUEST["themis"],
+		       'comments' => $instructions
+		       );
+    
+$file = fopen($textfilename,'w');
+  if ($file === FALSE) {
+    $this->error = "Can’t open file! " . $textfilename;
+  }
+  foreach($yaml_array as $key=>$value){
+    fwrite($file, $key . ": " . $value . PHP_EOL);
+  }
+  fwrite($file, "DELIVERY ADDRESS" . PHP_EOL);
+  foreach($address_info as $key=>$value) {
+    fwrite($file, $key . ": " . $value . PHP_EOL);
+  }
+  fclose($file);
+  
   /* copy the pdf to the output folder */
   /* use php copy */
 if(!@copy($pdfurl,$pdffilename))

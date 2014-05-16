@@ -559,6 +559,7 @@ class Stationery extends Cgiapp2 {
     usort($stationery_type_list[0], function($a, $b)
 	  {
 	    return strcmp($a->short_name, $b->short_name);
+	    return strcmp($a->full_name, $b->full_name);
 	  });
     /*    foreach ($stationery_type_list[0] as $buscard) {
       $buscard->url = $basic_url . '&id=' . $buscard->chili_id . '&base=' . $buscard->template_id;

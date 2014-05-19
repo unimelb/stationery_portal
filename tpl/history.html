@@ -1,24 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}Show History{% endblock %}
+{% block title %}Order History{% endblock %}
 {% block content %}
-<h3>Previous jobs</h3>
+<h3>Previous Orders</h3>
 {% if jobs|length >0 %}
-<ul>
-{% for job in jobs %}
-<li>{{ job.job_id }}. {{ job.ordered }}: {{ job.quantity }} x {{ job.template_name }} [<a href="{{ job.url }}">Re-order</a>]</li>
-{% endfor %} 
-    </ul>
-{% else %}
-<p><em>None</em></p>
-{% endif %}
-{% if incomplete|length >0 %}
-<h3>Unsubmitted jobs</h3>
-<ul>
-{% for job in incomplete %}
-<li>{{ job.job_id }}. {{ job.template_name }} [<a href="{{ job.url }}">Update</a>]</li>
+<div id="order-history">
+	<ul class="order">
+		{% for job in jobs %}
+		<li><span class="order-left"><span class="job-id">{{ job.job_id }}.</span><a class="button" href="{{ job.url }}">Re-order</a></span><span class="order-right"><span class="job-order">{{ job.quantity }} x {{ job.template_name }}</span><span class="date">Last Ordered: {{ job.ordered }}</span></span></li>
+		{% endfor %} 
+	</ul>
+</div>
+<h3>Unsubmitted Orders</h3>
+<div id="order-history">
+	<ul class="order">
+		{% for job in incomplete %}	
+		<li><span class="order-left"><span class="job-id">{{ job.job_id }}.</span><a class="button" href="{{ job.url }}">Update</a></span><span class="order-right"><span class="job-unsub">{{ job.template_name }}</span></span></li>
 {% endfor %}
-    </ul>
+	</ul>
+</div>
 {% endif %}
 {% endblock content %}
 {% block nav %}

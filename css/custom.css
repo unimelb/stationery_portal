@@ -235,6 +235,16 @@ label.stationery-form { padding-left: 20px; }
 input { font-size: 14px; }
 input.button-text { font-size: 18px; }
 
+/* Order History Styles */
+#order-history { border: solid 1px #e0e0e0; font-size: 16px; color: #003366; padding: 10px; border-radius: 6px; -webkit-border-radius: 6px; -moz-border-radius: 6px; -o-border-radius: 6px; display: inline-block; width: 95%; }
+	ul.order li { list-style-type: none; display: inline-block; }
+	span.order-left { width: 160px; height: 42px; display: block; float: left; }
+	span.order-right { height: 42px; display: block; float: left; }
+	ul.order li span.job-id { font-weight: bold; padding: 12px 20px 0 0; width: 20px; display: block; text-align: right; float: left; }
+	ul.order li span.job-order { font-weight: bold; display: block; margin: 4px 0 0 10px; }
+	ul.order li span.job-unsub { font-weight: bold; display: block; margin: 11px 0 0 10px; min-width: 200px; }
+	ul.order li span.date { color: #999; font-weight: bold;font-size: 10px; display: block; padding-left: 10px; margin-top: -5px; }
+
 @media screen and (max-width: 480px) {
 
 #main h2 { color: #036 !important;}

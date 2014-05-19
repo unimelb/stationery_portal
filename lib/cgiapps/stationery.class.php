@@ -935,7 +935,7 @@ class Stationery extends Cgiapp2 {
     $jobslist = array();
     $incomplete = array();
     $statement1 = $this->select[4];
-    $statement = str_replace('ORDER BY job_id DESC LIMIT 1', 'ORDER BY ordered', $statement1);
+    $statement = str_replace('ORDER BY job_id DESC LIMIT 1', 'ORDER BY ordered DESC', $statement1);
     try {
       $stmt = $this->conn->prepare($statement);
       $stmt->execute(array('username' => $this->username));

@@ -196,7 +196,7 @@ class Stationery extends Cgiapp2 {
   private function sqlstatements() {
     $this->select = array(
 			  'SELECT * FROM user WHERE username = :id',
-			  'SELECT name, acronym, department_id FROM department',
+			  'SELECT name, acronym, department_id FROM department ORDER by acronym',
 			  'SELECT department_id from user_department where username = :id',
 			  "SELECT * FROM template WHERE category_id = :category_id AND department_id in ( jjjdepartments ) OR category_id = :category_id2 AND department_id IS NULL ORDER BY full_name ASC",
 			  'SELECT * FROM job WHERE username = :username ORDER BY job_id DESC LIMIT 1',

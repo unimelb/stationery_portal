@@ -41,8 +41,14 @@
 </div>
 	</fieldset>
 
-	<label><input name="submitted" type="submit" value="Update details"></label>
+	<label><input class="col-2 first" name="submitted" type="submit" value="Update details"></label>
+	<div  class="col-4">
+		<h4 style="color:#cc0000;border-bottom:none;margin:6px 0 0;">Once you UPDATE DETAILS you can <a href="index.php?mode=template">SELECT TEMPLATE</a></h4>
+	</div>
+	
+	
 </form>
+
 {% endblock %}
 {% block nav %}
 {% include 'nav.html' %}

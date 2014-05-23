@@ -1,3 +1,4 @@
+
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
@@ -62,27 +63,30 @@
       <div class="hgroup">
         <h1><a href="/" title="University Stationery">University Stationery</a><br />&nbsp;</h1>
 				<div class="home-profile-wrapper">
-					{% include 'home-profile.html' %}
+					<div class="nav-bar">
+						<ul>
+							<li><a href="index.php?mode=start">Home</a></li>
+							<li><a href="index.php?mode=profile">My Profile</a></li>
+						</ul>
+					</div>
 				</div>
       </div>
       <div class="nav-wrapper">
-				{% include 'nav.html' %}
+				<!-- Not Required, but a placeholder nonetheless -->
       </div>
     </div>
 
-		<h2>{% block title %}University Stationery{% endblock %}</h2>
+		<h2 id="ordering-envelopes">Ordering Envelopes</h2>
 		
 		<hr />
 		
 		<div class="wrapper white col-8 first" id="main">
 			<div class="col-6" id="content">
-				{% block error %}
-					{{(error|default(''))|raw}}
-				{% endblock %}
-				
-				{% block content %}
-					<p>Hello Giles!</p>
-				{% endblock %}
+				<p class="pullquote">Envelopes pre-printed with the University Crest logo are available to order in a variety of sizes via the University's preferred supplier for office supplies. More information is available at:</p>
+				<h4><a href="http://purchasing.unimelb.edu.au/preferred_suppliers/stationery/online_catalogue" title="Lyreco Catalogue : Strategic procurement"><em>purchasing.unimelb.edu.au/preferred_suppliers/stationery/online_catalogue</em></a></h4>
+				<hr /><br />
+				<p>The <strong>University Stationery system</strong> does not presently support the set up of customised envelopes. If you require customised envelope artwork to be prepared, please contact Winnie Au Yeung on 8344 3967</p>
+				<p>If you require artwork to be prepared that is not captured via one of the available templates, please contact John Bedovian on 8344 6934</p>
 			</div>
 			
 			<div class="aside col-2">
@@ -90,9 +94,6 @@
 				<p><strong>UOM Chili Publish Admin</strong><br />
 					<strong>Email:</strong> <a href="mailto:&#x63;&#x68;&#x69;&#x6C;&#x69;&#x40;&#x6C;&#x69;&#x73;&#x74;&#x73;&#x2E;&#x75;&#x6E;&#x69;&#x6D;&#x65;&#x6C;&#x62;&#x2E;&#x65;&#x64;&#x75;&#x2E;&#x61;&#x75;">chili@lists.unimelb.edu.au</a></p>
 				<hr class="visible" />
-				<!-- {% block nav %}
-				{% endblock nav %} -->
-				<p><a class="icon document" href="/ordering-envelopes.html" target="_blank"><strong>Looking to</strong>Order Envelopes?</a></p>
 				<p><a class="icon document" href="http://marketing.unimelb.edu.au/upto/"><strong>Looking for</strong>University Publishing Templates Online?</a></p>
 				<hr />
 			</div>
@@ -101,7 +102,28 @@
 	</div>
   <hr>
   <div class="footer">
-    {% include 'mcd-footer.html' %}
+<div id="local" class="wrapper">
+  <div id="org-details" class="col-2">
+    <p><strong>Marketing</strong></p>
+    <p class="location">Level 3, 780 Elizabeth Street <br> The University of Melbourne <br>Parkville 3010 VIC Australia</p>
+  </div>
+
+  <ul class="col-2">
+    <li><strong>Authoriser:</strong><br>
+      Director, University Marketing</li><br>
+    <li><strong>Maintainer:</strong><br>
+      <a href="mailto:&#x63;&#x68;&#x69;&#x6C;&#x69;&#x40;&#x6C;&#x69;&#x73;&#x74;&#x73;&#x2E;&#x75;&#x6E;&#x69;&#x6D;&#x65;&#x6C;&#x62;&#x2E;&#x65;&#x64;&#x75;&#x2E;&#x61;&#x75;">Marketing Publishing Services</a></li>
+  </ul>
+
+  <ul class="col-2">
+    <li><strong>Date created:</strong><br>
+      30 November 2013</li><br>
+    <li><strong>Date modified:</strong><!--#config timefmt="%d %B %Y" --><br>
+      <!--#echo var="LAST_MODIFIED" --></li>
+  </ul>
+  <hr>
+</div>
+<hr>
   </div>
 	
 			<script type="text/javascript" charset="utf-8">

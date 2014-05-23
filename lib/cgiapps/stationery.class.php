@@ -206,7 +206,8 @@ class Stationery extends Cgiapp2 {
 			  'SELECT id FROM template WHERE template_id = :template_id AND chili_id = :chili_id',
 			  'SELECT t.full_name FROM template t, job j WHERE j.job_id= :job_id and j.template_id = t.template_id',
 			  'SELECT quantity, price_AUD FROM template_price WHERE category_id = :category_id',
-			  'SELECT * FROM address where address_id = :address_id'
+			  'SELECT * FROM address where address_id = :address_id',
+			  "SELECT * FROM template WHERE category_id = :category_id AND department_id IS NULL ORDER BY full_name ASC"
 			  );
     $this->insert = array(
 			  'INSERT INTO user VALUES(:username, :firstname, :lastname, :telephone, :email, DEFAULT);',
@@ -525,16 +526,27 @@ class Stationery extends Cgiapp2 {
     /* get templates */
     $categories_count = 4;
     $basic_url = 'index.php?mode=edit';
-    try {
-      $statement1 = $this->select[3];
+
+    $statement1 = $this->select[3];
+    $category_ids = array('category_id' => 0);
+    if (count($dept_ids) == 0) {
+      $statement = $this->select[10]; 
+    }
+    else {
       // replace :department with $department_list
       $statement = str_replace("jjjdepartments", $department_list, $statement1);
+      $category_ids['category_id2'] = 0;
+      }
+    try {
       $stmt = $this->conn->prepare($statement);
       $category_id = 1;
        /* for each category, just 1 here now */
       for ($category_id = 1; $category_id < $categories_count +1; $category_id ++) {
-	$stmt->execute(array(':category_id' => $category_id,
-			     ':category_id2' => $category_id)
+	foreach(array_keys($category_ids) as $key){
+	  $category_ids[$key] = $category_id;
+	}
+	
+	$stmt->execute($category_ids
 		       );
 	while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
 	  $row->url = $basic_url . '&id=' . $row->chili_id . '&base=' . $row->template_id;

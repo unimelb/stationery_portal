@@ -2,8 +2,24 @@
 
 {% block title %}Final{% endblock %}
 {% block content %}
-<p>Thanks for all the Chilis!</p>
-<p><a href="logout.php">Logout now</a>, or drive round again</p>
+<p>Hello {{ userprofile.given_name }} {{ userprofile.family_name }}</p>
+<p>Your order confirmation is below.</p>
+<h3>Your Order #{{ ordernumber }} (placed on {{ order_date }})</h3>
+<p>{{ stationery_type }}</p>
+<p>{{ quantity }} @ ${{ price }}</p>
+<h3>Delivery Address</h3>
+{{ address_details.addressee }}<br />
+{{ address_details.location }}<br />
+{{ address_details.street_number }} {{ address_details.street }}<br />
+{{ address_details.town }} {{ address_details.postcode }}<br />
+<h3>Turnaround and delivery</h3>
+<p>Orders approved by 3:00 PM Thursday will be delivered to the
+Marketing Office on the following Tuesday afternoon.<p>
+<p>Stationery is despatched through the University’s internal mail system to the address
+  details above, or can be collected from Marketing Office at level 3/780 Elizabeth St.</p>
+<p>Please Note: Marketing takes no responsibility for the
+  delivery once it leaves the Marketing Office.</p>
+
 {% endblock %}
 {% block nav %}
 {% include 'nav.html' %}

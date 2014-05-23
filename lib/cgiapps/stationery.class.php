@@ -152,8 +152,6 @@ class Stationery extends Cgiapp2 {
     $this->user_visible_modes = array(
 			      'template' => 'Select Template',
 			      'history' => 'History',
-			      'confirm' => 'Confirm',
-			      'thanks' => 'Thanks'
 			      );
 
     $this->start_mode('start');
@@ -244,6 +242,22 @@ class Stationery extends Cgiapp2 {
    * redirect to showProfile if no profile is defined locally
    * for this username ($_SESSION["username"])
    */
+  /* get info about a user. Used in final and showprofile */
+  /* returns false if no matched profile */
+  private function getProfile($username) {
+    $profile = false;
+    try {
+      $stmt = $this->conn->prepare($this->select[0]);
+      $stmt->execute(array('id' => $username));
+      while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
+	$profile = $row;
+      }
+    }
+    catch(Exception $e) {
+      $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
+    return $profile;
+  }
   function showStart() {
     /* check database for user name */
     $error = "";
@@ -1150,7 +1164,7 @@ function showFinal() {
     $instructions = $_REQUEST["comments"];
   }
 
-  $today = date("Y-m-d H:i:s");
+  $today = date('Y-m-d H:i:s');
   $var_array = array(
 		     'quantity' => $quantity,
 		     'themis_code' => $_REQUEST["themis"],
@@ -1305,12 +1319,35 @@ if ($res === TRUE){
     $this->error .= 'zip creation failed because of' . $e->getMessage();
   }
 }
-
+$ordernumber = substr($job_name, 0, 4);
+$userprofile = $this->getProfile($_SESSION["username"]);
+$stationery_type = $this->getTemplateNameFromJob($job_id);
+/* info for screen
+Hello <Firstname> $userprofile->first_name <Surname>,$userprofile->surname
+Your order confirmation is below.
+Your Order #<XXXX> $ordernumber (placed on <Date/time>) $today
+<Stationery type>
+<$quantity> and <$price>
+Delivery Address
+<Addressee>
+<Location>
+<Number>
+<Street Name>
+<Town/Campus>
+<Postcode>
+*/
   $t = 'final.html';
   $t = $this->twig->loadTemplate($t);
   $output = $t->render(array(
 			     'modes' => $this->user_visible_modes,
-			     'error' => $this->error
+			     'error' => $this->error,
+			     'address_details' => $address_info,
+			     'userprofile' => $userprofile,
+			     'stationery_type' => $stationery_type,
+			     'quantity' => $quantity,
+			     'price' => $price,
+			     'order_date' => $today,
+			     'ordernumber' => $ordernumber
 			     ));
   return $output;
 }

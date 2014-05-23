@@ -8,10 +8,11 @@
 <p>{{ stationery_type }}</p>
 <p>{{ quantity }} @ ${{ price }}</p>
 <h3>Delivery Address</h3>
-{{ address_details.addressee }}<br />
-{{ address_details.location }}<br />
-{{ address_details.street_number }} {{ address_details.street }}<br />
-{{ address_details.town }} {{ address_details.postcode }}<br />
+<p>{{ address_details.addressee }}<br />
+	{{ address_details.location }}<br />
+	{{ address_details.street_number }} {{ address_details.street }}<br />
+	{{ address_details.town }} {{ address_details.postcode }}
+</p>
 <h3>Turnaround and delivery</h3>
 <p>Orders approved by 3:00 PM Thursday will be delivered to the
 Marketing Office on the following Tuesday afternoon.<p>
@@ -19,6 +20,10 @@ Marketing Office on the following Tuesday afternoon.<p>
   details above, or can be collected from Marketing Office at level 3/780 Elizabeth St.</p>
 <p>Please Note: Marketing takes no responsibility for the
   delivery once it leaves the Marketing Office.</p>
+<div id="buttons">
+	<p><a class="button" href="index.php?mode=template">Order more stationery</a></p>
+	<p><a class="button" href="logout.php">Sign Out</a></p>
+</div>
 
 {% endblock %}
 {% block nav %}

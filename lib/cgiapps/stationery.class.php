@@ -493,7 +493,8 @@ class Stationery extends Cgiapp2 {
     /* divide department list into 2 for styling */
     $list1_length = ceil(count($departments)/2);
     $departments1 = array_slice($departments, 0, $list1_length );
-    $departments2 = array_slice($departments, -1 * ($list1_length-1));
+    $departments2 = array_slice($departments, count($departments1));
+    //$departments2 = array_diff($departments, $departments1);
     /* output */
     $t = 'profile.html';
     $t = $this->twig->loadTemplate($t);

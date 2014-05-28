@@ -21,6 +21,7 @@ require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/addons/Twig/lib/Twig/Au
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/dbconnect.inc.php");
 include_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/chili.inc.php");
 include_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/storage.inc.php");
+include_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/email_admin.inc.php");
 class Stationery extends Cgiapp2 {
   /**
    * @var string $username
@@ -1276,19 +1277,6 @@ function showFinal() {
   }
   fclose($file);
   
-
-  /* use php copy */
-  /*if(!@copy($pdfurl,$pdffilename))
-    {
-    $errors= error_get_last();
-    
-    $this->error .= "pdf could not be copied due to " . print_r($errors);
-    } else {
-    /* or else pass */
-  /*
-    $error .= "File copied successfully";
-    }
-  */
   /* copy the pdf to the output folder */
   $ch = curl_init();
   $timeout = 0;
@@ -1337,7 +1325,23 @@ function showFinal() {
      <Town/Campus>
      <Postcode>
   */
-  /*$this->email_details();*/
+  $recipient = $userprofile->email;
+  $t2 = 'email.txt';
+  $t2 = $this->twig->loadTemplate($t2);
+  $message_text = $t2->render(array(
+			     'address_details' => $address_info,
+			     'userprofile' => $userprofile,
+			     'stationery_type' => $stationery_type,
+			     'quantity' => $quantity,
+			     'price' => $price,
+			     'order_date' => $today,
+			     'ordernumber' => $ordernumber
+			     ));
+  $extra_mail_info = array('ordernumber' => $ordernumber);
+  $emailsuccess = $this->email_details($recipient, $message_text, $extra_mail_info);
+  if(!$emailsuccess) {
+    print_r($message_text);
+  }
   $t = 'final.html';
   $t = $this->twig->loadTemplate($t);
   $output = $t->render(array(
@@ -1356,32 +1360,29 @@ function showFinal() {
 /* email client and admin with details about order
  * send admin url of zip file in output folder;
  * send client details of order
+ * recipient is recipient's email
+ * message is the message to send
+ * extra_mail info is an array
  */
-private function email_details($recipient, $order_number) {
-  $recipient = "";
-  $subject = "";
+private function email_details($recipient, $message_text, $extra_mail_info) {
+  $ordernumber = "";
+  if (isset($extra_mail_info["ordernumber"])) {
+    $ordernumber = $extra_mail_info["ordernumber"];
+  }
+  $subject = "University stationery order #$ordernumber";
   $message_text = "";
-  $header_array = array('From' => "default");
-  
+  $header_array = array('From' => ADMIN_EMAIL);
   $expanded_headers = array();
-  foreach($this->headers_array as $label=>$value)
+  foreach($header_array as $label=>$value)
     {
       $expanded_headers[] = $label . ': ' . $value;
     }
   $headers = implode("\r\n", $expanded_headers);
   $t = 'email.txt';
   $t = $this->twig->loadTemplate($t);
-  $message_text = $t->render(array(
-			     'address_details' => $address_info,
-			     'userprofile' => $userprofile,
-			     'stationery_type' => $stationery_type,
-			     'quantity' => $quantity,
-			     'price' => $price,
-			     'order_date' => $today,
-			     'ordernumber' => $ordernumber
-			     ));
-  $message_text = wordwrap($this->message_text, 70);
-  return mail($this->recipient, $this->subject, $message_text, $this->headers);
+
+  $message_text = wordwrap($message_text, 70);  
+  return mail($recipient, $subject, $message_text, $headers);
 }
 }
 

@@ -1,0 +1,21 @@
+Hello {{ userprofile.given_name }} {{ userprofile.family_name }}
+Your order confirmation is below.
+
+Your Order #{{ ordernumber }} (placed on {{ order_date }})
+{{ stationery_type }}
+{{ quantity }} @ ${{ price }}
+
+Delivery Address
+================
+{{ address_details.addressee }}
+{{ address_details.location }}
+{{ address_details.street_number }} {{ address_details.street }}
+{{ address_details.town }} {{ address_details.postcode }}
+
+Turnaround and delivery
+=======================
+Orders approved by 3:00 PM Thursday will be delivered to the Marketing Office on the following Tuesday afternoon.
+
+Stationery is despatched through the University’s internal mail system to the address details above, or can be collected from Marketing Office at level 3/780 Elizabeth St.
+
+Please Note: Marketing takes no responsibility for the delivery once it leaves the Marketing Office.

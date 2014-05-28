@@ -1204,18 +1204,18 @@ function showFinal() {
  *** generate text file
  probably in YAML (see php yaml_emit_file)
  **** details
-+ print pdf cross-reference
+ + print pdf cross-reference
  + quantity
  + price 
-+ delivery address
+ + delivery address
  - addressee
  - location
  - street_number . street
  - town
  - postcode
-+ date generated 
-+ THEMIS code
-+ comments 
+ + date generated 
+ + THEMIS code
+ + comments 
   */
   $job_name = $this->getTemplateName($job_id);
   /* db query needed here */
@@ -1225,7 +1225,7 @@ function showFinal() {
   $textfilename = FILESTORE . $job_name . ".txt";
   $pdffilename = FILESTORE . $job_name . ".pdf";
   $zipfilename = FILESTORE . $job_name . ".zip";
-    /* get task id for the pdf creation*/
+  /* get task id for the pdf creation*/
   $dom = new DOMDocument();
   $dom->loadXML($taskXML->DocumentCreatePDFResult);
   $task_id = $dom->getElementsByTagName("task")->item(0)->getAttribute("id");
@@ -1253,7 +1253,7 @@ function showFinal() {
     $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     $pdfurl = "";
   }
-$yaml_array =  array(
+  $yaml_array =  array(
 		       'job information' => $job_name . "-print.pdf",
 		       'url' => $pdfurl,
 		       'quantity' => $quantity,
@@ -1263,7 +1263,7 @@ $yaml_array =  array(
 		       'comments' => $instructions
 		       );
     
-$file = fopen($textfilename,'w');
+  $file = fopen($textfilename,'w');
   if ($file === FALSE) {
     $this->error = "Can’t open file! " . $textfilename;
   }
@@ -1279,64 +1279,65 @@ $file = fopen($textfilename,'w');
 
   /* use php copy */
   /*if(!@copy($pdfurl,$pdffilename))
-{
-  $errors= error_get_last();
+    {
+    $errors= error_get_last();
     
-  $this->error .= "pdf could not be copied due to " . print_r($errors);
-} else {
-  /* or else pass */
+    $this->error .= "pdf could not be copied due to " . print_r($errors);
+    } else {
+    /* or else pass */
   /*
     $error .= "File copied successfully";
-}
+    }
   */
   /* copy the pdf to the output folder */
-$ch = curl_init();
-$timeout = 0;
-curl_setopt ($ch, CURLOPT_URL, $pdfurl);
-curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+  $ch = curl_init();
+  $timeout = 0;
+  curl_setopt ($ch, CURLOPT_URL, $pdfurl);
+  curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
 
-// Getting binary data
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
+  // Getting binary data
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
 
-$pdf = curl_exec($ch);
-curl_close($ch);
-file_put_contents( $pdffilename, $pdf );
+  $pdf = curl_exec($ch);
+  curl_close($ch);
+  file_put_contents( $pdffilename, $pdf );
   /*
  *** zip text and print pdf
  remove the original files, keep only the zip if possible
   */
   $zip = new ZipArchive;
-$res = $zip->open($zipfilename, ZipArchive::CREATE);
-if ($res === TRUE){
-  try {
-    $zip->addFile($textfilename, str_replace(FILESTORE, '', $textfilename));
-    $zip->addFile($pdffilename, str_replace(FILESTORE, '', $pdffilename));
-    $zip->close();
-    /* finally, remove the textfile and pdffile */
-    unlink($textfilename);
-    unlink($pdffilename);
-  } catch(Exception $e) {
-    $this->error .= 'zip creation failed because of' . $e->getMessage();
+  $res = $zip->open($zipfilename, ZipArchive::CREATE);
+  if ($res === TRUE){
+    try {
+      $zip->addFile($textfilename, str_replace(FILESTORE, '', $textfilename));
+      $zip->addFile($pdffilename, str_replace(FILESTORE, '', $pdffilename));
+      $zip->close();
+      /* finally, remove the textfile and pdffile */
+      unlink($textfilename);
+      unlink($pdffilename);
+    } catch(Exception $e) {
+      $this->error .= 'zip creation failed because of' . $e->getMessage();
+    }
   }
-}
-$ordernumber = substr($job_name, 0, 4);
-$userprofile = $this->getProfile($_SESSION["username"]);
-$stationery_type = $this->getTemplateNameFromJob($job_id);
-/* info for screen
-Hello <Firstname> $userprofile->first_name <Surname>,$userprofile->surname
-Your order confirmation is below.
-Your Order #<XXXX> $ordernumber (placed on <Date/time>) $today
-<Stationery type>
-<$quantity> and <$price>
-Delivery Address
-<Addressee>
-<Location>
-<Number>
-<Street Name>
-<Town/Campus>
-<Postcode>
-*/
+  $ordernumber = substr($job_name, 0, 4);
+  $userprofile = $this->getProfile($_SESSION["username"]);
+  $stationery_type = $this->getTemplateNameFromJob($job_id);
+  /* info for screen
+     Hello <Firstname> $userprofile->first_name <Surname>,$userprofile->surname
+     Your order confirmation is below.
+     Your Order #<XXXX> $ordernumber (placed on <Date/time>) $today
+     <Stationery type>
+     <$quantity> and <$price>
+     Delivery Address
+     <Addressee>
+     <Location>
+     <Number>
+     <Street Name>
+     <Town/Campus>
+     <Postcode>
+  */
+  /*$this->email_details();*/
   $t = 'final.html';
   $t = $this->twig->loadTemplate($t);
   $output = $t->render(array(
@@ -1352,7 +1353,36 @@ Delivery Address
 			     ));
   return $output;
 }
-
+/* email client and admin with details about order
+ * send admin url of zip file in output folder;
+ * send client details of order
+ */
+private function email_details($recipient, $order_number) {
+  $recipient = "";
+  $subject = "";
+  $message_text = "";
+  $header_array = array('From' => "default");
+  
+  $expanded_headers = array();
+  foreach($this->headers_array as $label=>$value)
+    {
+      $expanded_headers[] = $label . ': ' . $value;
+    }
+  $headers = implode("\r\n", $expanded_headers);
+  $t = 'email.txt';
+  $t = $this->twig->loadTemplate($t);
+  $message_text = $t->render(array(
+			     'address_details' => $address_info,
+			     'userprofile' => $userprofile,
+			     'stationery_type' => $stationery_type,
+			     'quantity' => $quantity,
+			     'price' => $price,
+			     'order_date' => $today,
+			     'ordernumber' => $ordernumber
+			     ));
+  $message_text = wordwrap($this->message_text, 70);
+  return mail($this->recipient, $this->subject, $message_text, $this->headers);
+}
 }
 
 ?>

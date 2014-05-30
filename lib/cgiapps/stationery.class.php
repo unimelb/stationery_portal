@@ -1110,10 +1110,21 @@ try {
     }
     return $address_id;  
 }
+/* currently a mammoth function, well worthy of refactoring (esp. those marked X):
+ * 1. updates job with address from confirm screen
+ * 2. generates a print pdf in CHILI X
+ * 3. gets its url (CHILI) X
+ * 4. copies url to output folder with curl X
+ * 5. creates a text file for the job
+ * 6. zips text file and pdf X
+ * 7. mails text file info to recipient
+ * 8. mails zip file url to admin
+ * 9. shows text file info on screen
+ */
 function showFinal() {
   /*
- *** add address to address table
- */
+   * add address to address table
+   */
   $error = "";
   $address_info = array(
 			"addressee" => $_REQUEST["addressee"],
@@ -1311,20 +1322,6 @@ function showFinal() {
   $ordernumber = substr($job_name, 0, 4);
   $userprofile = $this->getProfile($_SESSION["username"]);
   $stationery_type = $this->getTemplateNameFromJob($job_id);
-  /* info for screen
-     Hello <Firstname> $userprofile->first_name <Surname>,$userprofile->surname
-     Your order confirmation is below.
-     Your Order #<XXXX> $ordernumber (placed on <Date/time>) $today
-     <Stationery type>
-     <$quantity> and <$price>
-     Delivery Address
-     <Addressee>
-     <Location>
-     <Number>
-     <Street Name>
-     <Town/Campus>
-     <Postcode>
-  */
   /* email client and admin with details about order
    * send admin url of zip file in output folder;
    * send client details of order*/
@@ -1342,14 +1339,24 @@ function showFinal() {
 			     'order_date' => $today,
 			     'ordernumber' => $ordernumber
 			     ));
+   $zipurl = FILEURL . $job_name . '.zip';
+   $message_text2 = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>Stationery Order ' .$ordernumber . '</title></head><body><p>URL: <a href="' . $zipurl . '">'. $zipurl .'</a></p></body></html>';
    $headers = $this->email_headers(array());
+   $headers2 = $this->email_headers(
+				    array(
+					  "MIME-Version" => "1.0",
+					  "Content-type" => "text/html; charset=utf-8"
+					  )
+				    );
    $emailsuccess = mail($recipient, $subject, $message_text, $headers);
-   if(!$emailsuccess) {
+   $emailsuccess2 = mail(ADMIN_EMAIL, $subject, $message_text2, $headers2);
+   if(!$emailsuccess2) {
      $this->error .="<pre>email failed</pre>";
    }
    else {
      $this->error .="<pre>email sent</pre>";
    }
+   /* screen output, after all that */
    $t = 'final.html';
    $t = $this->twig->loadTemplate($t);
    $output = $t->render(array(
@@ -1372,11 +1379,13 @@ function showFinal() {
 private function email_headers($extra_headers_array) {
   $header_array = array('From' => ADMIN_EMAIL);
   if (is_array($extra_headers_array)) {
-    $expanded_headers = $extra_headers_array;
+    foreach($extra_headers_array as $label=>$value) {
+      $header_array[$label] = $value;
+    }
   }
-  else {
-    $expanded_headers = array();
-  }
+
+  $expanded_headers = array();
+
   foreach($header_array as $label=>$value)
     {
       $expanded_headers[] = $label . ': ' . $value;

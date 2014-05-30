@@ -1327,20 +1327,24 @@ function showFinal() {
    * send client details of order*/
    $recipient = $userprofile->email;
    $subject = "University stationery order $ordernumber";
-   $message_text = wordwrap($message_text, 70);
+   $zipurl = FILEURL . $job_name . '.zip';
+   $email_array = array(
+			'address_details' => $address_info,
+			'userprofile' => $userprofile,
+			'stationery_type' => $stationery_type,
+			'quantity' => $quantity,
+			'price' => $price,
+			'order_date' => $today,
+			'ordernumber' => $ordernumber,
+			'zipurl' => $zipurl
+			);
    $t2 = 'email.txt';
    $t2 = $this->twig->loadTemplate($t2);
-   $message_text = $t2->render(array(
-			     'address_details' => $address_info,
-			     'userprofile' => $userprofile,
-			     'stationery_type' => $stationery_type,
-			     'quantity' => $quantity,
-			     'price' => $price,
-			     'order_date' => $today,
-			     'ordernumber' => $ordernumber
-			     ));
-   $zipurl = FILEURL . $job_name . '.zip';
-   $message_text2 = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>Stationery Order ' .$ordernumber . '</title></head><body><p>URL: <a href="' . $zipurl . '">'. $zipurl .'</a></p></body></html>';
+   $message_text = $t2->render($email_array);
+   $message_text = wordwrap($message_text, 70);
+   $t3 = 'admin_email.html';
+   $t3 = $this->twig->loadTemplate($t3);
+   $message_text2 = $t3->render($email_array);
    $headers = $this->email_headers(array());
    $headers2 = $this->email_headers(
 				    array(
@@ -1351,10 +1355,7 @@ function showFinal() {
    $emailsuccess = mail($recipient, $subject, $message_text, $headers);
    $emailsuccess2 = mail(ADMIN_EMAIL, $subject, $message_text2, $headers2);
    if(!$emailsuccess2) {
-     $this->error .="<pre>email failed</pre>";
-   }
-   else {
-     $this->error .="<pre>email sent</pre>";
+     $this->error .="<pre>admin email failed</pre>";
    }
    /* screen output, after all that */
    $t = 'final.html';

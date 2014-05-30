@@ -1,0 +1,21 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+{% block title %}<title>Stationery Order {{ordernumber}}</title>{% endblock %}
+</head>
+<body>
+{% block content %}
+<p>A stationery order has been placed.</p>
+<h3>Order #{{ ordernumber }} (placed on {{ order_date }})</h3>
+<p>Order placed by {{ userprofile.given_name }} {{ userprofile.family_name }} (<a href="mailto:{{ userprofile.email }}">{{ userprofile.email }}</a>)</p>
+<p>{{ stationery_type }}</p>
+<p>{{ quantity }} @ ${{ price }}</p>
+<h3>Delivery Address</h3>
+<p>{{ address_details.addressee }}<br />
+	{{ address_details.location }}<br />
+	{{ address_details.street_number }} {{ address_details.street }}<br />
+	{{ address_details.town }} {{ address_details.postcode }}
+</p>
+<h3>URL of order (pdf and summary)</h3> 
+<p><a href="{{ zipurl }}">{{ zipurl }}</a></p>
+{% endblock %}
+</body>
+</html>

@@ -59,6 +59,26 @@
 	<input id="job" name="job" type="hidden" value="{{ job_id }}" />
 	<label><input class="button-text" name="submitted" type="submit" value="Place Order"></label>
 </form>
+<script type="text/javascript">
+var reversed = [29, 26, 22, 10, 7, 2];
+var popcap;
+$("[name='themis']").keyup(function(event){
+if(event.target.value.length < 2) {
+				   reversed = [29, 26, 22, 10, 7, 2]; 
+			       }
+		    popcap = reversed.pop();
+		    if (event.target.value.length == popcap) {
+			event.target.value += "-";
+			if (popcap == 10){
+			    event.target.value += "5573-";
+			}
+		    }
+		    else if (event.target.value.length < popcap){
+			reversed.push(popcap);
+		    }
+		}
+	       );
+</script>
 {% endblock %}
 {% block nav %}
 {% include 'nav.html' %}

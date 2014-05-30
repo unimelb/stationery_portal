@@ -1325,10 +1325,15 @@ function showFinal() {
      <Town/Campus>
      <Postcode>
   */
-  $recipient = $userprofile->email;
-  $t2 = 'email.txt';
-  $t2 = $this->twig->loadTemplate($t2);
-  $message_text = $t2->render(array(
+  /* email client and admin with details about order
+   * send admin url of zip file in output folder;
+   * send client details of order*/
+   $recipient = $userprofile->email;
+   $subject = "University stationery order $ordernumber";
+   $message_text = wordwrap($message_text, 70);
+   $t2 = 'email.txt';
+   $t2 = $this->twig->loadTemplate($t2);
+   $message_text = $t2->render(array(
 			     'address_details' => $address_info,
 			     'userprofile' => $userprofile,
 			     'stationery_type' => $stationery_type,
@@ -1337,14 +1342,17 @@ function showFinal() {
 			     'order_date' => $today,
 			     'ordernumber' => $ordernumber
 			     ));
-  $extra_mail_info = array('ordernumber' => $ordernumber);
-  $emailsuccess = $this->email_details($recipient, $message_text, $extra_mail_info);
-  if(!$emailsuccess) {
-    print_r($message_text);
-  }
-  $t = 'final.html';
-  $t = $this->twig->loadTemplate($t);
-  $output = $t->render(array(
+   $headers = $this->email_headers(array());
+   $emailsuccess = mail($recipient, $subject, $message_text, $headers);
+   if(!$emailsuccess) {
+     $this->error .="<pre>email failed</pre>";
+   }
+   else {
+     $this->error .="<pre>email sent</pre>";
+   }
+   $t = 'final.html';
+   $t = $this->twig->loadTemplate($t);
+   $output = $t->render(array(
 			     'modes' => $this->user_visible_modes,
 			     'error' => $this->error,
 			     'address_details' => $address_info,
@@ -1357,32 +1365,24 @@ function showFinal() {
 			     ));
   return $output;
 }
-/* email client and admin with details about order
- * send admin url of zip file in output folder;
- * send client details of order
- * recipient is recipient's email
- * message is the message to send
- * extra_mail info is an array
+/* returns formatted email headers
+ * $extra_headers_array are additional mail headers, eg.
+ * "cc" => "bob.sackamento@bob.com"
  */
-private function email_details($recipient, $message_text, $extra_mail_info) {
-  $ordernumber = "";
-  if (isset($extra_mail_info["ordernumber"])) {
-    $ordernumber = $extra_mail_info["ordernumber"];
-  }
-  $subject = "University stationery order #$ordernumber";
-  $message_text = "";
+private function email_headers($extra_headers_array) {
   $header_array = array('From' => ADMIN_EMAIL);
-  $expanded_headers = array();
+  if (is_array($extra_headers_array)) {
+    $expanded_headers = $extra_headers_array;
+  }
+  else {
+    $expanded_headers = array();
+  }
   foreach($header_array as $label=>$value)
     {
       $expanded_headers[] = $label . ': ' . $value;
     }
   $headers = implode("\r\n", $expanded_headers);
-  $t = 'email.txt';
-  $t = $this->twig->loadTemplate($t);
-
-  $message_text = wordwrap($message_text, 70);  
-  return mail($recipient, $subject, $message_text, $headers);
+  return $headers;
 }
 }
 

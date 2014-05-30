@@ -1,4 +1,5 @@
-Hello {{ userprofile.given_name }} {{ userprofile.family_name }}
+Hello {{ userprofile.given_name }} {{ userprofile.family_name }},
+
 Your order confirmation is below.
 
 Your Order #{{ ordernumber }} (placed on {{ order_date }})
@@ -19,3 +20,5 @@ Orders approved by 3:00 PM Thursday will be delivered to the Marketing Office on
 Stationery is despatched through the University’s internal mail system to the address details above, or can be collected from Marketing Office at level 3/780 Elizabeth St.
 
 Please Note: Marketing takes no responsibility for the delivery once it leaves the Marketing Office.
+
+Please do not reply to this email.

@@ -61,23 +61,24 @@
 </form>
 <script type="text/javascript">
 var reversed = [29, 26, 22, 10, 7, 2];
+var hyphen_count = reversed.length -1;
+var countdown = hyphen_count;
 var popcap;
 $("[name='themis']").keyup(function(event){
-if(event.target.value.length < 2) {
-				   reversed = [29, 26, 22, 10, 7, 2]; 
+			       if(event.target.value.length < 2){
+				   countdown = hyphen_count;
 			       }
-		    popcap = reversed.pop();
-		    if (event.target.value.length == popcap) {
-			event.target.value += "-";
-			if (popcap == 10){
-			    event.target.value += "5573-";
-			}
-		    }
-		    else if (event.target.value.length < popcap){
-			reversed.push(popcap);
-		    }
-		}
-	       );
+			       if (countdown >-1 && event.target.value.length == reversed[countdown]) {
+				   event.target.value += "-";
+				   if (reversed[countdown] == 10){
+				       event.target.value += "5573-";
+				   }
+			       }
+			       else if (event.target.value.length > reversed[countdown]){
+				   countdown --;
+			       }
+			   }
+			  );
 </script>
 {% endblock %}
 {% block nav %}

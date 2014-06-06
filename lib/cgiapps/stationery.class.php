@@ -154,7 +154,13 @@ class Stationery extends Cgiapp2 {
 			      'template' => 'Select Template',
 			      'history' => 'History',
 			      );
-
+    $admin_visible = array(
+			   'modify_template' => 'Modify Template',
+			   'modify_department' => 'Modify Department',
+			   'modify_categories' => 'Modify Category',
+			   'modify_privileges' => 'Admin access',
+			   'analytics' => 'Analytics'
+			   );
     $this->start_mode('start');
     //$this->error_mode('handle_errors');
     $this->mode_param('mode');
@@ -162,6 +168,11 @@ class Stationery extends Cgiapp2 {
     if(isset($_SESSION['username']))
       {
 	$this->username = $_SESSION['username'];
+	if ($this->isAdmin()) {
+	  $visible_modes = array_merge($admin_visible, $this->user_visible_modes);
+	  $this->user_visible_modes = $visible_modes;
+	}
+  
       }
     else
       {
@@ -206,7 +217,8 @@ class Stationery extends Cgiapp2 {
 			  'SELECT t.full_name FROM template t, job j WHERE j.job_id= :job_id and j.template_id = t.template_id',
 			  'SELECT quantity, price_AUD FROM template_price WHERE category_id = :category_id',
 			  'SELECT * FROM address where address_id = :address_id',
-			  "SELECT * FROM template WHERE category_id = :category_id AND department_id IS NULL ORDER BY full_name ASC"
+			  "SELECT * FROM template WHERE category_id = :category_id AND department_id IS NULL ORDER BY full_name ASC",
+			  'SELECT username from user_group where group_id = 1 and username= :username'
 			  );
     $this->insert = array(
 			  'INSERT INTO user VALUES(:username, :firstname, :lastname, :telephone, :email, DEFAULT);',
@@ -258,6 +270,28 @@ class Stationery extends Cgiapp2 {
       $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     }
     return $profile;
+  }
+  /* returns true if the user is a member of the 'admin' group;
+   * false otherwise */
+  private function isAdmin() {
+    $count = 0;
+    $group_membership = array();
+    try {
+      $stmt = $this->conn->prepare($this->select[11]);
+      $stmt->execute(array('username' => $this->username));
+      while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
+      $count = array_push($group_membership, $row);
+      }
+    }
+    catch(Exception $e) {
+      $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
+    if($count > 0) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
   function showStart() {
     /* check database for user name */

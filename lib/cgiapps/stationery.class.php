@@ -113,7 +113,7 @@ class Stationery extends Cgiapp2 {
 					    ));
     $tpl_params = $this->param('template_params');
     $this->template_filename = $tpl_params['filename'];
-
+    try{
     /* obtain chili api key */
     /* remove , array('trace' => 1) after testing */
     $this->client = new SoapClient(CHILI_APP . "main.asmx?wsdl");
@@ -122,6 +122,10 @@ class Stationery extends Cgiapp2 {
     $dom = new DOMDocument();
     $dom->loadXML($keyrequest->GenerateApiKeyResult);
     $this->apikey = $dom->getElementsByTagName("apiKey")->item(0)->getAttribute("key");
+    }
+    catch(Exception $e){
+      $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
     /**
      * set up the legal run modes => methods table
      * note that login screen is handled outside of the app
@@ -137,7 +141,8 @@ class Stationery extends Cgiapp2 {
 			   'proof' => 'showProof',
 			   'history' => 'showHistory',
 			   'confirm' => 'showConfirmation',
-			   'thanks' => 'showFinal'
+			   'thanks' => 'showFinal',
+			   'errors' => 'handle_errors'
 			   ));
     // should be an entry for each of the run modes above
     $this->run_modes_default_text = array(
@@ -148,7 +153,8 @@ class Stationery extends Cgiapp2 {
 					  'proof' => 'Show Proof',
 					  'history' => 'History',
 					  'confirm' => 'Confirm',
-					  'thanks' => 'Thanks'
+					  'thanks' => 'Thanks',
+					  'errors' => 'A problem'
 					  );
     $this->user_visible_modes = array(
 			      'template' => 'Select Template',
@@ -162,15 +168,17 @@ class Stationery extends Cgiapp2 {
 			   'analytics' => 'Analytics'
 			   );
     $this->start_mode('start');
-    //$this->error_mode('handle_errors');
+    $this->error_mode('handle_errors');
     $this->mode_param('mode');
     $this->action = $_SERVER['SCRIPT_NAME'];
+    $this->sqlstatements();
     if(isset($_SESSION['username']))
       {
 	$this->username = $_SESSION['username'];
 	if ($this->isAdmin()) {
 	  $visible_modes = array_merge($admin_visible, $this->user_visible_modes);
 	  $this->user_visible_modes = $visible_modes;
+
 	}
   
       }
@@ -178,13 +186,13 @@ class Stationery extends Cgiapp2 {
       {
 	$this->username = "bobmadjr"; // test username only
       }
-    $this->sqlstatements();
+
     //$this->upload_dir = $_SERVER["DOCUMENT_ROOT"] . LIBPATH . FILESTORE;
   }
  
    /* select a random user for chili api functions */
    private function getChiliUser() {
-     // users need to be moved to databas
+     // users need to be moved to database
      $chili_users_inc = array(
 			 array('username'=>'StatUser1', 'password'=>'cmyk011'),
 			 array('username'=>'StatUser2', 'password'=>'cmyk011'), 
@@ -218,7 +226,7 @@ class Stationery extends Cgiapp2 {
 			  'SELECT quantity, price_AUD FROM template_price WHERE category_id = :category_id',
 			  'SELECT * FROM address where address_id = :address_id',
 			  "SELECT * FROM template WHERE category_id = :category_id AND department_id IS NULL ORDER BY full_name ASC",
-			  'SELECT username from user_group where group_id = 1 and username= :username'
+			  'SELECT * from user_group where group_id = 1 and username = :username'
 			  );
     $this->insert = array(
 			  'INSERT INTO user VALUES(:username, :firstname, :lastname, :telephone, :email, DEFAULT);',
@@ -243,8 +251,17 @@ class Stationery extends Cgiapp2 {
   }  
   /**
    * error handling
+   * an Exception gets sent to this function
    */
-  function handle_errors($errno, $errstr) {
+  function handle_errors($e) {
+    $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    $t = 'base.html';
+    $t = $this->twig->loadTemplate($t);
+    $output = $t->render(array(
+			       'modes' => $this->user_visible_modes,
+			       'error' => $error
+			       ));
+    return $output;
   }
   /**
    * mode functions here
@@ -277,10 +294,11 @@ class Stationery extends Cgiapp2 {
     $count = 0;
     $group_membership = array();
     try {
-      $stmt = $this->conn->prepare($this->select[11]);
-      $stmt->execute(array('username' => $this->username));
+      $statement = $this->select[11];
+      $stmt = $this->conn->prepare($statement);
+      $stmt->execute(array(':username' => $this->username));
       while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
-      $count = array_push($group_membership, $row);
+	$count = array_push($group_membership, $row);
       }
     }
     catch(Exception $e) {
@@ -295,7 +313,7 @@ class Stationery extends Cgiapp2 {
   }
   function showStart() {
     /* check database for user name */
-    $error = "";
+    $error = $this->error;
     try {
       //$conn = new PDO(DBCONNECT, DBUSER, DBPASS);
       //$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -308,7 +326,7 @@ class Stationery extends Cgiapp2 {
     } catch(Exception $e) {
       $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     }
-    $t = 'start.html';
+     $t = 'start.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
 			       'modes' => $this->user_visible_modes,

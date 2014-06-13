@@ -15,7 +15,6 @@
  * required files
  */
 require_once(dirname(__FILE__) . "/../../lib/find_path.inc.php");
-//require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/addons/cgiapp2_Plugin_twig.class.php"); //also includes cgiapp2
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/addons/Cgiapp2-2.0.0/Cgiapp2.class.php");
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/addons/Twig/lib/Twig/Autoloader.php");
 require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/includes/dbconnect.inc.php");
@@ -142,7 +141,12 @@ class Stationery extends Cgiapp2 {
 			   'history' => 'showHistory',
 			   'confirm' => 'showConfirmation',
 			   'thanks' => 'showFinal',
-			   'errors' => 'handle_errors'
+			   'errors' => 'handle_errors',
+			   'template_admin' => 'modifyTemplate',
+			   'department_admin' => 'modifyDepartment',
+			   'category_admin' => 'modifyCategory',
+			   'privileges_admin' => 'modifyAdmin',
+			   'analytics_admin' => 'showAnalytics'
 			   ));
     // should be an entry for each of the run modes above
     $this->run_modes_default_text = array(
@@ -154,18 +158,23 @@ class Stationery extends Cgiapp2 {
 					  'history' => 'History',
 					  'confirm' => 'Confirm',
 					  'thanks' => 'Thanks',
-					  'errors' => 'A problem'
+					  'errors' => 'A problem',
+					  'template_admin' => 'Modify Templates',
+					  'department_admin' => 'Modify Departments',
+					  'category_admin' => 'Modify Categories',
+					  'privileges_admin' => 'Administrator access',
+					  'analytics_admin' => 'Analytics'
 					  );
     $this->user_visible_modes = array(
 			      'template' => 'Select Template',
 			      'history' => 'History',
 			      );
     $admin_visible = array(
-			   'modify_template' => 'Modify Template',
-			   'modify_department' => 'Modify Department',
-			   'modify_categories' => 'Modify Category',
-			   'modify_privileges' => 'Admin access',
-			   'analytics' => 'Analytics'
+			   'template_admin' => 'Modify Template',
+			   'department_admin' => 'Modify Department',
+			   'category_admin' => 'Modify Category',
+			   'privileges_admin' => 'Admin access',
+			   'analytics_admin' => 'Analytics'
 			   );
     $this->start_mode('start');
     $this->error_mode('handle_errors');
@@ -1446,6 +1455,85 @@ private function email_headers($extra_headers_array) {
   $headers = implode("\r\n", $expanded_headers);
   return $headers;
 }
+/* Admin functions */
+
+function modifyTemplate() {
+  if (!$this->isAdmin()) {
+    return $this->showStart();
+  }
+  $entity = 'Template';
+  /* screen output*/
+  $t = 'admin-list.html';
+  $t = $this->twig->loadTemplate($t);
+  $output = $t->render(array(
+			     'modes' => $this->user_visible_modes,
+			     'error' => $this->error,
+			     'entity' => $entity
+			     ));
+  return $output;
+}
+function modifyDepartment() {
+  if (!$this->isAdmin()) {
+    return $this->showStart();
+  }
+  $entity = 'Department';
+  /* screen output*/
+  $t = 'admin-list.html';
+  $t = $this->twig->loadTemplate($t);
+  $output = $t->render(array(
+			     'modes' => $this->user_visible_modes,
+			     'error' => $this->error,
+			     'entity' => $entity
+			     ));
+  return $output;
+
+}
+function modifyCategory() {
+  if (!$this->isAdmin()) {
+    return $this->showStart();
+  }
+$entity = 'Category';
+  /* screen output*/
+  $t = 'admin-list.html';
+  $t = $this->twig->loadTemplate($t);
+  $output = $t->render(array(
+			     'modes' => $this->user_visible_modes,
+			     'error' => $this->error,
+			     'entity' => $entity
+			     ));
+  return $output;
+
+}
+function modifyAdmin() {
+  if (!$this->isAdmin()) {
+    return $this->showStart();
+  }
+  $entity = 'Administrator access';
+  /* screen output*/
+  $t = 'admin-list.html'; //maybe some changes for this one
+  $t = $this->twig->loadTemplate($t);
+  $output = $t->render(array(
+			     'modes' => $this->user_visible_modes,
+			     'error' => $this->error,
+			     'entity' => $entity
+			     ));
+  return $output;
+
+}
+function showAnalytics() {
+  if (!$this->isAdmin()) {
+    return $this->showStart();
+  }
+  /* screen output*/
+  $t = 'admin-analytics.html'; //needs its own template
+  $t = $this->twig->loadTemplate($t);
+  $output = $t->render(array(
+			     'modes' => $this->user_visible_modes,
+			     'error' => $this->error,
+			     ));
+  return $output;
+}
+
 }
 
 ?>

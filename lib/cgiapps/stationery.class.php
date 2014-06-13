@@ -146,7 +146,8 @@ class Stationery extends Cgiapp2 {
 			   'department_admin' => 'modifyDepartment',
 			   'category_admin' => 'modifyCategory',
 			   'privileges_admin' => 'modifyAdmin',
-			   'analytics_admin' => 'showAnalytics'
+			   'analytics_admin' => 'showAnalytics',
+			   'delete' => 'confirmDelete'
 			   ));
     // should be an entry for each of the run modes above
     $this->run_modes_default_text = array(
@@ -163,7 +164,8 @@ class Stationery extends Cgiapp2 {
 					  'department_admin' => 'Modify Departments',
 					  'category_admin' => 'Modify Categories',
 					  'privileges_admin' => 'Administrator access',
-					  'analytics_admin' => 'Analytics'
+					  'analytics_admin' => 'Analytics',
+					  'delete' => 'Confirm delete'
 					  );
     $this->user_visible_modes = array(
 			      'template' => 'Select Template',
@@ -509,7 +511,7 @@ class Stationery extends Cgiapp2 {
 	}	
       }
       catch(Exception $e) {
-	$error = print_r($to_delete, true) . '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+	$this->error .= '<pre>ERROR: ' . $e->getMessage() . '</pre>';
       }
       $error .= "<p>Updated ". $this->username . ".</p>";
     }
@@ -1292,10 +1294,7 @@ function showFinal() {
   */
   $job_name = $this->getTemplateName($job_id);
   /* db query needed here */
-  /*$yaml_dump = yaml_emit($yaml_array);
-    print_r($yaml_dump);*/
-  /* yaml would be nice but not enabled on server */
-  $textfilename = FILESTORE . $job_name . ".txt";
+   $textfilename = FILESTORE . $job_name . ".txt";
   $pdffilename = FILESTORE . $job_name . ".pdf";
   $zipfilename = FILESTORE . $job_name . ".zip";
   /* get task id for the pdf creation*/
@@ -1456,12 +1455,99 @@ private function email_headers($extra_headers_array) {
   return $headers;
 }
 /* Admin functions */
+/* $table is the name of the table
+ * $conditions is an array of context-specific WHERE clause conditions eg.
+ * ('id' => 1, username = 'godzilla') or
+ * ('id' => array(1,2,3,4)) for a WHERE...IN clause
+ * $ordering a string or array of column names for ORDER BY...
+ * returns an array of objects
+ */
+private function getListFromDB($table, $conditions = null, $ordering = null) {
+  $entity_list = array();
+  $sql = "SELECT * from $table";
+  if(is_array($conditions) and !is_empty($conditions)){
+    $sql .= ' WHERE ' . $this->makeConstraintSQL($conditions);
+  }
+  if (!is_null($ordering)){
+    $sql .= ' ' . $this->makeOrderingSQL($ordering);
+  }
+  try {
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute(array());
+    while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
+      array_push($entity_list, $row);
+    }
+  }
+  catch(Exception $e) {
+    $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+  }
+  return $entity_list;
+}
+/* $conditions is an array (column=>value)
+ * if value is an array it is made into an IN clause
+ */
+private function makeConstraintSQL($conditions) {
+  $keytext = "";
+  $key_conditions = array();
+  if (is_array($conditions)) {
+    foreach ($conditions as $column_name => $value) {
+      $final_value = "";
+      $operator = ' = ';
+      if (is_array($value)) {
+	$operator = ' IN ';
+	$final_value .= '(';
+	foreach ($value as $item)
+	  {
+	    if (is_string($item)) {
+	      $item = "'" . $item . "'";
+	    }
+	    $final_value .= $item . ', ';
+	  }
+	$final_value = rtrim($final_value, ', ');
+	$final_value .= ')';
+      }
+      else {
+	if (is_string($value)) {
+	  $item = "'" . $value . "'";
+	}
+	$final_value = $value;
+      }
+      $key_conditions[] = strtolower($column_name) . $operator . $final_value;
+    }
+  }
+  $keytext = implode(" AND ", $key_conditions);
+  return $keytext;
+}
+/**
+ * adds an ordering clause to a SQL statement
+ * @param array(string) or simple string $ordering, a list of columns to order the query by
+ * For convenience, a single term need not be enclosed in an array
+ * @return string
+ */
+private function makeOrderingSQL($order_by) {
+  $all_columns = "";
+  if (is_array($order_by))
+    {
+      foreach ($order_by as $column_name)
+	{
+	  $all_columns .= $column_name . ', ';
+	}
+      $all_columns = rtrim($all_columns, ', ');
+    }
+  else
+    {
+      $all_columns = $order_by;
+    }
+  return 'ORDER BY ' . $all_columns;
+}
 
 function modifyTemplate() {
   if (!$this->isAdmin()) {
     return $this->showStart();
   }
   $entity = 'Template';
+  $template_list = $this->getListFromDB(strtolower($entity), null, 'template_id');
   /* screen output*/
   $t = 'admin-list.html';
   $t = $this->twig->loadTemplate($t);

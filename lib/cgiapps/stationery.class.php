@@ -110,6 +110,8 @@ class Stationery extends Cgiapp2 {
     $this->twig = new Twig_Environment($this->loader, array(
 					    "auto_reload" => true
 					    ));
+    /* allows twig to parse object values as arrays */
+    $this->twig->addFilter(new Twig_SimpleFilter('cast_to_array', function ($stdClassObject) { return (array)$stdClassObject; }));
     $tpl_params = $this->param('template_params');
     $this->template_filename = $tpl_params['filename'];
     try{
@@ -1547,7 +1549,7 @@ function modifyTemplate() {
     return $this->showStart();
   }
   $entity = 'Template';
-  $template_list = $this->getListFromDB(strtolower($entity), null, 'template_id');
+  $template_list = $this->getListFromDB(strtolower($entity . '_view'), null, null);
   $properties = array();
   if(count($template_list) > 0 ){
     $properties1 = array_keys(get_object_vars($template_list[0]));
@@ -1560,7 +1562,8 @@ function modifyTemplate() {
 			     'modes' => $this->user_visible_modes,
 			     'error' => $this->error,
 			     'entity' => $entity,
-			     'properties' => $properties
+			     'properties' => $properties,
+			     'item_list' => $template_list
 			     ));
   return $output;
 }

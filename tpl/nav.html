@@ -1,8 +1,19 @@
 <div class="nav-bar">
-	<ul>
-		{% for key,value in modes %}
-		<li><a href="index.php?mode={{ key }}">{{ value }}</a></li>
-		{% endfor %}
-		<li><strong><a href="logout.php">Sign out</a></strong></li>
-	</ul>
+  <ul>
+    {% if modes|length > 2 %}
+    <li>Administration<ul>
+	{% for key,value in modes|slice(0,5) %}
+	<li><a href="index.php?mode={{ key }}">{{ value }}</a></li>
+	{% endfor %}
+    </ul></li>
+    {% for key,value in modes|slice(-2) %}
+    <li><a href="index.php?mode={{ key }}">{{ value }}</a></li>
+    {% endfor %}
+    {% else %}
+    {% for key,value in modes %}
+    <li><a href="index.php?mode={{ key }}">{{ value }}</a></li>
+    {% endfor %}
+    {% endif %}
+    <li><strong><a href="logout.php">Sign out</a></strong></li>
+  </ul>
 </div>

@@ -1548,13 +1548,19 @@ function modifyTemplate() {
   }
   $entity = 'Template';
   $template_list = $this->getListFromDB(strtolower($entity), null, 'template_id');
+  $properties = array();
+  if(count($template_list) > 0 ){
+    $properties1 = array_keys(get_object_vars($template_list[0]));
+    $properties = str_replace('_', ' ', $properties1);
+  }
   /* screen output*/
   $t = 'admin-list.html';
   $t = $this->twig->loadTemplate($t);
   $output = $t->render(array(
 			     'modes' => $this->user_visible_modes,
 			     'error' => $this->error,
-			     'entity' => $entity
+			     'entity' => $entity,
+			     'properties' => $properties
 			     ));
   return $output;
 }

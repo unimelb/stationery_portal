@@ -63,7 +63,7 @@
 var reversed = [29, 26, 22, 10, 7, 2];
 var hyphen_count = reversed.length -1;
 var countdown = hyphen_count;
-var popcap;
+var removehyphen;
 $("[name='themis']").keyup(function(event){
 			       if(event.target.value.length < 2){
 				   countdown = hyphen_count;
@@ -77,6 +77,8 @@ $("[name='themis']").keyup(function(event){
 			       else if (event.target.value.length > reversed[countdown]){
 				   countdown --;
 			       }
+    removehyphen = event.target.value.replace(/--/g, '-');
+    event.target.value = removehyphen;
 			   }
 			  );
 </script>

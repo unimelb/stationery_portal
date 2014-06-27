@@ -12,7 +12,7 @@
 <p><strong>Delete</strong> goes to confirm screen, remembers current screen and returns on confirmation or cancellation</p>
 <h3>{{ entity|title }}s</h3>
 <!-- table if any items present-->
-<p><a class="button" href="#">Add new {{ entity }}</a></p>
+<p><a class="button" href="{{ addurl }}">Add new {{ entity }}</a></p>
 <table>
 <tr>
   <th>Mark to delete</th>
@@ -32,7 +32,7 @@
 {% endfor %}
 </table>
 <p><a class="button" href="#">Delete marked {{ entity }}(s)</a></p>
-<p><a class="button" href="#">Add new {{ entity }}</a></p>
+<p><a class="button" href="{{ addurl }}">Add new {{ entity }}</a></p>
 {% endblock %}
 {% block nav %}
 {% include 'nav.html' %}

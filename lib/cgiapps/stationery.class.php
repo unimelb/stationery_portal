@@ -148,6 +148,8 @@ class Stationery extends Cgiapp2 {
 			   'department_admin' => 'modifyDepartment',
 			   'category_admin' => 'modifyCategory',
 			   'privileges_admin' => 'modifyAdmin',
+			   'add_item' => 'addItem',
+			   'update_item' => 'updateItem',
 			   'analytics_admin' => 'showAnalytics',
 			   'delete' => 'confirmDelete'
 			   ));
@@ -1555,6 +1557,9 @@ function modifyTemplate() {
     $properties1 = array_keys(get_object_vars($template_list[0]));
     $properties = str_replace('_', ' ', $properties1);
   }
+  $editurl = $this->action . "?mode=update_item&entity=$entity&template_id=";
+  $deleteurl = $this->action . "?mode=delete&entity=$entity";
+  $addurl = $this->action . "?mode=add_item&entity=$entity";
   /* screen output*/
   $t = 'admin-list.html';
   $t = $this->twig->loadTemplate($t);
@@ -1563,7 +1568,8 @@ function modifyTemplate() {
 			     'error' => $this->error,
 			     'entity' => $entity,
 			     'properties' => $properties,
-			     'item_list' => $template_list
+			     'item_list' => $template_list,
+			     'addurl' => $addurl
 			     ));
   return $output;
 }
@@ -1628,7 +1634,106 @@ function showAnalytics() {
 			     ));
   return $output;
 }
+/* give the user confirmation before deletion 
+ * needs: 
+ * the Entity type to delete, (also gives where to return to on submit or cancel)
+ * the id number of the thing(s) to delete
+ * submit (deletes) or cancel (return to origin)
+ */
+function confirmDelete() {
+}
+/* a generic function to add or edit entity details
+ * gets all fields from the specified Entity
+ * (filled in with values if a id number specified ie EDIT, otherwise blank ie CREATE)
+ * when submitted, adds the Entity, returns to the appropriate list page
+ */
+/* it may not be possible to have just one function for this; we'll see */
+function addItem() {
+  if (isset($_REQUEST['entity'])) {
+    $entity = strtolower($_REQUEST['entity']);
+  }
+  else {
+    return $this->showStart();
+  }
+  $returnurl = $this->action . '?mode=' . $entity .'_admin';
+  $properties = $this->getPropertyList($entity);
+  foreach($properties as $property) {
+    if (is_array($property)){
+      $subtype = array_keys($property)[0];
+      $working_array = $property[$subtype];
+      $new_array = array();
+      foreach($working_array as $subthing) {
+	$subthing->id = reset($subthing);
+	$subthing->description = next($subthing);
+     
+      }
+      
+    }
+ 
+  }
+/* screen output*/
+  $t = 'admin-add.html';
+  $t = $this->twig->loadTemplate($t);
+  $output = $t->render(array(
+			     'modes' => $this->user_visible_modes,
+			     'error' => $this->error,
+			     'entity' => $entity,
+			     'properties' => $properties,
+			     'returnurl' => $returnurl
+			     ));
+  return $output;
+}
+/* Takes an entity name and returns a list of properties for that database
+ * calls describe :entity;
+ * adds field name to array: 
+ * if primary key (Key = 'PRI'), changes name to id
+ * if foreign key, adds a new property list to the array, 
+ * entity based on the field name
+ * returns the array
+ * which will have the following example structure:
+ * id, field1, field2, (field3 => (id, field1a, field2a))
+ */
+private function getPropertyList($entity) {
+  $property_list = array();
+  $item_fields = array();
 
+  try {
+    $stmt = $this->conn->prepare("DESCRIBE $entity");
+    $stmt->execute();
+      while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
+	$item_fields[] = $row;
+      }
+  }
+  catch(Exception $e){
+    $this->error = '<pre>ERROR: ' . $statement . '; ' . $e->getMessage() . '</pre>';
+  }
+  /* find fields */
+  foreach ($item_fields as $field) {
+    if ($field->Key == 'PRI') {
+      $property_list[] = 'id';
+    }
+    else if ($field->Key == 'MUL') {
+      $id_field = $field->Field;
+      $subentity = str_replace('_id', '', $id_field);
+      /* get all subentities */
+      $subentity_list = $this->getListFromDB($subentity);
+      $property_list[] = array($subentity => $subentity_list);
+    }
+    else {
+      $property_list[] = $field->Field;
+    }
+  }
+  return $property_list;
+}
+
+/* a generic function to add or edit entity details
+ * gets all fields from the specified Entity
+ * filled in with values if a id number specified ie EDIT, otherwise blank ie CREATE)
+ * when submitted, updates the Entity, returns to the appropriate list page
+ */
+/* it may not be possible to have just one function for this; we'll see */
+function updateItem() {
+}
 }
 
 ?>

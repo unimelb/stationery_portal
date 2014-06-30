@@ -1469,7 +1469,7 @@ private function email_headers($extra_headers_array) {
 private function getListFromDB($table, $conditions = null, $ordering = null) {
   $entity_list = array();
   $sql = "SELECT * from $table";
-  if(is_array($conditions) and !is_empty($conditions)){
+  if(is_array($conditions) and !empty($conditions)){
     $sql .= ' WHERE ' . $this->makeConstraintSQL($conditions);
   }
   if (!is_null($ordering)){
@@ -1504,7 +1504,7 @@ private function makeConstraintSQL($conditions) {
 	foreach ($value as $item)
 	  {
 	    if (is_string($item)) {
-	      $item = "'" . $item . "'";
+	      $item = $this->conn->quote($item);
 	    }
 	    $final_value .= $item . ', ';
 	  }
@@ -1513,7 +1513,7 @@ private function makeConstraintSQL($conditions) {
       }
       else {
 	if (is_string($value)) {
-	  $item = "'" . $value . "'";
+	  $item = $this->conn->quote($value);
 	}
 	$final_value = $value;
       }
@@ -1698,31 +1698,38 @@ private function getPropertyList($entity) {
   $item_fields = array();
 
   try {
-    $stmt = $this->conn->prepare("DESCRIBE $entity");
-    $stmt->execute();
+  $item_fields = $this->getListFromDB('information_schema.columns', array('table_name' => "'". $entity . "'"), null);
+    /*$statement = "select column_name, column_key from information_schema.columns where table_name = ':entity'";
+    //$stmt = $this->conn->prepare("DESCRIBE $entity");
+    $stmt = $this->conn->prepare($statement);
+    $stmt->execute(array(':entity' => strtolower($entity)));
     while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
       $item_fields[] = $row;
-    }
+      }*/
     /* find fields */
+    /* Key = column_key; Field = column_name in DESCRIBE entity equivalent*/
     foreach ($item_fields as $field) {
-      if ($field->Key == 'PRI') {
+      if ($field->COLUMN_KEY == 'PRI') {
 	$property_list[] = 'id';
       }
-      else if ($field->Key == 'MUL') {
-	$id_field = $field->Field;
+      else if ($field->COLUMN_KEY == 'MUL') {
+	$id_field = $field->COLUMN_NAME;
 	$subentity = str_replace('_id', '', $id_field);
 	/* get all subentities */
+
 	$subentity_list = $this->getListFromDB($subentity);
 	$property_list[] = array($subentity => $subentity_list);
       }
       else {
-	$property_list[] = $field->Field;
+	$property_list[] = $field->COLUMN_NAME;
       }
     }
   }
   catch(Exception $e){
-    $this->error = '<pre>ERROR: ' . $statement . '; ' . $e->getMessage() . '</pre>';
+    return $this->handle_errors($e);
+    /*$this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';*/
   }
+
   return $property_list;
 }
 

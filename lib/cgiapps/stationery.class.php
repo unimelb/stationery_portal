@@ -1700,28 +1700,28 @@ private function getPropertyList($entity) {
   try {
     $stmt = $this->conn->prepare("DESCRIBE $entity");
     $stmt->execute();
-      while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
-	$item_fields[] = $row;
+    while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
+      $item_fields[] = $row;
+    }
+    /* find fields */
+    foreach ($item_fields as $field) {
+      if ($field->Key == 'PRI') {
+	$property_list[] = 'id';
       }
+      else if ($field->Key == 'MUL') {
+	$id_field = $field->Field;
+	$subentity = str_replace('_id', '', $id_field);
+	/* get all subentities */
+	$subentity_list = $this->getListFromDB($subentity);
+	$property_list[] = array($subentity => $subentity_list);
+      }
+      else {
+	$property_list[] = $field->Field;
+      }
+    }
   }
   catch(Exception $e){
     $this->error = '<pre>ERROR: ' . $statement . '; ' . $e->getMessage() . '</pre>';
-  }
-  /* find fields */
-  foreach ($item_fields as $field) {
-    if ($field->Key == 'PRI') {
-      $property_list[] = 'id';
-    }
-    else if ($field->Key == 'MUL') {
-      $id_field = $field->Field;
-      $subentity = str_replace('_id', '', $id_field);
-      /* get all subentities */
-      $subentity_list = $this->getListFromDB($subentity);
-      $property_list[] = array($subentity => $subentity_list);
-    }
-    else {
-      $property_list[] = $field->Field;
-    }
   }
   return $property_list;
 }

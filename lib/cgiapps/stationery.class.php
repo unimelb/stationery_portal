@@ -169,6 +169,8 @@ class Stationery extends Cgiapp2 {
 					  'category_admin' => 'Modify Categories',
 					  'privileges_admin' => 'Administrator access',
 					  'analytics_admin' => 'Analytics',
+					  'add_item' => 'Create new item',
+					  'update_item' =>'Update item',
 					  'delete' => 'Confirm delete'
 					  );
     $this->user_visible_modes = array(
@@ -1551,11 +1553,16 @@ function modifyTemplate() {
     return $this->showStart();
   }
   $entity = 'Template';
-  $template_list = $this->getListFromDB(strtolower($entity . '_view'), null, null);
-  $properties = array();
-  if(count($template_list) > 0 ){
-    $properties1 = array_keys(get_object_vars($template_list[0]));
-    $properties = str_replace('_', ' ', $properties1);
+  try {
+    $template_list = $this->getListFromDB(strtolower($entity . '_view'), null, null);
+    $properties = array();
+    if(count($template_list) > 0 ){
+      $properties1 = array_keys(get_object_vars($template_list[0]));
+      $properties = str_replace('_', ' ', $properties1);
+    }
+  }
+  catch(Exception $e) {
+    return $this->handle_errors($e);
   }
   $editurl = $this->action . "?mode=update_item&entity=$entity&template_id=";
   $deleteurl = $this->action . "?mode=delete&entity=$entity";
@@ -1657,11 +1664,10 @@ function addItem() {
   }
   $returnurl = $this->action . '?mode=' . $entity .'_admin';
   $properties = $this->getPropertyList($entity);
-  foreach($properties as $property) {
+   foreach($properties as $property) {
     if (is_array($property)){
       $subtype = array_keys($property)[0];
       $working_array = $property[$subtype];
-      $new_array = array();
       foreach($working_array as $subthing) {
 	$subthing->id = reset($subthing);
 	$subthing->description = next($subthing);

@@ -249,7 +249,8 @@ class Stationery extends Cgiapp2 {
 			  'INSERT INTO user VALUES(:username, :firstname, :lastname, :telephone, :email, DEFAULT);',
 			  'INSERT INTO user_department VALUES(:username, :department_id)',
 			  'INSERT INTO job (job_id, username, template_id) VALUES(DEFAULT, :username, :template_id)',
-			  'INSERT INTO address(address_id, addressee, location, street_number, street, town, postcode) VALUES (DEFAULT, :addressee, :location, :street_number, :street, :town, :postcode)'
+			  'INSERT INTO address(address_id, addressee, location, street_number, street, town, postcode) VALUES (DEFAULT, :addressee, :location, :street_number, :street, :town, :postcode)',
+			  'INSERT INTO :entity (xxx) VALUES (DEFAULT, yyy)'
 			  );
     $this->update = array(
 			  'UPDATE user SET given_name = :firstname, family_name = :lastname, phone = :phone, email = :email WHERE username = :id',
@@ -1179,6 +1180,36 @@ try {
     }
     return $address_id;  
 }
+/* similar to addAddress above but more generic
+ * thing is an entity name, eg. template, department
+ * thing_details is an array of (property_name => property_value)
+ * for the thing
+ * returns the id of the new thing
+ */
+private function addThing($thing, $thing_details) {
+  print_r($thing_details);
+  $thing_id = -1;
+  $statement = $this->insert[4];
+  $column_names = array_keys($thing_details);
+  $statement = str_replace('xxx', implode(', ', $column_names), $statement);
+  $statement = str_replace('yyy', ':yyy', $statement);
+  $statement = str_replace('yyy', implode(', :', $column_names), $statement);
+  $thing_details['entity'] = $thing;
+  print_r($statement);
+try {
+      $stmt = $this->conn->prepare($statement);
+      $stmt->execute($thing_details);
+}
+    catch (Exception $e) {
+      $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+      $thing_id = false;
+    }
+    /* get address id for address just created */
+    if ($thing_id !== false) {
+      $thing_id = $this->conn->lastInsertId();
+    }
+    return $thing_id;  
+}
 /* currently a mammoth function, well worthy of refactoring (esp. those marked X):
  * 1. updates job with address from confirm screen
  * 2. generates a print pdf in CHILI X
@@ -1670,18 +1701,25 @@ function addItem() {
      * (entity)_column_1=xyz
      */
     $insert_values = array();
-    foreach($_REQUEST as $key=>$value){
-      if (!strpos($key,'_')===false) {
-	
+     foreach($_REQUEST as $key=>$value){
+      $hyphen = strpos($key,'_');
+      if ($hyphen !== false) {
+	$column = substr($key, $hyphen + 1);
+	$insert_values[$column] = $value;
       }
     }
+     
+    $id = $this->addThing($entity, $insert_values);
+    $this->error .= $id;
   }
+  /*else {*/
 
   $returnurl = $this->action . '?mode=' . $entity .'_admin';
+  $action = $this->action . '?mode=update_item';
   $properties = $this->getPropertyList($entity);
    foreach($properties as $property) {
     if (is_array($property)){
-      $subtype1 = array_keys($property);//[0];
+      $subtype1 = array_keys($property);
       $subtype = $subtype1[0];
       $working_array = $property[$subtype];
       foreach($working_array as $subthing) {
@@ -1698,9 +1736,11 @@ function addItem() {
 			     'error' => $this->error,
 			     'entity' => $entity,
 			     'properties' => $properties,
-			     'returnurl' => $returnurl
+			     'returnurl' => $returnurl,
+			     'action' => $action
 			     ));
   return $output;
+  /*}*/
 }
 /* Takes an entity name and returns a list of properties for that database
  * calls describe :entity;
@@ -1759,6 +1799,25 @@ private function getPropertyList($entity) {
  */
 /* it may not be possible to have just one function for this; we'll see */
 function updateItem() {
+  print_r($_REQUEST);
+    if (isset($_REQUEST['entity'])) {
+    $entity = strtolower($_REQUEST['entity']);
+  }
+  else {
+    return $this->showStart();
+  }
+ /* screen output*/
+  $t = 'admin-update.html';
+  $t = $this->twig->loadTemplate($t);
+  $output = $t->render(array(
+			     'modes' => $this->user_visible_modes,
+			     'error' => $this->error,
+			     'entity' => $entity/*,
+			     'properties' => $properties,
+			     'returnurl' => $returnurl,
+			     'action' => $action*/
+			     ));
+  return $output; 
 }
 }
 

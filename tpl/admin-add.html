@@ -6,12 +6,12 @@
 <p>A submit button which creates the entity</p>
 <p>Then, return to the calling entity admin page</p>
 
-<form>
+<form action="{{ action|raw }}" method="POST">
 {% for property in properties %}
 {% if property is iterable %}
 {% for key, value in property %}
-<label for="{{entity|lower}}_{{ key }}">{{ key|title }}</label>
-<select name="{{entity|lower}}_{{ key }}">
+<label for="{{entity|lower}}_{{ key }}_id">{{ key|title }}</label>
+<select name="{{entity|lower}}_{{ key }}_id">
 {% for subentity in value %}
 <option value="{{ subentity.id }}">{{ subentity.description }}</option>
 {% endfor %}

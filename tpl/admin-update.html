@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Update {{ entity|title }}{% endblock %}
+{% block content %}
+<p>A form constructed from the database fields for the appropriate entity</p>
+<p>A submit button which updates the entity</p>
+<p>Then, return to the calling entity admin page</p>
+
+<form action="{{ action }}" method="POST">
+{% for property in properties %}
+{% if property is iterable %}
+{% for key, value in property %}
+<label for="{{entity|lower}}_{{ key }}">{{ key|title }}</label>
+<select name="{{entity|lower}}_{{ key }}">
+{% for subentity in value %}
+<option value="{{ subentity.id }}">{{ subentity.description }}</option>
+{% endfor %}
+</select>
+{% endfor %}
+{% else %}
+<label for="{{entity|lower}}_{{ property }}">{{ property }}</label> <input name="{{entity|lower}}_{{ property }}" {% if property == 'id' %}disabled="disabled"{% endif %} />
+{% endif %}
+{% endfor %}
+<input type="hidden" name="entity" value="{{ entity|lower }}" />
+
+<input type="submit" value="Create this {{ entity }}"/>
+
+<!-- <p><a class="button" href="#">Create this {{ entity }}</a></p>-->
+<p><a class="button" href="{{ returnurl }}">Return to {{ entity }} administration</a><p>
+</form>
+{% endblock %}
+{% block nav %}
+{% include 'nav.html' %}
+{% endblock nav %}

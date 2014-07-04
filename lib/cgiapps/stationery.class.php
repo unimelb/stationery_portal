@@ -1662,20 +1662,33 @@ function addItem() {
   else {
     return $this->showStart();
   }
+  if (isset($_REQUEST["submitted"])) {
+    /* create the information from the form into the database
+     * return editItem screen with the new object on success
+     * or blank addItem screen with message on failure
+     * plus the message '(entity) created successfully'
+     * (entity)_column_1=xyz
+     */
+    $insert_values = array();
+    foreach($_REQUEST as $key=>$value){
+      if (!strpos($key,'_')===false) {
+	
+      }
+    }
+  }
+
   $returnurl = $this->action . '?mode=' . $entity .'_admin';
   $properties = $this->getPropertyList($entity);
    foreach($properties as $property) {
     if (is_array($property)){
-      $subtype = array_keys($property)[0];
+      $subtype1 = array_keys($property);//[0];
+      $subtype = $subtype1[0];
       $working_array = $property[$subtype];
       foreach($working_array as $subthing) {
 	$subthing->id = reset($subthing);
 	$subthing->description = next($subthing);
-     
       }
-      
     }
- 
   }
 /* screen output*/
   $t = 'admin-add.html';

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ entity }} Administration{% endblock %}
+{% block title %}{{ entity|title }} Administration{% endblock %}
 {% block content %}
 <p>Admin list content here</p>
 <ul>
@@ -27,7 +27,7 @@
 {% for key, value in item|cast_to_array %}
 <td>{{ value }}</td>
 {% endfor %}
-<td><a class="button" href="#" aria-label="Edit {{ entity }} {{ item.short_name }}">Edit</a></td>
+<td><a class="button" href="{{ editurl }}{{ item.id }}" aria-label="Edit {{ entity }} {{ item.short_name }}">Edit</a></td>
 </tr>
 {% endfor %}
 </table>

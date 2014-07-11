@@ -1834,7 +1834,6 @@ function updateItem() {
     
   }
   
-
   
   $destination='update_item';
   $returnurl = $this->action . '?mode=' . $entity .'_admin';
@@ -1862,7 +1861,8 @@ function updateItem() {
 			     'entity' => $entity,
 			     'properties' => $properties,
 			     'returnurl' => $returnurl,
-			     'action' => $action
+			     'action' => $action,
+			     'item' => $item
 			     ));
   return $output; 
 }

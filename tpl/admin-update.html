@@ -18,7 +18,7 @@
 </select>
 {% endfor %}
 {% else %}
-<label for="{{entity|lower}}_{{ property }}">{{ property }}</label> <input name="{{entity|lower}}_{{ property }}" value="{{ values.property }}" {% if property == 'id' %}disabled="disabled"{% endif %} />
+<label for="{{entity|lower}}_{{ property }}">{{ property }}</label> <input name="{{entity|lower}}_{{ property }}" value="{{ item.property }}"{% if property == 'id' %} disabled="disabled"{% endif %} />
 {% endif %}
 {% endfor %}
 <input type="hidden" name="entity" value="{{ entity|lower }}" />

@@ -1187,7 +1187,6 @@ try {
  * returns the id of the new thing
  */
 private function addThing($thing, $thing_details) {
-  print_r($thing_details);
   $thing_id = -1;
   $statement = $this->insert[4];
   $column_names = array_keys($thing_details);
@@ -1195,7 +1194,6 @@ private function addThing($thing, $thing_details) {
   $statement = str_replace('yyy', ':yyy', $statement);
   $statement = str_replace('yyy', implode(', :', $column_names), $statement);
   $statement = str_replace(':entity', $thing, $statement);
-  print_r($statement);
 try {
       $stmt = $this->conn->prepare($statement);
       $stmt->execute($thing_details);
@@ -1578,14 +1576,18 @@ private function makeOrderingSQL($order_by) {
     }
   return 'ORDER BY ' . $all_columns;
 }
-
+/* a generic overview of some entity (default = template) */
 function modifyTemplate() {
   if (!$this->isAdmin()) {
     return $this->showStart();
   }
   $entity = 'Template';
+  if (isset($_REQUEST['entity'])) {
+    $entity = $_REQUEST['entity'];
+  }
   try {
     $template_list = $this->getListFromDB(strtolower($entity . '_view'), null, null);
+    /* make sure unimelb templates are visible in view */
     $properties = array();
     if(count($template_list) > 0 ){
       $properties1 = array_keys(get_object_vars($template_list[0]));
@@ -1595,7 +1597,7 @@ function modifyTemplate() {
   catch(Exception $e) {
     return $this->handle_errors($e);
   }
-  $editurl = $this->action . "?mode=update_item&entity=$entity&template_id=";
+  $editurl = $this->action . "?mode=update_item&entity=$entity&id=";
   $deleteurl = $this->action . "?mode=delete&entity=$entity";
   $addurl = $this->action . "?mode=add_item&entity=$entity";
   /* screen output*/
@@ -1607,7 +1609,8 @@ function modifyTemplate() {
 			     'entity' => $entity,
 			     'properties' => $properties,
 			     'item_list' => $template_list,
-			     'addurl' => $addurl
+			     'addurl' => $addurl,
+			     'editurl' => $editurl
 			     ));
   return $output;
 }
@@ -1710,19 +1713,17 @@ function addItem() {
 	$insert_values[$column] = $value;
       }
     }
-     print_r($insert_values);
-     
     $id = $this->addThing($entity, $insert_values);
     if($id !== false){
       $this->error .= "<pre>$id</pre>";
-      $destination = 'update_item';
+      $_REQUEST['id'] = $id;
+      return $this->updateItem();
     }
     else {
       $this->error .="<pre>There was a problem with addThing</pre>";
-    }
+     }
   }
   /*else {*/
-  $this->error="<pre>Everything is awesome</pre>";
   $returnurl = $this->action . '?mode=' . $entity .'_admin';
   $action = $this->action . '?mode=' . $destination;
   $properties = $this->getPropertyList($entity);
@@ -1809,22 +1810,59 @@ private function getPropertyList($entity) {
 /* it may not be possible to have just one function for this; we'll see */
 function updateItem() {
   print_r($_REQUEST);
-    if (isset($_REQUEST['entity'])) {
+  if (isset($_REQUEST['entity'])) {
     $entity = strtolower($_REQUEST['entity']);
   }
   else {
     return $this->showStart();
   }
- /* screen output*/
+  if (isset($_REQUEST['id'])) {
+    $id = $_REQUEST['id'];
+    /* if submitted, update the details
+     * get entity details by id 
+     * print the details
+     */
+    $itemlist = $this->getListFromDB($entity, array($entity . '_id' => $id));
+    if (isset($itemlist) and count($itemlist) > 0) {
+      $item = $itemlist[0];
+      print_r($item);
+    }
+    else {
+      $_REQUEST['entity'] = $entity;
+      return $this->modifyTemplate();
+    }
+    
+  }
+  
+
+  
+  $destination='update_item';
+  $returnurl = $this->action . '?mode=' . $entity .'_admin';
+  $action = $this->action . '?mode=' . $destination;
+  $properties = $this->getPropertyList($entity);
+  foreach($properties as $property) {
+    if (is_array($property)){
+      $subtype1 = array_keys($property);
+      $subtype = $subtype1[0];
+      $working_array = $property[$subtype];
+      foreach($working_array as $subthing) {
+	$subthing->id = reset($subthing);
+	$subthing->description = next($subthing);
+      }
+    }
+      
+  }
+
+  /* screen output*/
   $t = 'admin-update.html';
   $t = $this->twig->loadTemplate($t);
   $output = $t->render(array(
 			     'modes' => $this->user_visible_modes,
 			     'error' => $this->error,
-			     'entity' => $entity/*,
+			     'entity' => $entity,
 			     'properties' => $properties,
 			     'returnurl' => $returnurl,
-			     'action' => $action*/
+			     'action' => $action
 			     ));
   return $output; 
 }

@@ -1191,10 +1191,10 @@ private function addThing($thing, $thing_details) {
   $thing_id = -1;
   $statement = $this->insert[4];
   $column_names = array_keys($thing_details);
-  $statement = str_replace('xxx', implode(', ', $column_names), $statement);
+  $statement = str_replace('xxx', $thing . '_id, ' . implode(', ', $column_names), $statement);
   $statement = str_replace('yyy', ':yyy', $statement);
   $statement = str_replace('yyy', implode(', :', $column_names), $statement);
-  $thing_details['entity'] = $thing;
+  $statement = str_replace(':entity', $thing, $statement);
   print_r($statement);
 try {
       $stmt = $this->conn->prepare($statement);
@@ -1693,7 +1693,9 @@ function addItem() {
   else {
     return $this->showStart();
   }
+  $destination='add_item';
   if (isset($_REQUEST["submitted"])) {
+    $this->error = "<pre>submitted</pre>";
     /* create the information from the form into the database
      * return editItem screen with the new object on success
      * or blank addItem screen with message on failure
@@ -1708,14 +1710,21 @@ function addItem() {
 	$insert_values[$column] = $value;
       }
     }
+     print_r($insert_values);
      
     $id = $this->addThing($entity, $insert_values);
-    $this->error .= $id;
+    if($id !== false){
+      $this->error .= "<pre>$id</pre>";
+      $destination = 'update_item';
+    }
+    else {
+      $this->error .="<pre>There was a problem with addThing</pre>";
+    }
   }
   /*else {*/
-
+  $this->error="<pre>Everything is awesome</pre>";
   $returnurl = $this->action . '?mode=' . $entity .'_admin';
-  $action = $this->action . '?mode=update_item';
+  $action = $this->action . '?mode=' . $destination;
   $properties = $this->getPropertyList($entity);
    foreach($properties as $property) {
     if (is_array($property)){

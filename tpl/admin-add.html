@@ -23,7 +23,7 @@
 {% endfor %}
 <input type="hidden" name="entity" value="{{ entity|lower }}" />
 
-<input type="submit" value="Create this {{ entity }}"/>
+<input name="submitted" type="submit" value="Create this {{ entity }}"/>
 
 <!-- <p><a class="button" href="#">Create this {{ entity }}</a></p>-->
 <p><a class="button" href="{{ returnurl }}">Return to {{ entity }} administration</a><p>

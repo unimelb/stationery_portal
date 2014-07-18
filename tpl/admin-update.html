@@ -18,12 +18,12 @@
 </select>
 {% endfor %}
 {% else %}
-<label for="{{entity|lower}}_{{ property }}">{{ property }}</label> <input name="{{entity|lower}}_{{ property }}" value="{{ item.property }}"{% if property == 'id' %} disabled="disabled"{% endif %} />
+<label for="{{entity|lower}}_{{ property }}">{{ property }}</label> <input name="{{entity|lower}}_{{ property }}" value="{{ item[loop.index0] }}"{% if property == 'id' %} disabled="disabled"{% endif %} />
 {% endif %}
 {% endfor %}
 <input type="hidden" name="entity" value="{{ entity|lower }}" />
 
-<input type="submit" value="Create this {{ entity }}"/>
+<input type="submit" value="Update this {{ entity }}"/>
 
 <!-- <p><a class="button" href="#">Create this {{ entity }}</a></p>-->
 <p><a class="button" href="{{ returnurl }}">Return to {{ entity }} administration</a><p>

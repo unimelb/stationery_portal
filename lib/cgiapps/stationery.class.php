@@ -1717,6 +1717,7 @@ function addItem() {
     if($id !== false){
       $this->error .= "<pre>$id</pre>";
       $_REQUEST['id'] = $id;
+      $_REQUEST['mode'] = 'update_item';
       return $this->updateItem();
     }
     else {
@@ -1826,7 +1827,10 @@ function updateItem() {
     if (isset($itemlist) and count($itemlist) > 0) {
       $item = $itemlist[0];
       print_r($item);
+      $item_props = get_object_vars($item);
+      $item_vars = array_values($item_props);
     }
+
     else {
       $_REQUEST['entity'] = $entity;
       return $this->modifyTemplate();
@@ -1862,7 +1866,7 @@ function updateItem() {
 			     'properties' => $properties,
 			     'returnurl' => $returnurl,
 			     'action' => $action,
-			     'item' => $item
+			     'item' => $item_vars
 			     ));
   return $output; 
 }

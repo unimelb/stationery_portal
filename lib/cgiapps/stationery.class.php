@@ -1810,7 +1810,6 @@ private function getPropertyList($entity) {
  */
 /* it may not be possible to have just one function for this; we'll see */
 function updateItem() {
-  print_r($_REQUEST);
   if (isset($_REQUEST['entity'])) {
     $entity = strtolower($_REQUEST['entity']);
   }
@@ -1826,10 +1825,10 @@ function updateItem() {
     $itemlist = $this->getListFromDB($entity, array($entity . '_id' => $id));
     if (isset($itemlist) and count($itemlist) > 0) {
       $item = $itemlist[0];
-      print_r($item);
       $item_props = get_object_vars($item);
       $item_vars = array_values($item_props);
     }
+
 
     else {
       $_REQUEST['entity'] = $entity;

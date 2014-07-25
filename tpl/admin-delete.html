@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}{{ entity|title }} Deletion Warning{% endblock %}
+{% block content %}
+{% if item_list|length >0 %}
+
+<p>You are about to <strong>delete</strong> the following:</p>
+<ul>
+  {% for item in item_list %}<li>
+{% for key, value in item|cast_to_array %}
+{{ value }}{% if not loop.last %}, {% endif %}{% endfor %}
+</li>{% endfor %}
+</ul>
+<p>Are you sure you want to delete {% if item_list|length > 1 %}these{% else %}this{% endif %}?</p>
+<p>Yes - go ahead and delete</p>
+{% else %}<p>Nothing to delete!<p>
+{% endif %}
+<p><a class="button" href="{{ returnurl }}">{% if item_list|length > 0 %}No, r{% else %}R{% endif %}eturn to {{ entity }} administration</a><p>
+
+{% endblock %}
+{% block nav %}
+{% include 'nav.html' %}
+{% endblock nav %}

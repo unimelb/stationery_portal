@@ -13,6 +13,7 @@
 <h3>{{ entity|title }}s</h3>
 <!-- table if any items present-->
 <p><a class="button" href="{{ addurl }}">Add new {{ entity }}</a></p>
+<form action="{{ action }}" method="POST">
 <table>
 <tr>
   <th>Mark to delete</th>
@@ -31,7 +32,11 @@
 </tr>
 {% endfor %}
 </table>
-<p><a class="button" href="#">Delete marked {{ entity }}(s)</a></p>
+<label for="submitted">Confirmation required: </label>
+<input name="submitted" type="submit" value="Delete marked {{ entity }}(s)"/>
+
+<!--<p><a class="button" href="{{ deleteurl }}">Delete marked {{ entity }}(s)</a></p> -->
+</form>
 <p><a class="button" href="{{ addurl }}">Add new {{ entity }}</a></p>
 {% endblock %}
 {% block nav %}

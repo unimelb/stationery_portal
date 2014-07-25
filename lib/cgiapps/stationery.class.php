@@ -1650,7 +1650,8 @@ function modifyTemplate() {
 			     'properties' => $properties,
 			     'item_list' => $template_list,
 			     'addurl' => $addurl,
-			     'editurl' => $editurl
+			     'editurl' => $editurl,
+			     'action' => $deleteurl
 			     ));
   return $output;
 }
@@ -1722,6 +1723,44 @@ function showAnalytics() {
  * submit (deletes) or cancel (return to origin)
  */
 function confirmDelete() {
+print_r($_REQUEST);
+$action = $this->action;
+$entity = strtolower($_REQUEST['entity']);
+$to_delete = array();
+$needle = 'markdelete' . ucfirst($entity);
+foreach($_REQUEST as $key => $value) {
+  if(strpos($key, $needle) !== false) {
+    $to_delete[] = $value;
+  }
+}
+print_r($to_delete);
+
+if (count($to_delete) < 1) {
+  $to_delete = -1;
+}
+$conditions = array('id' => $to_delete);
+$returnurl = $this->action . '?mode=' . $entity .'_admin';
+$item_list = $this->getListFromDB(strtolower($entity . '_view'), $conditions, null);
+/* make sure unimelb templates are visible in view */
+$properties = array();
+if(count($item_list) > 0 ){
+  $properties1 = array_keys(get_object_vars($item_list[0]));
+  $properties = str_replace('_', ' ', $properties1);
+}
+ /* screen output*/
+  $t = 'admin-delete.html';
+  $t = $this->twig->loadTemplate($t);
+  $output = $t->render(array(
+			     'modes' => $this->user_visible_modes,
+			     'error' => $this->error,
+			     'entity' => $entity,
+			     'action' => $action,
+			     'returnurl' => $returnurl,
+			     'properties' => $properties,
+			     'item_list' => $item_list
+			     ));
+  return $output; 
+
 }
 /* a generic function to add or edit entity details
  * gets all fields from the specified Entity
@@ -1925,6 +1964,7 @@ function updateItem() {
 			     ));
   return $output; 
 }
+
 }
 
 ?>

@@ -12,7 +12,12 @@
 </li>{% endfor %}
 </ul>
 <p>Are you sure you want to delete {% if item_list|length > 1 %}these{% else %}this{% endif %}?</p>
-<p>Yes - go ahead and delete</p>
+<form action="{{ action }}" method="POST">
+{% for id in id_list %}
+<input name="markdelete{{ entity|title }}_{{ loop.index }}" type="hidden" value="{{ id }}" />
+{% endfor %}
+<input name="submitted_confirm" type="submit" value="Yes - go ahead and delete"/>
+</form>
 {% else %}<p>Nothing to delete!<p>
 {% endif %}
 <p><a class="button" href="{{ returnurl }}">{% if item_list|length > 0 %}No, r{% else %}R{% endif %}eturn to {{ entity }} administration</a><p>

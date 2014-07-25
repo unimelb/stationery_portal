@@ -254,7 +254,8 @@ class Stationery extends Cgiapp2 {
 			  );
     $this->update = array(
 			  'UPDATE user SET given_name = :firstname, family_name = :lastname, phone = :phone, email = :email WHERE username = :id',
-			  'UPDATE job SET chili_id = :chili_id WHERE username = :username AND job_id = :job_id'
+			  'UPDATE job SET chili_id = :chili_id WHERE username = :username AND job_id = :job_id',
+			  'UPDATE :entity SET xxx WHERE entity_id = :id'
 			  );
     $this->delete = array(
 			  'DELETE FROM user_department WHERE username = :username AND department_id = :department_id'
@@ -1208,6 +1209,45 @@ try {
     }
     return $thing_id;  
 }
+/* general updater
+ * $thing is the entity (a string, lowercase)
+ * $thing_id is an integer
+ * $thing_details is an array of column=>value
+ */
+private function updateThing($thing, $thing_id, $thing_details) {
+  $returnid = -1;
+  /* get settext */
+   $settings = array();
+    $statement = "";
+    $key_conditions = array();
+    foreach ($thing_details as $key => $value) {
+      if (is_string($value))
+	{
+	  $value = trim($value);
+	  if (strlen($value) == 0)
+	    {
+	      $value === null;
+	    }
+	}
+      $lcasekey = strtolower($key);
+      $settings[] = $lcasekey . " = " . ":" . $lcasekey;
+    }
+    $settext = implode(", ", $settings);
+    $primary_key = $thing . '_' . 'id';
+    $keytext = $primary_key . " = :" . $primary_key;
+    $statement = "update $thing set " . $settext . " where " . $keytext;
+    print_r($statement);
+    $thing_details[$primary_key] = $thing_id;
+    try {
+      $stmt = $this->conn->prepare($statement);
+      $stmt->execute($thing_details);
+      $returnid = $thing_id;
+    }
+    catch(Exception $e) {
+      $this->error .= '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }
+    return $returnid;
+}
 /* currently a mammoth function, well worthy of refactoring (esp. those marked X):
  * 1. updates job with address from confirm screen
  * 2. generates a print pdf in CHILI X
@@ -1810,18 +1850,35 @@ private function getPropertyList($entity) {
  */
 /* it may not be possible to have just one function for this; we'll see */
 function updateItem() {
+  print_r($_REQUEST);
   if (isset($_REQUEST['entity'])) {
     $entity = strtolower($_REQUEST['entity']);
   }
   else {
     return $this->showStart();
   }
+  
   if (isset($_REQUEST['id'])) {
     $id = $_REQUEST['id'];
     /* if submitted, update the details
      * get entity details by id 
      * print the details
      */
+    if (isset($_REQUEST["submitted"])) {
+      $this->error = "<pre>submitted</pre>";
+      /*
+       * (entity)_column_1=xyz
+       */
+      $insert_values = array();
+      foreach($_REQUEST as $key=>$value){
+	$hyphen = strpos($key,'_');
+	if ($hyphen !== false) {
+	  $column = substr($key, $hyphen + 1);
+	  $insert_values[$column] = $value;
+	}
+      }
+      $this->updateThing($entity, $id, $insert_values);
+    }
     $itemlist = $this->getListFromDB($entity, array($entity . '_id' => $id));
     if (isset($itemlist) and count($itemlist) > 0) {
       $item = $itemlist[0];
@@ -1830,17 +1887,16 @@ function updateItem() {
     }
 
 
-    else {
-      $_REQUEST['entity'] = $entity;
-      return $this->modifyTemplate();
-    }
     
   }
   
-  
+  else {
+    $_REQUEST['entity'] = $entity;
+    return $this->modifyTemplate();
+  }
   $destination='update_item';
   $returnurl = $this->action . '?mode=' . $entity .'_admin';
-  $action = $this->action . '?mode=' . $destination;
+  $action = $this->action . '?mode=' . $destination . '&entity=' . $entity .'&id='. $id;
   $properties = $this->getPropertyList($entity);
   foreach($properties as $property) {
     if (is_array($property)){

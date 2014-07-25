@@ -11,8 +11,8 @@
 {% set propertyno = loop.index0 %}
 {% if property is iterable %}
 {% for key, value in property %}
-<label for="{{entity|lower}}_{{ key }}">{{ key|title }}</label>
-<select name="{{entity|lower}}_{{ key }}">
+<label for="{{entity|lower}}_{{ key }}_id">{{ key|title }}</label>
+<select name="{{entity|lower}}_{{ key }}_id">
 {% for subentity in value %}
 <option value="{{ subentity.id }}"{% if subentity.id == item[propertyno] %} selected="selected"{% endif %}>{{ subentity.description }}</option>
 {% endfor %}
@@ -24,7 +24,7 @@
 {% endfor %}
 <input type="hidden" name="entity" value="{{ entity|lower }}" />
 
-<input type="submit" value="Update this {{ entity }}"/>
+<input name="submitted" type="submit" value="Update this {{ entity }}"/>
 
 <!-- <p><a class="button" href="#">Create this {{ entity }}</a></p>-->
 <p><a class="button" href="{{ returnurl }}">Return to {{ entity }} administration</a><p>

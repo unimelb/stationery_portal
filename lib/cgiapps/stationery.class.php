@@ -1248,6 +1248,22 @@ private function updateThing($thing, $thing_id, $thing_details) {
     }
     return $returnid;
 }
+/* deletes from database
+ * $thing is the entity name 
+ * $id can be an integer or array of integers,
+ * representing an IN clause */
+protected function deleteThings($thing, $id) {
+  $conditions = array(strtolower($thing) . '_id' => $id);
+  $keytext = $this->makeConstraintSQL($conditions);
+  $statement = "delete from $thing where " . $keytext;
+  try {
+    $stmt = $this->conn->prepare($statement);
+    $stmt->execute();
+  }
+  catch (Exception $e) {
+    $this->error .= '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+  }
+}
 /* currently a mammoth function, well worthy of refactoring (esp. those marked X):
  * 1. updates job with address from confirm screen
  * 2. generates a print pdf in CHILI X
@@ -1723,7 +1739,7 @@ function showAnalytics() {
  * submit (deletes) or cancel (return to origin)
  */
 function confirmDelete() {
-print_r($_REQUEST);
+
 $action = $this->action;
 $entity = strtolower($_REQUEST['entity']);
 $to_delete = array();
@@ -1735,11 +1751,21 @@ foreach($_REQUEST as $key => $value) {
 }
 print_r($to_delete);
 
-if (count($to_delete) < 1) {
-  $to_delete = -1;
+if (count($to_delete) > 0) {
+  $conditions = array('id' => $to_delete);
 }
-$conditions = array('id' => $to_delete);
+else {
+  $conditions = array('id' => -1);
+}
+
+if(isset($_REQUEST['submitted_confirm'])) {
+  /* delete listed things */
+  print_r($_REQUEST);
+  $this->deleteThings($entity, $to_delete);
+  //return $this->modifyTemplate();
+}
 $returnurl = $this->action . '?mode=' . $entity .'_admin';
+$confirmurl = $this->action . '?mode=delete&entity=' . $entity;
 $item_list = $this->getListFromDB(strtolower($entity . '_view'), $conditions, null);
 /* make sure unimelb templates are visible in view */
 $properties = array();
@@ -1754,10 +1780,11 @@ if(count($item_list) > 0 ){
 			     'modes' => $this->user_visible_modes,
 			     'error' => $this->error,
 			     'entity' => $entity,
-			     'action' => $action,
+			     'action' => $confirmurl,
 			     'returnurl' => $returnurl,
 			     'properties' => $properties,
-			     'item_list' => $item_list
+			     'item_list' => $item_list,
+			     'id_list' => $to_delete
 			     ));
   return $output; 
 

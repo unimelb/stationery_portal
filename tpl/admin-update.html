@@ -2,33 +2,38 @@
 
 {% block title %}Update {{ entity|title }}{% endblock %}
 {% block content %}
-<p>A form constructed from the database fields for the appropriate entity</p>
-<p>A submit button which updates the entity</p>
-<p>Then, return to the calling entity admin page</p>
-
 <form action="{{ action }}" method="POST">
 {% for property in properties %}
 {% set propertyno = loop.index0 %}
 {% if property is iterable %}
 {% for key, value in property %}
 <label for="{{entity|lower}}_{{ key }}_id">{{ key|title }}</label>
+
 <select name="{{entity|lower}}_{{ key }}_id">
 {% for subentity in value %}
 <option value="{{ subentity.id }}"{% if subentity.id == item[propertyno] %} selected="selected"{% endif %}>{{ subentity.description }}</option>
 {% endfor %}
 </select>
+
 {% endfor %}
 {% else %}
-<label for="{{entity|lower}}_{{ property }}">{{ property }}</label> <input name="{{entity|lower}}_{{ property }}" value="{{ item[loop.index0] }}"{% if property == 'id' %} disabled="disabled"{% endif %} />
+<label for="{{entity|lower}}_{{ property }}">{{ property }}</label> 
+<input name="{{entity|lower}}_{{ property }}" value="{{ item[loop.index0] }}"{% if property == 'id' %} disabled="disabled"{% endif %} />
+
 {% endif %}
+<br />
 {% endfor %}
 <input type="hidden" name="entity" value="{{ entity|lower }}" />
 
 <input name="submitted" type="submit" value="Update this {{ entity }}"/>
 
 <!-- <p><a class="button" href="#">Create this {{ entity }}</a></p>-->
-<p><a class="button" href="{{ returnurl }}">Return to {{ entity }} administration</a><p>
+
 </form>
+{% if special.active %}
+<p><a class="button" href="{{ special.action }}">View price list</a><p>
+{% endif %}
+<p><a class="button" href="{{ returnurl }}">Return to {{ entity }} administration</a><p>
 {% endblock %}
 {% block nav %}
 {% include 'nav.html' %}

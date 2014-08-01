@@ -20,6 +20,7 @@
 {% else %}
 <label for="{{entity|lower}}_{{ property }}">{{ property }}</label> <input name="{{entity|lower}}_{{ property }}" {% if property == 'id' %}disabled="disabled"{% endif %} />
 {% endif %}
+<br />
 {% endfor %}
 <input type="hidden" name="entity" value="{{ entity|lower }}" />
 

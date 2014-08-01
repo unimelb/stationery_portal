@@ -2,15 +2,7 @@
 
 {% block title %}{{ entity|title }} Administration{% endblock %}
 {% block content %}
-<p>Admin list content here</p>
-<ul>
-<li>(delete checkbox) (details of item) (edit button)</li>
-<li>&hellip;</li>
-</ul>
-<p><strong>Edit</strong> goes to detail screen with existing id number</p>
-<p><strong>Add new</strong> goes to detail screen with no id number</p>
-<p><strong>Delete</strong> goes to confirm screen, remembers current screen and returns on confirmation or cancellation</p>
-<h3>{{ entity|title }}s</h3>
+<h3>{{ plural|title }}</h3>
 <!-- table if any items present-->
 <p><a class="button" href="{{ addurl }}">Add new {{ entity }}</a></p>
 <form action="{{ action }}" method="POST">
@@ -33,9 +25,8 @@
 {% endfor %}
 </table>
 <label for="submitted">Confirmation required: </label>
-<input name="submitted" type="submit" value="Delete marked {{ entity }}(s)"/>
 
-<!--<p><a class="button" href="{{ deleteurl }}">Delete marked {{ entity }}(s)</a></p> -->
+<input name="submitted" type="submit" value="Delete marked {{ plural }}"/>
 </form>
 <p><a class="button" href="{{ addurl }}">Add new {{ entity }}</a></p>
 {% endblock %}

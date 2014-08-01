@@ -1236,7 +1236,7 @@ private function updateThing($thing, $thing_id, $thing_details) {
     $primary_key = $thing . '_' . 'id';
     $keytext = $primary_key . " = :" . $primary_key;
     $statement = "update $thing set " . $settext . " where " . $keytext;
-    print_r($statement);
+
     $thing_details[$primary_key] = $thing_id;
     try {
       $stmt = $this->conn->prepare($statement);
@@ -1640,7 +1640,9 @@ function modifyTemplate() {
   $entity = 'Template';
   if (isset($_REQUEST['entity'])) {
     $entity = $_REQUEST['entity'];
+    
   }
+  $plural = $this->pluralise($entity);
   try {
     $template_list = $this->getListFromDB(strtolower($entity . '_view'), null, null);
     /* make sure unimelb templates are visible in view */
@@ -1667,41 +1669,18 @@ function modifyTemplate() {
 			     'item_list' => $template_list,
 			     'addurl' => $addurl,
 			     'editurl' => $editurl,
-			     'action' => $deleteurl
+			     'action' => $deleteurl,
+			     'plural' => $plural
 			     ));
   return $output;
 }
 function modifyDepartment() {
-  if (!$this->isAdmin()) {
-    return $this->showStart();
-  }
-  $entity = 'Department';
-  /* screen output*/
-  $t = 'admin-list.html';
-  $t = $this->twig->loadTemplate($t);
-  $output = $t->render(array(
-			     'modes' => $this->user_visible_modes,
-			     'error' => $this->error,
-			     'entity' => $entity
-			     ));
-  return $output;
-
+  $_REQUEST['entity'] = 'Department';
+  return $this->modifyTemplate();
 }
 function modifyCategory() {
-  if (!$this->isAdmin()) {
-    return $this->showStart();
-  }
-$entity = 'Category';
-  /* screen output*/
-  $t = 'admin-list.html';
-  $t = $this->twig->loadTemplate($t);
-  $output = $t->render(array(
-			     'modes' => $this->user_visible_modes,
-			     'error' => $this->error,
-			     'entity' => $entity
-			     ));
-  return $output;
-
+   $_REQUEST['entity'] = 'Category';
+   return $this->modifyTemplate();
 }
 function modifyAdmin() {
   if (!$this->isAdmin()) {
@@ -1749,7 +1728,7 @@ foreach($_REQUEST as $key => $value) {
     $to_delete[] = $value;
   }
 }
-print_r($to_delete);
+
 
 if (count($to_delete) > 0) {
   $conditions = array('id' => $to_delete);
@@ -1760,7 +1739,7 @@ else {
 
 if(isset($_REQUEST['submitted_confirm'])) {
   /* delete listed things */
-  print_r($_REQUEST);
+
   $this->deleteThings($entity, $to_delete);
   //return $this->modifyTemplate();
 }
@@ -1859,6 +1838,23 @@ function addItem() {
   return $output;
   /*}*/
 }
+/* an extremely lightweight and fragile pluralise function,
+ * suitable only for entity names at this stage
+ * $singular is the thing to pluralise
+ */
+private function pluralise($singular) {
+
+  $last_letter = strtolower($singular[strlen($singular)-1]);
+  switch($last_letter) {
+  case 'y':
+    return substr($singular,0,-1).'ies';
+  case 's':
+    return $singular.'es';
+  default:
+    return $singular.'s';
+  }
+
+}
 /* Takes an entity name and returns a list of properties for that database
  * calls describe :entity;
  * adds field name to array: 
@@ -1916,7 +1912,7 @@ private function getPropertyList($entity) {
  */
 /* it may not be possible to have just one function for this; we'll see */
 function updateItem() {
-  print_r($_REQUEST);
+
   if (isset($_REQUEST['entity'])) {
     $entity = strtolower($_REQUEST['entity']);
   }

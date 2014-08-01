@@ -1115,7 +1115,7 @@ private function getPricelistFromJob($job_id) {
   $pricelist = array();
    $statement = $this->select[7];
    $statement2 = str_replace("t.full_name", "t.category_id", $statement);
-   $statement3 = $this->select[8];
+
   try {
     $stmt = $this->conn->prepare($statement2);
     $stmt->execute(array('job_id' => $job_id));
@@ -1126,6 +1126,24 @@ private function getPricelistFromJob($job_id) {
   catch (Exception $e){
     $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
   }
+  $pricelist = $this->getPricelistFromCategory($category_id);
+  /*$statement3 = $this->select[8];
+    try {
+    $stmt2 = $this->conn->prepare($statement3);
+    $stmt2->execute(array('category_id' => $category_id));
+    while($row = $stmt2->fetch(PDO::FETCH_OBJ)) {
+      array_push($pricelist, $row);
+    }
+  }
+ 
+  catch (Exception $e){
+    $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }*/
+  return $pricelist;
+}
+private function getPricelistFromCategory($category_id) {
+  $pricelist = array();
+  $statement3 = $this->select[8];
   try {
     $stmt2 = $this->conn->prepare($statement3);
     $stmt2->execute(array('category_id' => $category_id));
@@ -1643,8 +1661,17 @@ function modifyTemplate() {
     
   }
   $plural = $this->pluralise($entity);
+
+  if (isset($_REQUEST['parent_entity']) && isset($_REQUEST['parent_id'])){
+    $parent_entity = $_REQUEST['parent_entity'];
+    $parent_id = $_REQUEST['parent_id'];
+    $conditions = array(strtolower($parent_entity) . '_id' => $parent_id);
+  }
+  else {
+    $conditions = null;
+  }
   try {
-    $template_list = $this->getListFromDB(strtolower($entity . '_view'), null, null);
+    $template_list = $this->getListFromDB(strtolower($entity . '_view'), $conditions, null);
     /* make sure unimelb templates are visible in view */
     $properties = array();
     if(count($template_list) > 0 ){
@@ -1696,8 +1723,8 @@ function modifyAdmin() {
 			     'entity' => $entity
 			     ));
   return $output;
-
 }
+
 function showAnalytics() {
   if (!$this->isAdmin()) {
     return $this->showStart();
@@ -1957,6 +1984,14 @@ function updateItem() {
     return $this->modifyTemplate();
   }
   $destination='update_item';
+  $special = new StdClass();
+  $special->active = false;
+  if (strtolower($entity) == 'category') {
+    $special->active = true;
+    $special->entity = 'template_price';
+    $special->destination = 'template_admin';
+    $special->action = $this->action . '?mode=' . $special->destination . '&entity=' . $special->entity . '&parent_entity=' . $entity . '&parent_id='. $id;
+  }
   $returnurl = $this->action . '?mode=' . $entity .'_admin';
   $action = $this->action . '?mode=' . $destination . '&entity=' . $entity .'&id='. $id;
   $properties = $this->getPropertyList($entity);
@@ -1983,7 +2018,8 @@ function updateItem() {
 			     'properties' => $properties,
 			     'returnurl' => $returnurl,
 			     'action' => $action,
-			     'item' => $item_vars
+			     'item' => $item_vars,
+			     'special' => $special
 			     ));
   return $output; 
 }

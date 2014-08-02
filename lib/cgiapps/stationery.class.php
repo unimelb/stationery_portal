@@ -1229,7 +1229,11 @@ try {
 }
 /* general updater
  * $thing is the entity (a string, lowercase)
- * $thing_id is an integer
+ * $thing_id is an integer,
+ * or an array of integers (for IN clause)
+ * or an associative array of identifying columns:
+ * column=>values which together define a unique table entry
+ * for those tables with no primary key.
  * $thing_details is an array of column=>value
  */
 private function updateThing($thing, $thing_id, $thing_details) {
@@ -1237,7 +1241,7 @@ private function updateThing($thing, $thing_id, $thing_details) {
   /* get settext */
    $settings = array();
     $statement = "";
-    $key_conditions = array();
+    $conditions = array();
     foreach ($thing_details as $key => $value) {
       if (is_string($value))
 	{
@@ -1251,11 +1255,24 @@ private function updateThing($thing, $thing_id, $thing_details) {
       $settings[] = $lcasekey . " = " . ":" . $lcasekey;
     }
     $settext = implode(", ", $settings);
-    $primary_key = $thing . '_' . 'id';
-    $keytext = $primary_key . " = :" . $primary_key;
+    $primary_key = strtolower($thing) . '_' . 'id';
+    $conditions = array($primary_key => $thing_id);
+    $keytext = $this->makeConstraintSQL($conditions);
+    if (is_array($thing_id) && $this->is_assoc($thing_id)) {
+	/* no primary key, build $keytext from columns */
+	foreach ($thing_id as $column_name => $value) {
+	  $conditions[] = strtolower($column_name) . " = " . $this->conn->quote($value);
+	  }
+	$keytext = implode(" AND ", $conditions);
+      }
+
+    //$keytext = $primary_key . " = :" . $primary_key;
     $statement = "update $thing set " . $settext . " where " . $keytext;
 
-    $thing_details[$primary_key] = $thing_id;
+    print_r($statement);
+
+    //$thing_details[$primary_key] = $thing_id;
+    print_r($thing_details);
     try {
       $stmt = $this->conn->prepare($statement);
       $stmt->execute($thing_details);
@@ -1281,6 +1298,19 @@ protected function deleteThings($thing, $id) {
   catch (Exception $e) {
     $this->error .= '<pre>ERROR: ' . $e->getMessage() . '</pre>';
   }
+}
+/* helper function to determine if an array is associative
+ * from Captain kurO, http://stackoverflow.com/questions/173400/php-arrays-a-good-way-to-check-if-an-array-is-associative-or-sequential
+ * assumes:
+ * 
+ * is_array($array) == true
+ * If there is at least one string key, 
+ * $array will be regarded as associative array
+ * so it just checks for string keys, not true check for associative,
+ * but enough for this program
+ */
+private function is_assoc($array) {
+  return (bool)count(array_filter(array_keys($array), 'is_string'));
 }
 /* currently a mammoth function, well worthy of refactoring (esp. those marked X):
  * 1. updates job with address from confirm screen

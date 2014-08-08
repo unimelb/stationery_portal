@@ -31,7 +31,7 @@
 
 </form>
 {% if special.active %}
-<p><a class="button" href="{{ special.action }}">View price list</a><p>
+<p><a class="button" href="{{ special.action }}">View {{ special.entity }}</a><p>
 {% endif %}
 <p><a class="button" href="{{ returnurl }}">Return to {{ entity }} administration</a><p>
 {% endblock %}

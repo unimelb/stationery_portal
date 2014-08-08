@@ -148,6 +148,7 @@ class Stationery extends Cgiapp2 {
 			   'department_admin' => 'modifyDepartment',
 			   'category_admin' => 'modifyCategory',
 			   'privileges_admin' => 'modifyAdmin',
+			   'template_price_admin' => 'modifyTemplate',
 			   'add_item' => 'addItem',
 			   'update_item' => 'updateItem',
 			   'analytics_admin' => 'showAnalytics',
@@ -1696,10 +1697,13 @@ function modifyTemplate() {
     $parent_entity = $_REQUEST['parent_entity'];
     $parent_id = $_REQUEST['parent_id'];
     $conditions = array(strtolower($parent_entity) . '_id' => $parent_id);
+    $edit_addition = 'parent_entity='.$parent_entity.'&parent_id='.$parent_id;
   }
   else {
     $conditions = null;
+    $edit_addition = "id=";
   }
+
   try {
     $template_list = $this->getListFromDB(strtolower($entity . '_view'), $conditions, null);
     /* make sure unimelb templates are visible in view */
@@ -1707,12 +1711,14 @@ function modifyTemplate() {
     if(count($template_list) > 0 ){
       $properties1 = array_keys(get_object_vars($template_list[0]));
       $properties = str_replace('_', ' ', $properties1);
+      
+      
     }
   }
   catch(Exception $e) {
     return $this->handle_errors($e);
   }
-  $editurl = $this->action . "?mode=update_item&entity=$entity&id=";
+  $editurl = $this->action . "?mode=update_item&entity=$entity&" . $edit_addition ;
   $deleteurl = $this->action . "?mode=delete&entity=$entity";
   $addurl = $this->action . "?mode=add_item&entity=$entity";
   /* screen output*/
@@ -1723,6 +1729,7 @@ function modifyTemplate() {
 			     'error' => $this->error,
 			     'entity' => $entity,
 			     'properties' => $properties,
+			     'columns' =>$properties1,
 			     'item_list' => $template_list,
 			     'addurl' => $addurl,
 			     'editurl' => $editurl,
@@ -1739,6 +1746,7 @@ function modifyCategory() {
    $_REQUEST['entity'] = 'Category';
    return $this->modifyTemplate();
 }
+
 function modifyAdmin() {
   if (!$this->isAdmin()) {
     return $this->showStart();
@@ -1984,7 +1992,7 @@ function updateItem() {
      * print the details
      */
     if (isset($_REQUEST["submitted"])) {
-      $this->error = "<pre>submitted</pre>";
+      $this->error .= "<pre>submitted</pre>";
       /*
        * (entity)_column_1=xyz
        */
@@ -1998,7 +2006,13 @@ function updateItem() {
       }
       $this->updateThing($entity, $id, $insert_values);
     }
-    $itemlist = $this->getListFromDB($entity, array($entity . '_id' => $id));
+    if (!is_array($id)) {
+      $id_array = array($entity . '_id' => $id);
+    }
+    else {
+      $id_array = $id;
+    }
+    $itemlist = $this->getListFromDB($entity, $id_array);
     if (isset($itemlist) and count($itemlist) > 0) {
       $item = $itemlist[0];
       $item_props = get_object_vars($item);
@@ -2021,8 +2035,15 @@ function updateItem() {
     $special->entity = 'template_price';
     $special->destination = 'template_admin';
     $special->action = $this->action . '?mode=' . $special->destination . '&entity=' . $special->entity . '&parent_entity=' . $entity . '&parent_id='. $id;
-  }
+    }
   $returnurl = $this->action . '?mode=' . $entity .'_admin';
+if (isset($_REQUEST['parent_entity']) && isset($_REQUEST['parent_id'])){
+    $parent_entity = $_REQUEST['parent_entity'];
+    $parent_id = $_REQUEST['parent_id'];
+    $conditions = array(strtolower($parent_entity) . '_id' => $parent_id);
+    $returnurl .= '&entity='. $entity .'&parent_entity='.$parent_entity.'&parent_id='.$parent_id;
+
+  }
   $action = $this->action . '?mode=' . $destination . '&entity=' . $entity .'&id='. $id;
   $properties = $this->getPropertyList($entity);
   foreach($properties as $property) {

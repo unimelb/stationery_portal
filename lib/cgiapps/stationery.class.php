@@ -1265,14 +1265,15 @@ private function updateThing($thing, $thing_id, $thing_details) {
 	foreach ($thing_id as $column_name => $value) {
 	  $conditions[] = $column_name . " = " . $value;
 	  }
-	print_r($conditions);
+	//print_r($conditions);
 	$keytext = implode(" AND ", $conditions);
-	
+	$returnid = $thing_details;
     }
     else {
       $primary_key = strtolower($thing) . '_' . 'id';
-      $conditions = array($primary_key => $thing_id);
+      $conditions[$primary_key] = $thing_id;
       $keytext = $this->makeConstraintSQL($conditions);
+      $returnid = $thing_id;
     }
 
     //$keytext = $primary_key . " = :" . $primary_key;
@@ -1285,8 +1286,8 @@ private function updateThing($thing, $thing_id, $thing_details) {
     try {
       $stmt = $this->conn->prepare($statement);
       $stmt->execute($thing_details);
-      $returnid = $thing_id;
-    }
+ 
+     }
     catch(Exception $e) {
       $this->error .= '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     }
@@ -1986,7 +1987,7 @@ private function getPropertyList($entity) {
 /* it may not be possible to have just one function for this; we'll see */
 function updateItem() {
   parse_str($_SERVER['QUERY_STRING'], $query);
-  //print_r($query);
+  print_r($query);
   if (isset($_REQUEST['entity'])) {
     $entity = strtolower($_REQUEST['entity']);
   }
@@ -2014,7 +2015,9 @@ function updateItem() {
 	  $insert_values[$column] = $value;
 	}
       }
-      $this->updateThing($entity, $id, $insert_values);
+      $id = $this->updateThing($entity, $id, $insert_values);
+      //$_REQUEST['parent_id'] = $parent_id;
+      //$_REQUEST['parent_entity'] = $parent_entity;
     }
     if (!is_array($id)) {
       $id_array = array($entity . '_id' => $id);

@@ -1238,6 +1238,8 @@ try {
  * $thing_details is an array of column=>value
  */
 private function updateThing($thing, $thing_id, $thing_details) {
+  //print_r($thing_details);
+  print_r($thing_id);
   $returnid = -1;
   /* get settext */
    $settings = array();
@@ -1252,20 +1254,26 @@ private function updateThing($thing, $thing_id, $thing_details) {
 	      $value === null;
 	    }
 	}
-      $lcasekey = strtolower($key);
+      $lcasekey = $key; // don't need lower case
       $settings[] = $lcasekey . " = " . ":" . $lcasekey;
     }
     $settext = implode(", ", $settings);
-    $primary_key = strtolower($thing) . '_' . 'id';
-    $conditions = array($primary_key => $thing_id);
-    $keytext = $this->makeConstraintSQL($conditions);
+    //print_r("settext: $settext\n");
+    $conditions = array();
     if (is_array($thing_id) && $this->is_assoc($thing_id)) {
 	/* no primary key, build $keytext from columns */
 	foreach ($thing_id as $column_name => $value) {
-	  $conditions[] = strtolower($column_name) . " = " . $this->conn->quote($value);
+	  $conditions[] = $column_name . " = " . $value;
 	  }
+	print_r($conditions);
 	$keytext = implode(" AND ", $conditions);
-      }
+	
+    }
+    else {
+      $primary_key = strtolower($thing) . '_' . 'id';
+      $conditions = array($primary_key => $thing_id);
+      $keytext = $this->makeConstraintSQL($conditions);
+    }
 
     //$keytext = $primary_key . " = :" . $primary_key;
     $statement = "update $thing set " . $settext . " where " . $keytext;
@@ -1273,7 +1281,7 @@ private function updateThing($thing, $thing_id, $thing_details) {
     print_r($statement);
 
     //$thing_details[$primary_key] = $thing_id;
-    print_r($thing_details);
+    //print_r($thing_details);
     try {
       $stmt = $this->conn->prepare($statement);
       $stmt->execute($thing_details);
@@ -1977,7 +1985,8 @@ private function getPropertyList($entity) {
  */
 /* it may not be possible to have just one function for this; we'll see */
 function updateItem() {
-
+  parse_str($_SERVER['QUERY_STRING'], $query);
+  //print_r($query);
   if (isset($_REQUEST['entity'])) {
     $entity = strtolower($_REQUEST['entity']);
   }
@@ -1985,8 +1994,8 @@ function updateItem() {
     return $this->showStart();
   }
   
-  if (isset($_REQUEST['id'])) {
-    $id = $_REQUEST['id'];
+  if (isset($query['id'])) {
+    $id = $query['id'];
     /* if submitted, update the details
      * get entity details by id 
      * print the details
@@ -1997,10 +2006,11 @@ function updateItem() {
        * (entity)_column_1=xyz
        */
       $insert_values = array();
+      $remove_entity = $entity . '_';
       foreach($_REQUEST as $key=>$value){
-	$hyphen = strpos($key,'_');
+	$hyphen = strpos($key, $remove_entity);
 	if ($hyphen !== false) {
-	  $column = substr($key, $hyphen + 1);
+	  $column = substr($key, $hyphen + strlen($remove_entity));
 	  $insert_values[$column] = $value;
 	}
       }
@@ -2013,6 +2023,7 @@ function updateItem() {
       $id_array = $id;
     }
     $itemlist = $this->getListFromDB($entity, $id_array);
+    $item_vars = array();
     if (isset($itemlist) and count($itemlist) > 0) {
       $item = $itemlist[0];
       $item_props = get_object_vars($item);
@@ -2044,7 +2055,9 @@ if (isset($_REQUEST['parent_entity']) && isset($_REQUEST['parent_id'])){
     $returnurl .= '&entity='. $entity .'&parent_entity='.$parent_entity.'&parent_id='.$parent_id;
 
   }
-  $action = $this->action . '?mode=' . $destination . '&entity=' . $entity .'&id='. $id;
+//&id='. $id;
+$add_id = http_build_query(array('id' => $id));
+			   $action = $this->action . '?mode=' . $destination . '&entity=' . $entity .'&'. $add_id;
   $properties = $this->getPropertyList($entity);
   foreach($properties as $property) {
     if (is_array($property)){

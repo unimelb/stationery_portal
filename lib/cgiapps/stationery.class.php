@@ -2051,13 +2051,13 @@ function updateItem() {
     $special->action = $this->action . '?mode=' . $special->destination . '&entity=' . $special->entity . '&parent_entity=' . $entity . '&parent_id='. $id;
     }
   $returnurl = $this->action . '?mode=' . $entity .'_admin';
-if (isset($_REQUEST['parent_entity']) && isset($_REQUEST['parent_id'])){
+  if (isset($_REQUEST['parent_entity']) && isset($_REQUEST['parent_id'])){
     $parent_entity = $_REQUEST['parent_entity'];
     $parent_id = $_REQUEST['parent_id'];
     $conditions = array(strtolower($parent_entity) . '_id' => $parent_id);
     $returnurl .= '&entity='. $entity .'&parent_entity='.$parent_entity.'&parent_id='.$parent_id;
-
-  }
+    
+}
 //&id='. $id;
 $add_id = http_build_query(array('id' => $id));
 			   $action = $this->action . '?mode=' . $destination . '&entity=' . $entity .'&'. $add_id;
@@ -2074,6 +2074,7 @@ $add_id = http_build_query(array('id' => $id));
     }
       
   }
+  
 
   /* screen output*/
   $t = 'admin-update.html';
@@ -2086,7 +2087,9 @@ $add_id = http_build_query(array('id' => $id));
 			     'returnurl' => $returnurl,
 			     'action' => $action,
 			     'item' => $item_vars,
-			     'special' => $special
+			     'special' => $special,
+			     'parent_entity' => $parent_entity,
+			     'parent_id' => $parent_id
 			     ));
   return $output; 
 }

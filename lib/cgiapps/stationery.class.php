@@ -1111,9 +1111,9 @@ private function getTemplateNameFromJob($job_id) {
   }
   return $template_name;
 }
-private function getPricelistFromJob($job_id) {
+/* gets category_id from job_id, or 0 if none */
+private function getCategoryFromJob($job_id) {
   $category_id=0;
-  $pricelist = array();
    $statement = $this->select[7];
    $statement2 = str_replace("t.full_name", "t.category_id", $statement);
 
@@ -1127,7 +1127,29 @@ private function getPricelistFromJob($job_id) {
   catch (Exception $e){
     $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
   }
-  $pricelist = $this->getPricelistFromCategory($category_id);
+  return $category_id;
+}
+/* this has become a wrapper function */
+private function getPricelistFromJob($job_id) {
+  $category_id=0;
+  $category_id = $this->getCategoryFromJob($job_id);
+  
+  $pricelist = array();
+  /*
+   $statement = $this->select[7];
+   $statement2 = str_replace("t.full_name", "t.category_id", $statement);
+
+  try {
+    $stmt = $this->conn->prepare($statement2);
+    $stmt->execute(array('job_id' => $job_id));
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $category_id = $row["category_id"];
+    }
+  }
+  catch (Exception $e){
+    $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    }*/
+
   /*$statement3 = $this->select[8];
     try {
     $stmt2 = $this->conn->prepare($statement3);
@@ -1140,6 +1162,7 @@ private function getPricelistFromJob($job_id) {
   catch (Exception $e){
     $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     }*/
+  $pricelist = $this->getPricelistFromCategory($category_id);
   return $pricelist;
 }
 private function getPricelistFromCategory($category_id) {
@@ -1430,6 +1453,8 @@ function showFinal() {
  **** details
  + print pdf cross-reference
  + quantity
+ + cost_price
+ + handling_cost
  + price 
  + delivery address
  - addressee
@@ -1474,11 +1499,29 @@ function showFinal() {
     $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
     $pdfurl = "";
   }
+  /* get base_price and handling fee for printers only
+   */
+  $category_id = $this->getCategoryFromJob($job_id);
+  $full_price_list = $this->getListFromDB(
+					  'template_price', 
+					  array('category_id' => $category_id,
+						'quantity' => $quantity));
+  if (! empty($full_price_list)) {
+    $full_price = $full_price_list[0];
+    $handling_cost = number_format($full_price->handling_cost, 2);
+    $cost_price = number_format($full_price->price_AUD, 2);
+  }
+  else {
+    $handling_cost = '';
+    $cost_price = '';
+  }
   $yaml_array =  array(
 		       'job information' => $job_name . "-print.pdf",
 		       'url' => $pdfurl,
 		       'quantity' => $quantity,
-		       'price' => $price,
+		       'base cost' => $cost_price,
+		       'handling cost' => $handling_cost,
+		       'sell price' => $price,
 		       'date' => $today,
 		       'THEMIS code' => $_REQUEST["themis"],
 		       'comments' => $instructions

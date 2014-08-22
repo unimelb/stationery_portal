@@ -1372,6 +1372,8 @@ function showFinal() {
    * add address to address table
    */
   $error = "";
+
+
   $address_info = array(
 			"addressee" => $_REQUEST["addressee"],
 			"location" => $_REQUEST["location"],
@@ -1380,6 +1382,22 @@ function showFinal() {
 			"town" => $_REQUEST["town"],
 			"postcode" => $_REQUEST["postcode"]
 			); 
+  if (isset($_REQUEST["collect"]) and $_REQUEST["collect"] == 'yes') {
+    $default_address_list = $this->getListFromDB('address', 
+						 array('address_id' => 1));
+    if (!empty($default_address_list)){
+      /* set address_id = 1*/
+      /* set additional comments */
+      $address_info = array();
+      $default_address = $default_address_list[0];
+      $address_info["addressee"] = $default_address->addressee;
+      $address_info["location"] = $default_address->location;
+      $address_info["street_number"] = $default_address->street_number;
+      $address_info["street"] = $default_address->street;
+      $address_info["town"] = $default_address->town;
+      $address_info["postcode"] = $default_address->postcode;
+    }
+  }
   $address_id = $this->addAddress($address_info);
   /*
  *** update job entity with address and other details

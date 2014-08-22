@@ -241,7 +241,7 @@ class Stationery extends Cgiapp2 {
 			  'SELECT j.job_id, j.username, c.description FROM job j, category c, template t WHERE t.template_id = j.template_id AND t.category_id = c.category_id and j.job_id = :job_id',
 			  'SELECT id FROM template WHERE template_id = :template_id AND chili_id = :chili_id',
 			  'SELECT t.full_name FROM template t, job j WHERE j.job_id= :job_id and j.template_id = t.template_id',
-			  'SELECT quantity, price_AUD FROM template_price WHERE category_id = :category_id',
+			  'SELECT quantity, sell_price as price_AUD FROM customer_price_view WHERE category_id = :category_id',
 			  'SELECT * FROM address where address_id = :address_id',
 			  "SELECT * FROM template WHERE category_id = :category_id AND department_id IS NULL ORDER BY full_name ASC",
 			  'SELECT * from user_group where group_id = 1 and username = :username'

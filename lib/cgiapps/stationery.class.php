@@ -1080,6 +1080,16 @@ function showConfirmation() {
    * sends proof and job data to temporary storage area
    * redirect to showFinal 
    */
+  $default_address_list = $this->getListFromDB('address', 
+					       array('address_id' => 1));
+  if (!empty($default_address_list)){
+    $default_address = $default_address_list[0];
+  }
+  else {
+    $default_address = '';
+  }
+    
+  
   $action = $this->action . "?mode=thanks";
   $job_id = $_REQUEST["job"];
   $stationery_type = $this->getTemplateNameFromJob($job_id);
@@ -1092,7 +1102,8 @@ function showConfirmation() {
 			       'action' => $action,
 			       'job_id' => $job_id,
 			       'stationery' => $stationery_title,
-			       'quantities' => $quantities
+			       'quantities' => $quantities,
+			       'default_address' => $default_address
 			       ));
     return $output;
   }

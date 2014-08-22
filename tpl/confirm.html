@@ -29,18 +29,29 @@
 		<hr />
 		<note class="col-3 push-2">Please ensure the natural account code 5573 is used.</note>
 	</fieldset>
-		
+
+	  <label class="col-2">Collect from Marketing Office?</label>
+	  <div class="follower col-3">
+	  <label for="collecty">
+	    <input type="radio" name="collect" id="collecty" value="yes" />Yes -- you will be notified by email when your item is ready for collection.</label>
+	  
+	  <label for="collectn"><input type="radio" name="collect" id="collectn" value="no" />No</label>
+	  </div>
+	
+
+	
+	
 	<fieldset class="address">
 		<h3>Delivery Address</h3>
-		<label class="col-2" for="addressee">Addressee</label>
+		<label class="col-2" for="addressee">Addressee/Name</label>
 		<input class="col-3" name="addressee" id="addressee" required = "required">
-		<label class="col-2" for="location">Location</label>
-		<input class="col-3" name="location" id="location" placeholder="eg. level, office no, etc">
-		<label class="col-2" for="number">Number</label>
+		<label class="col-2" for="location">Department/Location</label>
+		<input class="col-3" name="location" id="location" placeholder="eg. department, level, office no, etc" required="required" >
+		<label class="col-2" for="number">Street number</label>
 		<input class="col-3" name="number" id="number">
 		<label class="col-2" for="street">Street name</label>
 		<input class="col-3" name="street" id="street">
-		<label class="col-2" for="town">Town/Campus</label>
+		<label class="col-2" for="town">Campus/Suburb</label>
 		<input class="col-3" name="town" id="town" required = "required" >
 		<label class="col-2" for="postcode">Postcode</label>
 		<input class="col-3" name="postcode" id="postcode" required = "required">
@@ -49,7 +60,7 @@
 	
 	<fieldset>
 		<h3>Additional information</h3>
-		<textarea class="col-6" name="comments"></textarea>
+		<textarea class="col-6" name="comments" id="comments"></textarea>
 	</fieldset>
 	<hr />
 	<div class="pullout">
@@ -81,6 +92,33 @@ $("[name='themis']").keyup(function(event){
     event.target.value = removehyphen;
 			   }
 			  );
+</script>
+<script type="text/javascript">
+var comments_text = ' Please pick up from Marketing Office.';
+var old_comment = '';
+var new_comment = '';
+$("#collecty").click(function(event){
+/* fill in address fields with default info */
+$("#addressee").val('{{ default_address.addressee }}');
+$("#location").val('{{ default_address.location }}');
+$("#number").val('{{ default_address.street_number }}');
+$("#street").val('{{ default_address.street }}');
+$("#town").val('{{ default_address.town }}');
+$("#postcode").val('{{ default_address.postcode }}');
+/* add to comments */
+old_comment = $("#comments").val();
+new_comment = old_comment + comments_text;
+$("#comments").val(new_comment);
+/* disable address fields */
+$("fieldset.address input").attr("disabled", "disabled");
+});
+$("#collectn").click(function(event){
+/* enable address fields */
+$("fieldset.address input").removeAttr("disabled");
+old_comment = $("#comments").val();
+new_comment = old_comment.replace(comments_text, '');
+$("#comments").val(new_comment);
+});
 </script>
 {% endblock %}
 {% block nav %}

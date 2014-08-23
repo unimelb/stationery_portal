@@ -13,7 +13,11 @@ Delivery Address
 {{ address_details.street_number }} {{ address_details.street }}
 {{ address_details.town }} {{ address_details.postcode }}
 
-Turnaround and delivery
+{% if comments is not empty %}Additional Comments
+===================
+{{ comments }}
+
+{% endif %}Turnaround and delivery
 =======================
 Orders approved by 3:00 PM Thursday will be delivered to the Marketing Office on the following Tuesday afternoon.
 

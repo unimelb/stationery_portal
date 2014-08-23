@@ -14,6 +14,8 @@
 	{{ address_details.street_number }} {{ address_details.street }}<br />
 	{{ address_details.town }} {{ address_details.postcode }}
 </p>
+{% if comments is not empty %}<h3>Additional Comments</h3>
+<p>{{ comments }}</p>{% endif %}
 <h3>URL of order (pdf and summary)</h3> 
 <p><a href="{{ zipurl }}">{{ zipurl }}</a></p>
 {% endblock %}

@@ -1623,7 +1623,8 @@ function showFinal() {
 			'price' => $price,
 			'order_date' => $today,
 			'ordernumber' => $ordernumber,
-			'zipurl' => $zipurl
+			'zipurl' => $zipurl,
+			'comments' => $instructions
 			);
    $t2 = 'email.txt';
    $t2 = $this->twig->loadTemplate($t2);

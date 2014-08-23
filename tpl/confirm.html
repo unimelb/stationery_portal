@@ -94,7 +94,7 @@ $("[name='themis']").keyup(function(event){
 			  );
 </script>
 <script type="text/javascript">
-var comments_text = ' Please pick up from Marketing Office.';
+var comments_text = '{{ pick_up_comment }}';
 var old_comment = '';
 var new_comment = '';
 $("#collecty").click(function(event){
@@ -118,6 +118,7 @@ $("fieldset.address input").removeAttr("disabled");
 old_comment = $("#comments").val();
 new_comment = old_comment.replace(comments_text, '');
 $("#comments").val(new_comment);
+$("fieldset.address input").val('');
 });
 </script>
 {% endblock %}

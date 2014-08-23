@@ -1095,6 +1095,8 @@ function showConfirmation() {
   $stationery_type = $this->getTemplateNameFromJob($job_id);
   $quantities = $this->getPricelistFromJob($job_id);
   $stationery_title = "To print: " . $stationery_type;
+  /* this comment is used in showFinal also */
+  $pick_up_comment = ' Please pick up from Marketing Office.';
   $t = 'confirm.html';
   $t = $this->twig->loadTemplate($t);
   $output = $t->render(array(
@@ -1103,7 +1105,8 @@ function showConfirmation() {
 			       'job_id' => $job_id,
 			       'stationery' => $stationery_title,
 			       'quantities' => $quantities,
-			       'default_address' => $default_address
+			       'default_address' => $default_address,
+			       'pick_up_comment' =>  $pick_up_comment
 			       ));
     return $output;
   }
@@ -1373,8 +1376,28 @@ function showFinal() {
    */
   $error = "";
 
-
-  $address_info = array(
+   $instructions = '';
+  if(isset($_REQUEST["comments"])) {
+    $instructions = $_REQUEST["comments"];
+  }
+  if (isset($_REQUEST["collect"]) and $_REQUEST["collect"] == 'yes') {
+    $address_id = 1;
+    $default_address_list = $this->getListFromDB('address', 
+					       array('address_id' => $address_id));
+    if (!empty($default_address_list)){
+      $default_address = $default_address_list[0];
+      $address_info = array(
+			    "addressee" => $default_address->addressee,
+			    "location" => $default_address->location,
+			    "street_number" => $default_address->street_number,
+			    "street" => $default_address->street,
+			    "town" => $default_address->town,
+			    "postcode" => $default_address->postcode
+			    );
+    }
+  }
+  else {
+    $address_info = array(
 			"addressee" => $_REQUEST["addressee"],
 			"location" => $_REQUEST["location"],
 			"street_number" => $_REQUEST["number"],
@@ -1382,23 +1405,8 @@ function showFinal() {
 			"town" => $_REQUEST["town"],
 			"postcode" => $_REQUEST["postcode"]
 			); 
-  if (isset($_REQUEST["collect"]) and $_REQUEST["collect"] == 'yes') {
-    $default_address_list = $this->getListFromDB('address', 
-						 array('address_id' => 1));
-    if (!empty($default_address_list)){
-      /* set address_id = 1*/
-      /* set additional comments */
-      $address_info = array();
-      $default_address = $default_address_list[0];
-      $address_info["addressee"] = $default_address->addressee;
-      $address_info["location"] = $default_address->location;
-      $address_info["street_number"] = $default_address->street_number;
-      $address_info["street"] = $default_address->street;
-      $address_info["town"] = $default_address->town;
-      $address_info["postcode"] = $default_address->postcode;
-    }
+    $address_id = $this->addAddress($address_info);
   }
-  $address_id = $this->addAddress($address_info);
   /*
  *** update job entity with address and other details
  Array
@@ -1436,10 +1444,7 @@ function showFinal() {
     $price = substr($_REQUEST['quantity'], strpos($quantityprice, '@')+1);
   }
  
-  $instructions = null;
-  if(isset($_REQUEST["comments"])) {
-    $instructions = $_REQUEST["comments"];
-  }
+
 
   $today = date('Y-m-d H:i:s');
   $var_array = array(
@@ -1544,6 +1549,7 @@ function showFinal() {
     $handling_cost = '';
     $cost_price = '';
   }
+ 
   $yaml_array =  array(
 		       'job information' => $job_name . "-print.pdf",
 		       'url' => $pdfurl,
@@ -1639,6 +1645,7 @@ function showFinal() {
      $this->error .="<pre>admin email failed</pre>";
    }
    /* screen output, after all that */
+ 
    $t = 'final.html';
    $t = $this->twig->loadTemplate($t);
    $output = $t->render(array(

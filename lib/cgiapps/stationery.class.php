@@ -1251,7 +1251,6 @@ private function addThing($thing, $thing_details) {
   $statement = str_replace('yyy', ':yyy', $statement);
   $statement = str_replace('yyy', implode(', :', $column_names), $statement);
   $statement = str_replace(':entity', $thing, $statement);
-  print_r($statement);
 try {
       $stmt = $this->conn->prepare($statement);
       $stmt->execute($thing_details);
@@ -1264,12 +1263,7 @@ try {
     if ($thing_id !== false) {
       $thing_id = $this->conn->lastInsertId();
     }
-    /*    if (!$thing_id) {
-	$this->error .= '<pre>thing_id false</pre>';
-      }
-      else {*/
-      print_r($thing_id);
-      /*}*/
+
     return $thing_id;  
 }
 /* insertThing
@@ -1312,7 +1306,7 @@ private function insertThing($thing, $thing_details) {
  */
 private function updateThing($thing, $thing_id, $thing_details) {
   //print_r($thing_details);
-  print_r($thing_id);
+  //print_r($thing_id);
   $returnid = -1;
   /* get settext */
    $settings = array();
@@ -1352,7 +1346,7 @@ private function updateThing($thing, $thing_id, $thing_details) {
     //$keytext = $primary_key . " = :" . $primary_key;
     $statement = "update $thing set " . $settext . " where " . $keytext;
 
-    print_r($statement);
+    //print_r($statement);
 
     //$thing_details[$primary_key] = $thing_id;
     //print_r($thing_details);
@@ -1980,12 +1974,12 @@ function addItem() {
     $parent_entity = $query['parent_entity'];
     $parent_id = $query['parent_id'];
     $conditions = array($entity . '_' . strtolower($parent_entity) . '_id' => $parent_id);
-    print_r($conditions);
+    //print_r($conditions);
     $edit_addition = 'parent_entity='.$parent_entity.'&parent_id='.$parent_id;
     $return_addition = '&entity='. $entity . '&' . $edit_addition;
   }
   else {
-    print_r("parent entity and id not set");
+    //print_r("parent entity and id not set");
     $return_addition = "";
     $conditions = array();
   }
@@ -2008,11 +2002,24 @@ function addItem() {
       }
      }
      $insert_values = array_merge($insert_values, $conditions);
-     print_r($insert_values);
+     //print_r($insert_values);
     $id = $this->addThing($entity, $insert_values);
-    print_r($id);
-    
+    //print_r($id);
+    if (! is_numeric($id)) {
+      $this->error .="<pre>There was a problem with addThing</pre>";
+    }
+    else {
+      if ((int)$id > 0){
+	$_REQUEST['id'] = $id;
+      }
+      else {
+	$_REQUEST['id'] = $insert_values;
+      }
+      $_REQUEST['mode'] = 'update_item';
+      return $this->updateItem();
+    }
     /*if($id !== false){*/
+    /*
     if(is_numeric($id) and (int)$id > 0){
       $this->error .= "<pre>$id</pre>";
       $_REQUEST['id'] = $id;
@@ -2022,16 +2029,16 @@ function addItem() {
     else if (is_numeric($id)) {
       /* mysql returns 00 for a non-sequence result */
       /* this result for a non-primary id add*/
-      $_REQUEST['parent_entity'] = $parent_entity;
-      $_REQUEST['parent_id'] = $parent_id;
+    /*
       $_REQUEST['mode'] = 'update_item';
-      $id_array= array();
+      $id_array= $insert_values;
       $_REQUEST['id'] = $id_array;
       return $this->updateItem();
     }
     else {
       $this->error .="<pre>There was a problem with addThing</pre>";
      }
+    */
   }
   /*else {*/
   $returnurl = $this->action . '?mode=' . $entity .'_admin' . $return_addition;
@@ -2138,8 +2145,8 @@ private function getPropertyList($entity) {
  */
 /* it may not be possible to have just one function for this; we'll see */
 function updateItem() {
-  parse_str($_SERVER['QUERY_STRING'], $query);
-  print_r($query);
+  /*parse_str($_SERVER['QUERY_STRING'], $query);
+    print_r($query);*/
   print_r($_REQUEST);
   if (isset($_REQUEST['entity'])) {
     $entity = strtolower($_REQUEST['entity']);
@@ -2148,8 +2155,8 @@ function updateItem() {
     return $this->showStart();
   }
   
-  if (isset($query['id'])) {
-    $id = $query['id'];
+  if (isset($_REQUEST['id'])) {
+    $id = $_REQUEST['id'];
     /* if submitted, update the details
      * get entity details by id 
      * print the details

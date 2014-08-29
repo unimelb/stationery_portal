@@ -2,18 +2,18 @@
 
 {% block title %}Add new {{ entity|title }}{% endblock %}
 {% block content %}
-<p>A form constructed from the database fields for the appropriate entity</p>
-<p>A submit button which creates the entity</p>
-<p>Then, return to the calling entity admin page</p>
 
 <form action="{{ action|raw }}" method="POST">
 {% for property in properties %}
 {% if property is iterable %}
 {% for key, value in property %}
 <label for="{{entity|lower}}_{{ key }}_id">{{ key|title }}</label>
-<select name="{{entity|lower}}_{{ key }}_id">
+{% if key == parent_entity %}
+<input type="hidden" name="{{entity|lower}}_{{ key }}_id" value="{{ parent_id }}" />
+{% endif %}
+<select name="{{entity|lower}}_{{ key }}_id"{% if key == parent_entity %} disabled="disabled"{% endif %}>
 {% for subentity in value %}
-<option value="{{ subentity.id }}">{{ subentity.description }}</option>
+<option value="{{ subentity.id }}" {% if subentity.id == parent_id %}selected="selected"{% endif %}>{{ subentity.description }}</option>
 {% endfor %}
 </select>
 {% endfor %}
@@ -23,6 +23,8 @@
 <br />
 {% endfor %}
 <input type="hidden" name="entity" value="{{ entity|lower }}" />
+{% if parent_entity is not empty %}<input type="hidden" name="parent_entity" value="{{ parent_entity|lower }}" />{% endif %}
+{% if parent_id is not empty %}<input type="hidden" name="parent_id" value="{{ parent_id }}" />{% endif %}
 
 <input name="submitted" type="submit" value="Create this {{ entity }}"/>
 

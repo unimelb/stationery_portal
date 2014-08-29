@@ -251,7 +251,7 @@ class Stationery extends Cgiapp2 {
 			  'INSERT INTO user_department VALUES(:username, :department_id)',
 			  'INSERT INTO job (job_id, username, template_id) VALUES(DEFAULT, :username, :template_id)',
 			  'INSERT INTO address(address_id, addressee, location, street_number, street, town, postcode) VALUES (DEFAULT, :addressee, :location, :street_number, :street, :town, :postcode)',
-			  'INSERT INTO :entity (xxx) VALUES (DEFAULT, yyy)'
+			  'INSERT INTO :entity (xxx) VALUES (yyy)'
 			  );
     $this->update = array(
 			  'UPDATE user SET given_name = :firstname, family_name = :lastname, phone = :phone, email = :email WHERE username = :id',
@@ -1247,10 +1247,11 @@ private function addThing($thing, $thing_details) {
   $thing_id = -1;
   $statement = $this->insert[4];
   $column_names = array_keys($thing_details);
-  $statement = str_replace('xxx', $thing . '_id, ' . implode(', ', $column_names), $statement);
+  $statement = str_replace('xxx', implode(', ', $column_names), $statement);
   $statement = str_replace('yyy', ':yyy', $statement);
   $statement = str_replace('yyy', implode(', :', $column_names), $statement);
   $statement = str_replace(':entity', $thing, $statement);
+  print_r($statement);
 try {
       $stmt = $this->conn->prepare($statement);
       $stmt->execute($thing_details);
@@ -1263,7 +1264,42 @@ try {
     if ($thing_id !== false) {
       $thing_id = $this->conn->lastInsertId();
     }
+    /*    if (!$thing_id) {
+	$this->error .= '<pre>thing_id false</pre>';
+      }
+      else {*/
+      print_r($thing_id);
+      /*}*/
     return $thing_id;  
+}
+/* insertThing
+ * a better and more general version of addThing
+ * which allows for Things without primary keys
+ * template_price, I'm looking at you!
+ * as above, takes $thing, the table
+ * and $thing_details, the array of property_name => property value
+ * and returns the id of the new thing, or -1 if it has none.
+ * inspired by from good old meid_sqlserver_dao::insertTableItem
+ * if it works as well or better, I'll rename it addThing
+ */
+private function insertThing($thing, $thing_details) {
+  $thing_id = -1;
+  $settings = array();
+  $column_list = array();
+  foreach ($thing_details as $key => $value) {
+      if (is_string($value))
+	{
+	  $value = trim($value);
+	  if (strlen($value) == 0)
+	    {
+	      $value === null;
+	    }
+	}
+      $lcasekey = $key; // don't need lower case
+      $settings[] = $lcasekey . " = " . ":" . $lcasekey;
+    }
+    $settext = implode(", ", $settings);
+  return $thing;
 }
 /* general updater
  * $thing is the entity (a string, lowercase)
@@ -1787,10 +1823,12 @@ function modifyTemplate() {
     $parent_id = $_REQUEST['parent_id'];
     $conditions = array(strtolower($parent_entity) . '_id' => $parent_id);
     $edit_addition = 'parent_entity='.$parent_entity.'&parent_id='.$parent_id;
+    $add_addition = '&' . $edit_addition;
   }
   else {
     $conditions = null;
     $edit_addition = "id=";
+    $add_addition = "";
   }
 
   try {
@@ -1809,7 +1847,7 @@ function modifyTemplate() {
   }
   $editurl = $this->action . "?mode=update_item&entity=$entity&" . $edit_addition ;
   $deleteurl = $this->action . "?mode=delete&entity=$entity";
-  $addurl = $this->action . "?mode=add_item&entity=$entity";
+  $addurl = $this->action . "?mode=add_item&entity=$entity" . $add_addition;
   /* screen output*/
   $t = 'admin-list.html';
   $t = $this->twig->loadTemplate($t);
@@ -1929,11 +1967,27 @@ if(count($item_list) > 0 ){
  */
 /* it may not be possible to have just one function for this; we'll see */
 function addItem() {
+  parse_str($_SERVER['QUERY_STRING'], $query);
+  print_r($query);
+  print_r($_REQUEST);
   if (isset($_REQUEST['entity'])) {
     $entity = strtolower($_REQUEST['entity']);
   }
   else {
     return $this->showStart();
+  }
+  if (isset($query['parent_entity']) && isset($query['parent_id'])){
+    $parent_entity = $query['parent_entity'];
+    $parent_id = $query['parent_id'];
+    $conditions = array($entity . '_' . strtolower($parent_entity) . '_id' => $parent_id);
+    print_r($conditions);
+    $edit_addition = 'parent_entity='.$parent_entity.'&parent_id='.$parent_id;
+    $return_addition = '&entity='. $entity . '&' . $edit_addition;
+  }
+  else {
+    print_r("parent entity and id not set");
+    $return_addition = "";
+    $conditions = array();
   }
   $destination='add_item';
   if (isset($_REQUEST["submitted"])) {
@@ -1945,18 +1999,34 @@ function addItem() {
      * (entity)_column_1=xyz
      */
     $insert_values = array();
+    $entity_prefix = $entity . '_';
      foreach($_REQUEST as $key=>$value){
-      $hyphen = strpos($key,'_');
+      $hyphen = strpos($key, $entity_prefix);
       if ($hyphen !== false) {
-	$column = substr($key, $hyphen + 1);
+	$column = substr($key, $hyphen + strlen($entity_prefix));
 	$insert_values[$column] = $value;
       }
-    }
+     }
+     $insert_values = array_merge($insert_values, $conditions);
+     print_r($insert_values);
     $id = $this->addThing($entity, $insert_values);
-    if($id !== false){
+    print_r($id);
+    
+    /*if($id !== false){*/
+    if(is_numeric($id) and (int)$id > 0){
       $this->error .= "<pre>$id</pre>";
       $_REQUEST['id'] = $id;
       $_REQUEST['mode'] = 'update_item';
+      return $this->updateItem();
+    }
+    else if (is_numeric($id)) {
+      /* mysql returns 00 for a non-sequence result */
+      /* this result for a non-primary id add*/
+      $_REQUEST['parent_entity'] = $parent_entity;
+      $_REQUEST['parent_id'] = $parent_id;
+      $_REQUEST['mode'] = 'update_item';
+      $id_array= array();
+      $_REQUEST['id'] = $id_array;
       return $this->updateItem();
     }
     else {
@@ -1964,7 +2034,7 @@ function addItem() {
      }
   }
   /*else {*/
-  $returnurl = $this->action . '?mode=' . $entity .'_admin';
+  $returnurl = $this->action . '?mode=' . $entity .'_admin' . $return_addition;
   $action = $this->action . '?mode=' . $destination;
   $properties = $this->getPropertyList($entity);
    foreach($properties as $property) {
@@ -1987,7 +2057,9 @@ function addItem() {
 			     'entity' => $entity,
 			     'properties' => $properties,
 			     'returnurl' => $returnurl,
-			     'action' => $action
+			     'action' => $action,
+			     'parent_entity' => $parent_entity,
+			     'parent_id' => $parent_id
 			     ));
   return $output;
   /*}*/
@@ -2068,6 +2140,7 @@ private function getPropertyList($entity) {
 function updateItem() {
   parse_str($_SERVER['QUERY_STRING'], $query);
   print_r($query);
+  print_r($_REQUEST);
   if (isset($_REQUEST['entity'])) {
     $entity = strtolower($_REQUEST['entity']);
   }

@@ -593,9 +593,10 @@ class Stationery extends Cgiapp2 {
     /* buscards = 1, letheads = 2, withcomps = 3, buscards_DS = 4, 
      *  Envelopes = 5 (unused)*/
     $error = "";
-    $stationery_type_list = array(
+    /*$stationery_type_list = array(
 				  array(), array(), array()
-				  );
+				  );*/
+    $stationery_type_list = array();
     $dept_ids = array();
     /* get department ids into comma separated string */
     try {
@@ -610,9 +611,21 @@ class Stationery extends Cgiapp2 {
     } 
     $department_list = implode(",", $dept_ids);
     /* get category ids and names into $categories */
-    
+    $categories = $this->getListFromDB('category');
     /* get templates */
-    $categories_count = 4;
+    $final_categories = array();
+    foreach ($categories as $cat) {
+      /* DS business cards are amalgamated with SS
+       * for presentation purposes */
+      if($cat->category_id != 4) {
+	$final_categories[] = $cat;
+      }
+    }
+    //print_r($final_categories);
+    for($i = 0; $i< count($final_categories); $i++) {
+      $stationery_type_list[] = array();
+    }
+    $categories_count = count($final_categories);
     $basic_url = 'index.php?mode=edit';
 
     $statement1 = $this->select[3];
@@ -630,19 +643,28 @@ class Stationery extends Cgiapp2 {
       $category_id = 1;
        /* for each category, just 1 here now */
       for ($category_id = 1; $category_id < $categories_count +1; $category_id ++) {
+
 	foreach(array_keys($category_ids) as $key){
-	  $category_ids[$key] = $category_id;
+	  //$category_ids[$key] = $category_id;
+	  $category_ids[$key] = $final_categories[$category_id-1]->category_id;
 	}
+	//print_r($category_ids);
 	
 	$stmt->execute($category_ids
 		       );
 	while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
 	  $row->url = $basic_url . '&id=' . $row->chili_id . '&base=' . $row->template_id;
-	  if ($category_id == 4) {
-	    array_push ($stationery_type_list[0], $row);
-	  }
-	  else {
-	    array_push ($stationery_type_list[$category_id-1], $row);
+	  $category_active = $categories[$category_id - 1]->is_active;
+
+	  if ($category_active == 'yes') {
+	    if ($category_id == 4) {
+	      /* double sided business cards go with single-sided */
+	      array_push ($stationery_type_list[0], $row);
+	    }
+	    else {
+	      array_push ($stationery_type_list[$category_id-1], $row);
+
+	    }
 	  }
 	}
 
@@ -662,13 +684,16 @@ class Stationery extends Cgiapp2 {
       $buscard->short = $buscard->full_name;
       }*/
     $t = 'template.html';
+    //print_r($stationery_type_list);
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
 			       'error' => $error,
 			       'modes' => $this->user_visible_modes,
 			       'buscards'=> $stationery_type_list[0],
 			       'letheads'=> $stationery_type_list[1],
-			       'withcomps'=> $stationery_type_list[2]
+			       'withcomps'=> $stationery_type_list[2],
+			       'stationery_types' => $stationery_type_list,
+			       'categories' => $final_categories
 			       ));
      return $output;
   }

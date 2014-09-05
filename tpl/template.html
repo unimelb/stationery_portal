@@ -32,14 +32,39 @@
 			{% endfor %}
 		</ul>
 	</div>
-	{# <p>Requires:</p>
+<!-- re-engineering this template here 2014-09-05 Patrick Maslen -->
+
+{% for stationery in stationery_types %}
+{% set category_info = categories[loop.index0] %}
+{% if category_info.category_id == 1 %}
+{% set category_image_url = '/images/bus-card-thumb-220x160.jpg' %}
+{% elseif category_info.category_id == 2 %}
+{% set category_image_url = '/images/letterhead-thumb-220x160.jpg' %}
+{% elseif category_info.category_id == 3 %}
+{% set category_image_url = '/images/comp-slips-thumb-220x160.jpg' %}
+{% else %}
+{# this is the default image if nothing else matches: #}
+{% set category_image_url = '/images/comp-slips-thumb-220x160.jpg' %}
+{% endif %}
+<!-- set default category image -->
+{% if category_info.is_active == 'yes' %}
+{% if loop.index0 %3 == 0 %}
+<hr />
+<div class="col-2 first">
+{% else %}
+<div class="col-2">
+{% endif %}
+
+		<img src="{{ category_image_url }}">
+		<p><strong>{{ category_info.description }}{% if category_info.description == 'Business Card' %} (SS and DS){% endif%}</strong></p>
 		<ul>
-	  	<li>profile information (from database)</li>
+			{% for type in stationery %}
+			<li><a href="{{ type.url }}">{{ type.full_name }}</a></li>
+			{% endfor %}
 		</ul>
-		<p>Yields:</p>
-		<ul>
-	  	<li>Template type</li>
-		</ul> #}
+	</div>
+{% endif %}
+{% endfor %}
 </div>
 {% endblock %}
 {% block nav %}

@@ -674,16 +674,16 @@ class Stationery extends Cgiapp2 {
 	    }
 	    else {
 	      /* find out how many elements in the exceptions list the category is greater than */
-	      $modifier_counter = -1;
+	      $modifier_counter = 1;
 	      foreach($exceptions_keys as $key) {
 		if ($category->category_id > $key) {
 		  $modifier_counter += 1;
 		}
 	      }
-	      if ($modifier_counter < 0) {
+	      /*if ($modifier_counter < 0) {
 		$modifier_counter = 0;
-	      }
-	      $destination_array = $category->category_id - count($exceptions) - ($modifier_counter);
+		}*/
+	      $destination_array = $category->category_id - ($modifier_counter);
 	    }
 	    //print_r($destination_array);
 	    array_push($stationery_type_list[$destination_array], $row);
@@ -719,6 +719,20 @@ class Stationery extends Cgiapp2 {
       }
       }*/
     //print_r($stationery_type_list);
+    $final_stationery_list = array();
+    $categories_available = array();
+    foreach ($stationery_type_list as $stationery_list) {
+      if(!empty($stationery_list)) {
+	$final_stationery_list[] = $stationery_list;
+      }
+    }
+    foreach ($final_categories as $cat) {
+      if (! in_array($cat->category_id, $exceptions_keys)) {
+	$categories_available[] = $cat;
+      }
+    }
+    //print_r($final_stationery_list);
+    //print_r($categories_available);
     $t = 'template.html';
      $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
@@ -727,8 +741,9 @@ class Stationery extends Cgiapp2 {
 			       'buscards'=> $stationery_type_list[0],
 			       'letheads'=> $stationery_type_list[1],
 			       'withcomps'=> $stationery_type_list[2],
-			       'stationery_types' => $stationery_type_list,
-			       'categories' => $final_categories
+			       'stationery_types' => $final_stationery_list,
+			       'categories' => $categories_available,
+			       'image_path' => LIBPATH
 			       ));
      return $output;
   }

@@ -180,10 +180,9 @@ class Stationery extends Cgiapp2 {
 			      );
     $admin_visible = array(
 			   'template_admin' => 'Modify Template',
-			   'department_admin' => 'Modify Department',
 			   'category_admin' => 'Modify Category',
-			   'privileges_admin' => 'Admin access',
-			   'analytics_admin' => 'Analytics'
+			   'department_admin' => 'Modify Department',
+			   'privileges_admin' => 'Admin access'
 			   );
     $this->start_mode('start');
     $this->error_mode('handle_errors');
@@ -2034,14 +2033,16 @@ function confirmDelete() {
     if(strpos($key, $needle) !== false) {
       if(strpos($value, $needle2) !== false) {
 	$id_properties = explode($needle2, $value);
+	print_r ($id_properties);
 	$final_value = array();
 	foreach($id_properties as $prop) {
+	  print_r('\n' . $prop);
 	  /* convert 'id[x]=y'
 	   * to x => y */
-	  $first = strpos('[', $prop);
-	  $second = strpos(']', $prop);
-	  
-	  $final_value[substr($prop, $first +1, - strlen($prop) + 1 - $second)] = substr($prop, $second + 2);
+	  $first = strpos($prop, ':');
+	  $firstly = substr($prop, 0, $first);
+	  $secondly = substr($prop, $first +1);
+	  $final_value[$firstly] = $secondly;
 	} 
 	$value = $final_value;
       }

@@ -16,7 +16,7 @@
 </tr>
 {% for item in item_list %}
 <tr>
-<td><input name="markdelete{{ entity }}{{ item.id }}" value="{% if item.id is defined %}{{ item.id }}{% endif %}" type="checkbox" aria-label="Mark {{ entity }} {{ item.short_name }} for deletion" /></td>
+<td><input name="markdelete{{ entity|lower }}{{ item.id }}" value="{% if item.id is defined %}{{ item.id }}{% else %}{% for key, value in item|cast_to_array %}{% if not loop.first %}&&&{% endif %}id[{{ key }}]={{ value }}{% endfor %}{% endif %}" type="checkbox" aria-label="Mark {{ entity }} {{ item.short_name }} for deletion" /></td>
 {% for key, value in item|cast_to_array %}
 <td>{{ value }}</td>
 {% endfor %}

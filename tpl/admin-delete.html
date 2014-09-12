@@ -14,7 +14,7 @@
 <p>Are you sure you want to delete {% if item_list|length > 1 %}these{% else %}this{% endif %}?</p>
 <form action="{{ action }}" method="POST">
 {% for id in id_list %}
-<input name="markdelete{{ entity|title }}_{{ loop.index }}" type="hidden" value="{{ id }}" />
+<input name="markdelete{{ entity|lower }}_{{ loop.index }}" type="hidden" value="{{ id }}" />
 {% endfor %}
 <input name="submitted_confirm" type="submit" value="Yes - go ahead and delete"/>
 </form>

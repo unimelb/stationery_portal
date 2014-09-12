@@ -1438,17 +1438,43 @@ private function updateThing($thing, $thing_id, $thing_details) {
 /* deletes from database
  * $thing is the entity name 
  * $id can be an integer or array of integers,
- * representing an IN clause */
+ * representing an IN clause 
+ * or an array of arrays,
+ * each representing a record,
+ * if there is no primary key to be deleted
+ */
 protected function deleteThings($thing, $id) {
-  $conditions = array(strtolower($thing) . '_id' => $id);
+  /*  if (is_array($id) and is_array($id[0])) {
+      /* ie no primary key *//*
+    foreach($id as $deletable) {
+      $keytext = $this->makeConstraintSQL($deletable);
+      $statement = "delete from $thing where " . $keytext;
+      try {
+	$stmt = $this->conn->prepare($statement);
+	$stmt->execute();
+      }
+      catch (Exception $e) {
+	$this->error .= '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+      } 
+    }
+  }*/
+  //print_r($id);
+  /*if(isset($id[0]) and is_array($id[0])){
+    $conditions = $id;
+  }
+  else {
+    $conditions = array(strtolower($thing) . '_id' => $id);
+    }*/
+  $conditions = $id;
   $keytext = $this->makeConstraintSQL($conditions);
   $statement = "delete from $thing where " . $keytext;
+  print_r($statement);
   try {
     $stmt = $this->conn->prepare($statement);
     $stmt->execute();
   }
   catch (Exception $e) {
-    $this->error .= '<pre>ERROR: ' . $e->getMessage() . '</pre>';
+    $this->error .= '<pre>ERROR: ' . $statement . ': ' . $e->getMessage() . '</pre>';
   }
 }
 /* helper function to determine if an array is associative
@@ -1820,37 +1846,56 @@ private function getListFromDB($table, $conditions = null, $ordering = null) {
 }
 /* $conditions is an array (column=>value)
  * if value is an array it is made into an IN clause
+ * if $conditions is an array of arrays
+ * then each sub-array is evaluated **recursively** 
+ * as an OR clause
  */
 private function makeConstraintSQL($conditions) {
   $keytext = "";
+  $all_keytext = array();
   $key_conditions = array();
   if (is_array($conditions)) {
-    foreach ($conditions as $column_name => $value) {
-      $final_value = "";
-      $operator = ' = ';
-      if (is_array($value)) {
-	$operator = ' IN ';
-	$final_value .= '(';
-	foreach ($value as $item)
-	  {
-	    if (is_string($item)) {
-	      $item = $this->conn->quote($item);
+    if ($this->is_assoc($conditions)){
+      foreach ($conditions as $column_name => $value) {
+	$final_value = "";
+	$operator = ' = ';
+	if (is_array($value)) {
+	  $operator = ' IN ';
+	  $final_value .= '(';
+	  foreach ($value as $item)
+	    {
+	      if (is_string($item)) {
+		$item = $this->conn->quote($item);
+	      }
+	      $final_value .= $item . ', ';
 	    }
-	    $final_value .= $item . ', ';
-	  }
-	$final_value = rtrim($final_value, ', ');
-	$final_value .= ')';
-      }
-      else {
-	if (is_string($value)) {
-	  $item = $this->conn->quote($value);
+	  $final_value = rtrim($final_value, ', ');
+	  $final_value .= ')';
 	}
-	$final_value = $value;
+	else {
+	  if (is_string($value)) {
+	    $item = $this->conn->quote($value);
+	  }
+	  $final_value = $value;
+	}
+	$key_conditions[] = strtolower($column_name) . $operator . $final_value;
       }
-      $key_conditions[] = strtolower($column_name) . $operator . $final_value;
     }
+    else {
+      foreach ($conditions as $cond) {
+	if (is_array($cond)) {
+	  /* create OR clauses for multiple 
+	   * arrays of column=>value */
+	  $all_keytext[] = $this->makeConstraintSQL($cond);
+	}
+      }
+    }
+    
   }
   $keytext = implode(" AND ", $key_conditions);
+  if(count($all_keytext) > 0) {
+    $keytext = implode(" OR ", $all_keytext);
+  }
   return $keytext;
 }
 /**
@@ -1979,41 +2024,65 @@ function showAnalytics() {
  * submit (deletes) or cancel (return to origin)
  */
 function confirmDelete() {
-
-$action = $this->action;
-$entity = strtolower($_REQUEST['entity']);
-$to_delete = array();
-$needle = 'markdelete' . ucfirst($entity);
-foreach($_REQUEST as $key => $value) {
-  if(strpos($key, $needle) !== false) {
-    $to_delete[] = $value;
+  print_r($_REQUEST);
+  $action = $this->action;
+  $entity = strtolower($_REQUEST['entity']);
+  $to_delete = array();
+  $needle = 'markdelete' . ($entity);
+  $needle2 = '&&&'; 
+ foreach($_REQUEST as $key => $value) {
+    if(strpos($key, $needle) !== false) {
+      if(strpos($value, $needle2) !== false) {
+	$id_properties = explode($needle2, $value);
+	$final_value = array();
+	foreach($id_properties as $prop) {
+	  /* convert 'id[x]=y'
+	   * to x => y */
+	  $first = strpos('[', $prop);
+	  $second = strpos(']', $prop);
+	  
+	  $final_value[substr($prop, $first +1, - strlen($prop) + 1 - $second)] = substr($prop, $second + 2);
+	} 
+	$value = $final_value;
+      }
+      $to_delete[] = $value;
+    }
   }
-}
+  print_r($to_delete);
 
-
-if (count($to_delete) > 0) {
-  $conditions = array('id' => $to_delete);
-}
-else {
-  $conditions = array('id' => -1);
-}
-
-if(isset($_REQUEST['submitted_confirm'])) {
-  /* delete listed things */
-
-  $this->deleteThings($entity, $to_delete);
-  //return $this->modifyTemplate();
-}
-$returnurl = $this->action . '?mode=' . $entity .'_admin';
-$confirmurl = $this->action . '?mode=delete&entity=' . $entity;
-$item_list = $this->getListFromDB(strtolower($entity . '_view'), $conditions, null);
-/* make sure unimelb templates are visible in view */
-$properties = array();
-if(count($item_list) > 0 ){
-  $properties1 = array_keys(get_object_vars($item_list[0]));
-  $properties = str_replace('_', ' ', $properties1);
-}
- /* screen output*/
+  if (isset($to_delete[0])) {
+    if(is_array($to_delete[0])){
+      /* no primary key */
+      $conditions = $to_delete;
+      $delete_conditions = $to_delete;
+    }
+    else {
+      /* primary key, an integer */
+      $conditions = array('id' => $to_delete);
+      $delete_conditions = array($entity . '_id' => $to_delete);
+    }
+  }
+  else {
+    $conditions = array('id' => -1);
+    $delete_conditions = array($entity . '_id' => -1);
+  }
+  print_r($conditions);
+  print_r($delete_conditions);
+  if(isset($_REQUEST['submitted_confirm'])) {
+    /* delete listed things */
+    $this->deleteThings($entity, $delete_conditions);
+    //return $this->modifyTemplate();
+  }
+  $returnurl = $this->action . '?mode=' . $entity .'_admin';
+  $confirmurl = $this->action . '?mode=delete&entity=' . $entity;
+  $item_list = $this->getListFromDB(strtolower($entity . '_view'), $conditions, null);
+  /* make sure unimelb templates are visible in view */
+  $properties = array();
+  if(count($item_list) > 0 ){
+    $properties1 = array_keys(get_object_vars($item_list[0]));
+    $properties = str_replace('_', ' ', $properties1);
+  }
+  /* screen output*/
   $t = 'admin-delete.html';
   $t = $this->twig->loadTemplate($t);
   $output = $t->render(array(

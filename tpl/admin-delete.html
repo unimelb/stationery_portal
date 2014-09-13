@@ -14,8 +14,10 @@
 <p>Are you sure you want to delete {% if item_list|length > 1 %}these{% else %}this{% endif %}?</p>
 <form action="{{ action }}" method="POST">
 {% for id in id_list %}
-<input name="markdelete{{ entity|lower }}_{{ loop.index }}" type="hidden" value="{{ id }}" />
+<input name="markdelete{{ entity|lower }}_{{ loop.index }}" type="hidden" value="{% if id is iterable %}{% for key, value in id|cast_to_array %}{% if not loop.first %}---{% endif %}{{ key }}:{{ value }}{% endfor %}{% else %}{{ id }}{% endif %}" />
 {% endfor %}
+{% if parent_entity is not empty %}<input type="hidden" name="parent_entity" value="{{ parent_entity|lower }}" />{% endif %}
+{% if parent_id is not empty %}<input type="hidden" name="parent_id" value="{{ parent_id }}" />{% endif %}
 <input name="submitted_confirm" type="submit" value="Yes - go ahead and delete"/>
 </form>
 {% else %}<p>Nothing to delete!<p>

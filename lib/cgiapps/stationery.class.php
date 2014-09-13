@@ -1959,7 +1959,7 @@ function modifyTemplate() {
     return $this->handle_errors($e);
   }
   $editurl = $this->action . "?mode=update_item&entity=$entity&" . $edit_addition ;
-  $deleteurl = $this->action . "?mode=delete&entity=$entity";
+  $deleteurl = $this->action . "?mode=delete&entity=$entity" . $add_addition;
   $addurl = $this->action . "?mode=add_item&entity=$entity" . $add_addition;
   /* screen output*/
   $t = 'admin-list.html';
@@ -2028,7 +2028,7 @@ function confirmDelete() {
   $entity = strtolower($_REQUEST['entity']);
   $to_delete = array();
   $needle = 'markdelete' . ($entity);
-  $needle2 = '&&&'; 
+  $needle2 = '---'; 
  foreach($_REQUEST as $key => $value) {
     if(strpos($key, $needle) !== false) {
       if(strpos($value, $needle2) !== false) {
@@ -2049,7 +2049,7 @@ function confirmDelete() {
       $to_delete[] = $value;
     }
   }
-  print_r($to_delete);
+ //print_r($to_delete);
 
   if (isset($to_delete[0])) {
     if(is_array($to_delete[0])){
@@ -2076,6 +2076,19 @@ function confirmDelete() {
   }
   $returnurl = $this->action . '?mode=' . $entity .'_admin';
   $confirmurl = $this->action . '?mode=delete&entity=' . $entity;
+if (isset($_REQUEST['parent_entity']) && isset($_REQUEST['parent_id'])){
+    $parent_entity = $_REQUEST['parent_entity'];
+    $parent_id = $_REQUEST['parent_id'];
+    $conditions = array(strtolower($parent_entity) . '_id' => $parent_id);
+    $extra = '&parent_entity='.$parent_entity.'&parent_id='.$parent_id;
+    $returnurl .= '&entity='. $entity . $extra;
+    $confirmurl .= $extra;
+}
+else {
+  $parent_entity = null;
+  $parent_id = null;
+}
+
   $item_list = $this->getListFromDB(strtolower($entity . '_view'), $conditions, null);
   /* make sure unimelb templates are visible in view */
   $properties = array();
@@ -2094,7 +2107,9 @@ function confirmDelete() {
 			     'returnurl' => $returnurl,
 			     'properties' => $properties,
 			     'item_list' => $item_list,
-			     'id_list' => $to_delete
+			     'id_list' => $to_delete,
+			     'parent_entity' => $parent_entity,
+			     'parent_id' => $parent_id
 			     ));
   return $output; 
 
@@ -2299,7 +2314,6 @@ function updateItem() {
   else {
     return $this->showStart();
   }
-  
   if (isset($_REQUEST['id'])) {
     $id = $_REQUEST['id'];
     /* if submitted, update the details
@@ -2349,6 +2363,7 @@ function updateItem() {
   $destination='update_item';
   $special = new StdClass();
   $special->active = false;
+  /* would be nice to have a more generic solution here*/
   if (strtolower($entity) == 'category') {
     $special->active = true;
     $special->entity = 'template_price';

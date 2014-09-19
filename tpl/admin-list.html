@@ -16,11 +16,11 @@
 </tr>
 {% for item in item_list %}
 <tr>
-<td><input name="markdelete{{ entity|lower }}{% if item.id is defined %}{{ item.id }}{% else %}{% for key, value in item|cast_to_array %}{% if not loop.first %}---{% endif %}{{ key }}:{{ value }}{% endfor %}{% endif %}" value="{% if item.id is defined %}{{ item.id }}{% else %}{% for key, value in item|cast_to_array %}{% if not loop.first %}---{% endif %}{{ key }}:{{ value }}{% endfor %}{% endif %}" type="checkbox" aria-label="Mark {{ entity }} {{ item.short_name }} for deletion" /></td>
+<td><input name="markdelete{{ entity|lower }}{% if item.id is defined %}{{ item.id }}{% else %}{% for key, value in item|cast_to_array %}{% if not loop.first %}---{% endif %}{{ key }}:{{ value }}{% endfor %}{% endif %}" value="{% if item.id is defined %}{{ item.id }}{% else %}{% for key, value in item|cast_to_array %}{% if not loop.first %}---{% endif %}{{ key }}:{{ value }}{% endfor %}{% endif %}" type="checkbox" aria-label="Mark {{ entity }} {% if item.id is defined %}{{ item.id }}{% else %}{% for key, value in item|cast_to_array %}{% if not loop.first %}, {% else %}with attributes {% endif %}{{ key }}:{{ value }}{% endfor %}{% endif %} for deletion" /></td>
 {% for key, value in item|cast_to_array %}
 <td>{{ value }}</td>
 {% endfor %}
-<td><a class="button" href="{{ editurl }}{% if item.id is defined %}{{ item.id }}{% else %}{% for key, value in item|cast_to_array %}&id[{{ key }}]={{ value }}{% endfor %}{% endif %}" aria-label="Edit {{ entity }} {{ item.short_name }}">Edit</a></td>
+<td><a class="button" href="{{ editurl }}{% if item.id is defined %}{{ item.id }}{% else %}{% for key, value in item|cast_to_array %}&id[{{ key }}]={{ value }}{% endfor %}{% endif %}" aria-label="Edit {{ entity }} {% if item.id is defined %}{{ item.id }}{% else %}{% for key, value in item|cast_to_array %}{% if not loop.first %}, {% else %}with attributes {% endif %}{{ key }}:{{ value }}{% endfor %}{% endif %}">Edit</a></td>
 </tr>
 {% endfor %}
 </table>

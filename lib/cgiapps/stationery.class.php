@@ -147,7 +147,7 @@ class Stationery extends Cgiapp2 {
 			   'template_admin' => 'modifyTemplate',
 			   'department_admin' => 'modifyDepartment',
 			   'category_admin' => 'modifyCategory',
-			   'privileges_admin' => 'modifyAdmin',
+			   'administrator_admin' => 'modifyAdmin',
 			   'template_price_admin' => 'modifyTemplate',
 			   'add_item' => 'addItem',
 			   'update_item' => 'updateItem',
@@ -168,7 +168,7 @@ class Stationery extends Cgiapp2 {
 					  'template_admin' => 'Modify Templates',
 					  'department_admin' => 'Modify Departments',
 					  'category_admin' => 'Modify Categories',
-					  'privileges_admin' => 'Administrator access',
+					  'administrator_admin' => 'Administrator access',
 					  'analytics_admin' => 'Analytics',
 					  'add_item' => 'Create new item',
 					  'update_item' =>'Update item',
@@ -182,7 +182,7 @@ class Stationery extends Cgiapp2 {
 			   'template_admin' => 'Modify Template',
 			   'category_admin' => 'Modify Category',
 			   'department_admin' => 'Modify Department',
-			   'privileges_admin' => 'Admin access'
+			   'administrator_admin' => 'Admin access'
 			   );
     $this->start_mode('start');
     $this->error_mode('handle_errors');
@@ -1991,16 +1991,43 @@ function modifyAdmin() {
   if (!$this->isAdmin()) {
     return $this->showStart();
   }
-  $entity = 'Administrator access';
+  /* similar to modifyTemplate but
+   * - no Edit column
+   * - action is slightly different
+   * don't want to add users, just add or subtract membership from group 1
+   * (administrators)
+   * two lists:
+   * 1. current administrators check box is admin (checked)
+   * 2. other users, check box to make them administrators
+   */
   /* screen output*/
+  $admin_usernames_list = $this->getListFromDB('user_group', array('group_id' => 1));
+  $admin_usernames = array();
+  foreach ($admin_usernames_list as $record) {
+    $admin_usernames[] = $record->username;
+  }
+  $all_users = $this->getListFromDB('user', null, array('family_name', 'given_name'));
+  $admin_users = array();
+  $non_admins = array();
+  foreach($all_users as $user) {
+    if (in_array($user->username, $admin_usernames)) {
+      $admin_users[] = $user;
+    }
+    else {
+      $non_admins[] = $user;
+    }
+  }
   $t = 'admin-list.html'; //maybe some changes for this one
   $t = $this->twig->loadTemplate($t);
   $output = $t->render(array(
 			     'modes' => $this->user_visible_modes,
 			     'error' => $this->error,
-			     'entity' => $entity
+			     'entity' => $entity,
+			     'admin_users' => $admin_users,
+			     'non_admins' => $non_admins
 			     ));
   return $output;
+
 }
 
 function showAnalytics() {
@@ -2116,10 +2143,8 @@ else {
 }
 /* a generic function to add or edit entity details
  * gets all fields from the specified Entity
- * (filled in with values if a id number specified ie EDIT, otherwise blank ie CREATE)
  * when submitted, adds the Entity, returns to the appropriate list page
  */
-/* it may not be possible to have just one function for this; we'll see */
 function addItem() {
   parse_str($_SERVER['QUERY_STRING'], $query);
   print_r($query);

@@ -104,13 +104,18 @@ background-image: linear-gradient(top, #4a7bba, #33619d); /* W3C */}
 .nav-bar ul li a { float: left; color: #fff; padding: 4px 10px; font-size: 14px; text-decoration: none;}
 .nav-bar ul li a.index { padding-right: 30px;  border: solid 1px #719ac4;
 background: #4f86be;
+
 background-image: url("../images/index_logo.png"); /* fallback */
 background-image: url("../images/index_logo.png"), -webkit-gradient(linear, left top, left bottom, from(#444444), to(#999999)); /* Saf4+, Chrome */
 background-image: url("../images/index_logo.png"), -webkit-linear-gradient(top, #76aae0, #4f86be); /* Chrome 10+, Saf5.1+ */
 background-image: url("../images/index_logo.png"), -moz-linear-gradient(top, #76aae0, #4f86be); /* FF3.6+ */
 background-image: url("../images/index_logo.png"), -ms-linear-gradient(top, #76aae0, #4f86be); /* IE10 */
 background-image: url("../images/index_logo.png"), -o-linear-gradient(top, #76aae0, #4f86be); /* Opera 11.10+ */
-background-image: url("../images/index_logo.png"), linear-gradient(top, #76aae0, #4f86be); /* W3C */}
+background-image: url("../images/index_logo.png"), linear-gradient(top, #76aae0, #4f86be); /* W3C */
+background-repeat: no-repeat;
+background-position: right;
+}
+
 .nav-bar ul li a:hover { opacity: 0.8;}
 .index_expand { position: absolute; z-index: 100; width: 323px; background: #4f86be; padding: 5px; border: solid 1px #719ac4; border-radius: 2px; -moz-border-radius: 2px; -webkit-border-radius: 2px;}
 .index_expand ul { list-style: none; display: inline; float: left;}

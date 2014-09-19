@@ -69,6 +69,10 @@
 				{% include 'nav.html' %}
       </div>
     </div>
+{% if modes|length > 2 %}
+{% include 'admin_menu_nav.html' %}
+{% endif %}
+
 
 		<h2>{% block title %}University Stationery{% endblock %}</h2>
 		

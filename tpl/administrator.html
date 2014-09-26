@@ -2,7 +2,7 @@
 
 {% block title %}{{ entity|title }} Management{% endblock %}
 {% block content %}
-<p>Check or uncheck names to update the administrator list. Administrators are listed first, followed by other users.</p>
+<p>Check or uncheck names to update the administrator list. Administrators (checked) are listed first, followed by other users.</p>
 <form action="{{ action }}" method="POST">
 <h3>{{ plural|title }}</h3>
 {% if admin_users is not empty %}
@@ -19,7 +19,7 @@
 {% if non_admins is not empty %}
 <ul>
 {% for user in non_admins %}
-  <li>(checkbox) {{ admin.username }} {{ admin.given_name }} {{ admin.family_name }}</li>
+  <li><input name="mark{{ entity|lower }}_{{ user.username }}" type="checkbox" aria-label="Mark {{ user.username }} as administrator" /> {{ user.given_name }} {{ user.family_name }} (<em>{{ user.username }}</em>)</li>
 {% endfor %}
 </ul>
 {% else %}
@@ -27,7 +27,7 @@
 {% endif %}
 
 <label for="submitted">Update administrator list </label>
-<input name="submitted" type="submit" value=" Update (un)marked {{ plural }}"/>
+<input name="submitted" type="submit" value=" Update"/>
 </form>
 
 {% endblock %}

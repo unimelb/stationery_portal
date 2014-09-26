@@ -1340,7 +1340,7 @@ try {
 
     return $thing_id;  
 }
-/* insertThing
+/* insertThing DEPRECATED
  * a better and more general version of addThing
  * which allows for Things without primary keys
  * template_price, I'm looking at you!
@@ -1350,7 +1350,7 @@ try {
  * inspired by from good old meid_sqlserver_dao::insertTableItem
  * if it works as well or better, I'll rename it addThing
  */
-private function insertThing($thing, $thing_details) {
+/*private function insertThing($thing, $thing_details) {
   $thing_id = -1;
   $settings = array();
   $column_list = array();
@@ -1368,7 +1368,8 @@ private function insertThing($thing, $thing_details) {
     }
     $settext = implode(", ", $settings);
   return $thing;
-}
+  }*/
+
 /* general updater
  * $thing is the entity (a string, lowercase)
  * $thing_id is an integer,
@@ -1830,6 +1831,7 @@ private function getListFromDB($table, $conditions = null, $ordering = null) {
   if (!is_null($ordering)){
     $sql .= ' ' . $this->makeOrderingSQL($ordering);
   }
+  print_r($sql);
   try {
 
     $stmt = $this->conn->prepare($sql);
@@ -1873,7 +1875,7 @@ private function makeConstraintSQL($conditions) {
 	}
 	else {
 	  if (is_string($value)) {
-	    $item = $this->conn->quote($value);
+	    $value = $this->conn->quote($value);
 	  }
 	  $final_value = $value;
 	}
@@ -1926,7 +1928,7 @@ function modifyTemplate() {
   }
   $entity = 'Template';
   if (isset($_REQUEST['entity'])) {
-    $entity = $_REQUEST['entity'];
+    $entity = strtolower($_REQUEST['entity']);
     
   }
   $plural = $this->pluralise($entity);
@@ -1986,7 +1988,15 @@ function modifyCategory() {
    $_REQUEST['entity'] = 'Category';
    return $this->modifyTemplate();
 }
-
+private function getAdminUsernames() {
+  $admin_usernames = array();
+  $admin_usernames_list = $this->getListFromDB('user_group', array('group_id' => 1));
+  $admin_usernames = array();
+  foreach ($admin_usernames_list as $record) {
+    $admin_usernames[] = $record->username;
+  }
+  return $admin_usernames;
+}
 function modifyAdmin() {
   if (!$this->isAdmin()) {
     return $this->showStart();
@@ -1998,16 +2008,53 @@ function modifyAdmin() {
    * (administrators)
    * two lists:
    * 1. current administrators check box is admin (checked)
-   * 2. other users, check box to make them administrators
+   * 2. other users, check box to make them administrators (unchecked by default)
    */
   /* screen output*/
   $entity = 'administrator';
-  
-  $admin_usernames_list = $this->getListFromDB('user_group', array('group_id' => 1));
-  $admin_usernames = array();
-  foreach ($admin_usernames_list as $record) {
-    $admin_usernames[] = $record->username;
+  $admin_usernames = $this->getAdminUsernames();
+  print_r($_REQUEST);
+  if(isset($_REQUEST['submitted'])) {
+    /* get the list of checked items 
+    * add usernames in the list to admin
+    * remove usernames in the existing admin list but NOT in the request list
+    * admin must have at least one member at the end otherwise error
+    * see also update profile for a similar function
+    */
+ 
+    $new_names = array();
+    $pattern = 'markadministrator_';
+    $offset = strlen($pattern);
+    foreach($_REQUEST as $req=>$value) {
+      $needle = strpos($req, $pattern);
+      if ($needle !== false) {
+	$username = substr($req, $needle + $offset);
+	$new_names[] = $username;
+      }
+    }
+    $common_names = array_intersect($admin_usernames, $new_names);
+    $to_add = array_diff($new_names, $common_names, $admin_usernames );
+    $to_remove = array_diff($admin_usernames, $common_names, $new_names);
+    $admin_count = count($admin_usernames) + count($to_add) - count($to_remove);
+    if ($admin_count > 0) {
+    /* add $to_add */
+      foreach($to_add as $adduser) {
+	$this->addThing('user_group', array('username' => $adduser, 'group_id' => 1)); 
+      }
+    /* remove $to_remove */
+      foreach($to_remove as $removeuser) {
+	$this->deleteThings('user_group', array('username' => $removeuser));
+      }
+      /* refresh username list for display */
+      $admin_usernames = $this->getAdminUsernames();
+    }
+    else {
+      $this->error .= '<p>Not updated: there must be at least one administrator.</p>';
+    }
   }
+
+  
+
   $all_users = $this->getListFromDB('user', null, array('family_name', 'given_name'));
   $admin_users = array();
   $non_admins = array();
@@ -2021,6 +2068,7 @@ function modifyAdmin() {
   }
 
   $plural = $this->pluralise($entity);
+  $action = $this->action . "?mode=administrator_admin";
   $t = 'administrator.html'; //maybe some changes for this one
   $t = $this->twig->loadTemplate($t);
   $output = $t->render(array(
@@ -2029,7 +2077,8 @@ function modifyAdmin() {
 			     'entity' => $entity,
 			     'admin_users' => $admin_users,
 			     'non_admins' => $non_admins,
-			     'plural' => $plural
+			     'plural' => $plural,
+			     'action' => $action
 			     ));
   return $output;
 
@@ -2293,7 +2342,7 @@ private function getPropertyList($entity) {
   $item_fields = array();
 
   try {
-  $item_fields = $this->getListFromDB('information_schema.columns', array('table_name' => "'". $entity . "'"), null);
+  $item_fields = $this->getListFromDB('information_schema.columns', array('table_name' => $entity ), null);
     /*$statement = "select column_name, column_key from information_schema.columns where table_name = ':entity'";
     //$stmt = $this->conn->prepare("DESCRIBE $entity");
     $stmt = $this->conn->prepare($statement);

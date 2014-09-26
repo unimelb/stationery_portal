@@ -648,12 +648,8 @@ class Stationery extends Cgiapp2 {
     try {
       $stmt = $this->conn->prepare($statement);
       $category_id = 1;
-       /* for each category, just 1 here now */
-      //for ($category_id = 1; $category_id < $categories_count +1; $category_id ++) {
       foreach($categories as $category) {
 	foreach(array_keys($category_ids) as $key){
-	  //$category_ids[$key] = $category_id;
-	  //$category_ids[$key] = $final_categories[$category_id-1]->category_id;
 	  $category_ids[$key] = $category->category_id;
 	}
 	//print_r($category_ids);
@@ -662,14 +658,9 @@ class Stationery extends Cgiapp2 {
 		       );
 	while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
 	  $row->url = $basic_url . '&id=' . $row->chili_id . '&base=' . $row->template_id;
-	  //$category_active = $categories[$category_id - 1]->is_active;
 	  if ($category->is_active == 'yes') {
 	    if (in_array($category->category_id, $exceptions_keys)){
 	      $destination_array = $exceptions[$category->category_id];
-	      /*if ($exceptions[$category->category_id] === 0) {
-		$destination_array = $exceptions[$category->category_id];
-		}*/
-	      //print_r($destination_array);
 	    }
 	    else {
 	      /* find out how many elements in the exceptions list the category is greater than */
@@ -679,21 +670,11 @@ class Stationery extends Cgiapp2 {
 		  $modifier_counter += 1;
 		}
 	      }
-	      /*if ($modifier_counter < 0) {
-		$modifier_counter = 0;
-		}*/
+
 	      $destination_array = $category->category_id - ($modifier_counter);
 	    }
 	    //print_r($destination_array);
 	    array_push($stationery_type_list[$destination_array], $row);
-	    /*if ($category_id == 4) {
-	      /* double sided business cards go with single-sided */
-	    /*array_push ($stationery_type_list[0], $row);
-	    }
-	    else {
-	      array_push ($stationery_type_list[$category_id-1], $row);
-
-	    }*/
 	  }
 	}
       }
@@ -707,17 +688,7 @@ class Stationery extends Cgiapp2 {
 	  {
 	    return strcmp($a->full_name, $b->full_name);
 	  });
-    /*    foreach ($stationery_type_list[0] as $buscard) {
-      $buscard->url = $basic_url . '&id=' . $buscard->chili_id . '&base=' . $buscard->template_id;
-      $buscard->short = $buscard->full_name;
-      }*/
-    /*    $final_stationery_list = array();
-    foreach($stationery_type_list as $list) {
-      if (!empty($list)) {
-	$final_stationery_list[] = $list;
-      }
-      }*/
-    //print_r($stationery_type_list);
+
     $final_stationery_list = array();
     $categories_available = array();
     foreach ($stationery_type_list as $stationery_list) {
@@ -785,30 +756,12 @@ class Stationery extends Cgiapp2 {
 	    }*/
 	  $job_id = $_REQUEST["job"];
 	  $itemID = $this->getChiliId($job_id);
-	  /*else {
-	    /* create new job locally 
-	    $job_id = $this->createJob($base);
-	  }*/
-	 
 	}
       }
     else {
       /* create new job locally */
       $job_id = $this->createJob($base);
-      /*
-      $documentName = $this->getTemplateName($job_id);
-      $soap_params = array(
-			   "apiKey" => $this->apikey,
-			   "resourceName" => "Documents",
-			   "itemID" => $blankDocTemplateID,
-			   "newName" => $documentName,
-			   "folderPath" =>  $folderPath,
-			   );
-      $resourceItemXML = $this->client->ResourceItemCopy($soap_params);
-      $dom = new DOMDocument();
-      $dom->loadXML($resourceItemXML->ResourceItemCopyResult);
-      $itemID = $dom->getElementsByTagName("item")->item(0)->getAttribute("id");
-      */
+
       $itemID = $this->duplicateTemplate($job_id, $blankDocTemplateID);
       /* update job with new template_id */
       $var_array = array('chili_id' => $itemID);
@@ -958,13 +911,7 @@ class Stationery extends Cgiapp2 {
     /* to here */
     $var_array["job_id"] = $job_id;
     try {
-      /*$this->update[1]*/
-      /*array(
-			   'chili_id' => $chili_id,
-			   'username' => $this->username,
-			   'job_id' => $job_id
-			   )
-      */
+
       $stmt = $this->conn->prepare($statement);
       $stmt->execute($var_array);
     }
@@ -1030,7 +977,6 @@ class Stationery extends Cgiapp2 {
     /* if not present, take it out of $editurl */
     if (isset($_REQUEST["samesame"])) {
       if($_REQUEST["samesame"] != "same") {
-	//$editurl = str_replace('&samesame=same', '', $editurl);
 	/* duplicate and update job, as in edit page */
 	$job_id_new = $this->createJob($base);
 	$itemID_new = $this->duplicateTemplate($job_id_new, $itemID);
@@ -1123,7 +1069,6 @@ class Stationery extends Cgiapp2 {
 	else {
 	  $row->url = $this->action . "?mode=proof&base=" .$row->template_id . "&proof=true&samesame=noway&job=" . $row->job_id;
 	  $date = date_create_from_format('Y-m-d H:i:s', $row->ordered);
-	  //$row->ordered = substr($row->ordered, 0, 10);
 	  $row->ordered = date_format($date, 'd F Y');
 	  array_push ($jobslist, $row);
 	}
@@ -1223,33 +1168,7 @@ private function getPricelistFromJob($job_id) {
   $category_id = $this->getCategoryFromJob($job_id);
   
   $pricelist = array();
-  /*
-   $statement = $this->select[7];
-   $statement2 = str_replace("t.full_name", "t.category_id", $statement);
 
-  try {
-    $stmt = $this->conn->prepare($statement2);
-    $stmt->execute(array('job_id' => $job_id));
-    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-      $category_id = $row["category_id"];
-    }
-  }
-  catch (Exception $e){
-    $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
-    }*/
-
-  /*$statement3 = $this->select[8];
-    try {
-    $stmt2 = $this->conn->prepare($statement3);
-    $stmt2->execute(array('category_id' => $category_id));
-    while($row = $stmt2->fetch(PDO::FETCH_OBJ)) {
-      array_push($pricelist, $row);
-    }
-  }
- 
-  catch (Exception $e){
-    $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
-    }*/
   $pricelist = $this->getPricelistFromCategory($category_id);
   return $pricelist;
 }
@@ -1295,18 +1214,6 @@ try {
     }
     /* get address id for address just created */
     if ($address_id !== false) {
-      /*  try {
-	  $stmt2 = $this->conn->prepare($this->select[9]);
-	  $stmt2->execute();
-	  while($row = $stmt2->fetch(PDO::FETCH_ASSOC)) {
-	  $address_id = $row["address_id"];
-	  }
-      
-	  }
-	  catch (Exception $e){
-	  $this->error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
-	  $address_id = false;
-	  }*/
       $address_id = $this->conn->lastInsertId();
     }
     return $address_id;  
@@ -1340,35 +1247,6 @@ try {
 
     return $thing_id;  
 }
-/* insertThing DEPRECATED
- * a better and more general version of addThing
- * which allows for Things without primary keys
- * template_price, I'm looking at you!
- * as above, takes $thing, the table
- * and $thing_details, the array of property_name => property value
- * and returns the id of the new thing, or -1 if it has none.
- * inspired by from good old meid_sqlserver_dao::insertTableItem
- * if it works as well or better, I'll rename it addThing
- */
-/*private function insertThing($thing, $thing_details) {
-  $thing_id = -1;
-  $settings = array();
-  $column_list = array();
-  foreach ($thing_details as $key => $value) {
-      if (is_string($value))
-	{
-	  $value = trim($value);
-	  if (strlen($value) == 0)
-	    {
-	      $value === null;
-	    }
-	}
-      $lcasekey = $key; // don't need lower case
-      $settings[] = $lcasekey . " = " . ":" . $lcasekey;
-    }
-    $settext = implode(", ", $settings);
-  return $thing;
-  }*/
 
 /* general updater
  * $thing is the entity (a string, lowercase)
@@ -1422,8 +1300,6 @@ private function updateThing($thing, $thing_id, $thing_details) {
     $statement = "update $thing set " . $settext . " where " . $keytext;
 
     //print_r($statement);
-
-    //$thing_details[$primary_key] = $thing_id;
     //print_r($thing_details);
     try {
       $stmt = $this->conn->prepare($statement);
@@ -1444,31 +1320,11 @@ private function updateThing($thing, $thing_id, $thing_details) {
  * if there is no primary key to be deleted
  */
 protected function deleteThings($thing, $id) {
-  /*  if (is_array($id) and is_array($id[0])) {
-      /* ie no primary key *//*
-    foreach($id as $deletable) {
-      $keytext = $this->makeConstraintSQL($deletable);
-      $statement = "delete from $thing where " . $keytext;
-      try {
-	$stmt = $this->conn->prepare($statement);
-	$stmt->execute();
-      }
-      catch (Exception $e) {
-	$this->error .= '<pre>ERROR: ' . $e->getMessage() . '</pre>';
-      } 
-    }
-  }*/
-  //print_r($id);
-  /*if(isset($id[0]) and is_array($id[0])){
-    $conditions = $id;
-  }
-  else {
-    $conditions = array(strtolower($thing) . '_id' => $id);
-    }*/
+
   $conditions = $id;
   $keytext = $this->makeConstraintSQL($conditions);
   $statement = "delete from $thing where " . $keytext;
-  print_r($statement);
+  //print_r($statement);
   try {
     $stmt = $this->conn->prepare($statement);
     $stmt->execute();
@@ -1477,6 +1333,7 @@ protected function deleteThings($thing, $id) {
     $this->error .= '<pre>ERROR: ' . $statement . ': ' . $e->getMessage() . '</pre>';
   }
 }
+
 /* helper function to determine if an array is associative
  * from Captain kurO, http://stackoverflow.com/questions/173400/php-arrays-a-good-way-to-check-if-an-array-is-associative-or-sequential
  * assumes:
@@ -1831,7 +1688,7 @@ private function getListFromDB($table, $conditions = null, $ordering = null) {
   if (!is_null($ordering)){
     $sql .= ' ' . $this->makeOrderingSQL($ordering);
   }
-  print_r($sql);
+  //print_r($sql);
   try {
 
     $stmt = $this->conn->prepare($sql);
@@ -2013,7 +1870,7 @@ function modifyAdmin() {
   /* screen output*/
   $entity = 'administrator';
   $admin_usernames = $this->getAdminUsernames();
-  print_r($_REQUEST);
+  //print_r($_REQUEST);
   if(isset($_REQUEST['submitted'])) {
     /* get the list of checked items 
     * add usernames in the list to admin
@@ -2104,7 +1961,7 @@ function showAnalytics() {
  * submit (deletes) or cancel (return to origin)
  */
 function confirmDelete() {
-  print_r($_REQUEST);
+  //print_r($_REQUEST);
   $action = $this->action;
   $entity = strtolower($_REQUEST['entity']);
   $to_delete = array();
@@ -2114,10 +1971,10 @@ function confirmDelete() {
     if(strpos($key, $needle) !== false) {
       if(strpos($value, $needle2) !== false) {
 	$id_properties = explode($needle2, $value);
-	print_r ($id_properties);
+	//print_r ($id_properties);
 	$final_value = array();
 	foreach($id_properties as $prop) {
-	  print_r('\n' . $prop);
+	  //print_r('\n' . $prop);
 	  /* convert 'id[x]=y'
 	   * to x => y */
 	  $first = strpos($prop, ':');
@@ -2148,8 +2005,8 @@ function confirmDelete() {
     $conditions = array('id' => -1);
     $delete_conditions = array($entity . '_id' => -1);
   }
-  print_r($conditions);
-  print_r($delete_conditions);
+  //print_r($conditions);
+  //print_r($delete_conditions);
   if(isset($_REQUEST['submitted_confirm'])) {
     /* delete listed things */
     $this->deleteThings($entity, $delete_conditions);
@@ -2201,8 +2058,8 @@ else {
  */
 function addItem() {
   parse_str($_SERVER['QUERY_STRING'], $query);
-  print_r($query);
-  print_r($_REQUEST);
+  //print_r($query);
+  //print_r($_REQUEST);
   if (isset($_REQUEST['entity'])) {
     $entity = strtolower($_REQUEST['entity']);
   }
@@ -2257,59 +2114,36 @@ function addItem() {
       $_REQUEST['mode'] = 'update_item';
       return $this->updateItem();
     }
-    /*if($id !== false){*/
-    /*
-    if(is_numeric($id) and (int)$id > 0){
-      $this->error .= "<pre>$id</pre>";
-      $_REQUEST['id'] = $id;
-      $_REQUEST['mode'] = 'update_item';
-      return $this->updateItem();
-    }
-    else if (is_numeric($id)) {
-      /* mysql returns 00 for a non-sequence result */
-      /* this result for a non-primary id add*/
-    /*
-      $_REQUEST['mode'] = 'update_item';
-      $id_array= $insert_values;
-      $_REQUEST['id'] = $id_array;
-      return $this->updateItem();
-    }
-    else {
-      $this->error .="<pre>There was a problem with addThing</pre>";
-     }
-    */
   }
-  /*else {*/
-  $returnurl = $this->action . '?mode=' . $entity .'_admin' . $return_addition;
-  $action = $this->action . '?mode=' . $destination;
-  $properties = $this->getPropertyList($entity);
-   foreach($properties as $property) {
-    if (is_array($property)){
-      $subtype1 = array_keys($property);
-      $subtype = $subtype1[0];
-      $working_array = $property[$subtype];
-      foreach($working_array as $subthing) {
-	$subthing->id = reset($subthing);
-	$subthing->description = next($subthing);
+    $returnurl = $this->action . '?mode=' . $entity .'_admin' . $return_addition;
+    $action = $this->action . '?mode=' . $destination;
+    $properties = $this->getPropertyList($entity);
+    foreach($properties as $property) {
+      if (is_array($property)){
+	$subtype1 = array_keys($property);
+	$subtype = $subtype1[0];
+	$working_array = $property[$subtype];
+	foreach($working_array as $subthing) {
+	  $subthing->id = reset($subthing);
+	  $subthing->description = next($subthing);
+	}
       }
     }
+    /* screen output*/
+    $t = 'admin-add.html';
+    $t = $this->twig->loadTemplate($t);
+    $output = $t->render(array(
+			       'modes' => $this->user_visible_modes,
+			       'error' => $this->error,
+			       'entity' => $entity,
+			       'properties' => $properties,
+			       'returnurl' => $returnurl,
+			       'action' => $action,
+			       'parent_entity' => $parent_entity,
+			       'parent_id' => $parent_id
+			       ));
+    return $output;
   }
-/* screen output*/
-  $t = 'admin-add.html';
-  $t = $this->twig->loadTemplate($t);
-  $output = $t->render(array(
-			     'modes' => $this->user_visible_modes,
-			     'error' => $this->error,
-			     'entity' => $entity,
-			     'properties' => $properties,
-			     'returnurl' => $returnurl,
-			     'action' => $action,
-			     'parent_entity' => $parent_entity,
-			     'parent_id' => $parent_id
-			     ));
-  return $output;
-  /*}*/
-}
 /* an extremely lightweight and fragile pluralise function,
  * suitable only for entity names at this stage
  * $singular is the thing to pluralise
@@ -2343,15 +2177,9 @@ private function getPropertyList($entity) {
 
   try {
   $item_fields = $this->getListFromDB('information_schema.columns', array('table_name' => $entity ), null);
-    /*$statement = "select column_name, column_key from information_schema.columns where table_name = ':entity'";
-    //$stmt = $this->conn->prepare("DESCRIBE $entity");
-    $stmt = $this->conn->prepare($statement);
-    $stmt->execute(array(':entity' => strtolower($entity)));
-    while($row = $stmt->fetch(PDO::FETCH_OBJ)) {
-      $item_fields[] = $row;
-      }*/
-    /* find fields */
-    /* Key = column_key; Field = column_name in DESCRIBE entity equivalent*/
+  /*$statement = "select column_name, column_key from information_schema.columns where table_name = ':entity'"; */
+  /* find fields */
+  /* Key = column_key; Field = column_name in DESCRIBE entity equivalent*/
     foreach ($item_fields as $field) {
       if ($field->COLUMN_KEY == 'PRI') {
 	$property_list[] = 'id';
@@ -2377,16 +2205,14 @@ private function getPropertyList($entity) {
   return $property_list;
 }
 
-/* a generic function to add or edit entity details
+/* a generic function to edit entity details
  * gets all fields from the specified Entity
- * filled in with values if a id number specified ie EDIT, otherwise blank ie CREATE)
- * when submitted, updates the Entity, returns to the appropriate list page
+ * filled in with values if a id number specified ie EDIT)
+ * when submitted, updates the Entity
  */
-/* it may not be possible to have just one function for this; we'll see */
 function updateItem() {
-  /*parse_str($_SERVER['QUERY_STRING'], $query);
-    print_r($query);*/
-  print_r($_REQUEST);
+  //print_r($query);*/
+  //print_r($_REQUEST);
   if (isset($_REQUEST['entity'])) {
     $entity = strtolower($_REQUEST['entity']);
   }

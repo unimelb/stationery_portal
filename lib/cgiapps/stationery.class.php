@@ -2001,6 +2001,8 @@ function modifyAdmin() {
    * 2. other users, check box to make them administrators
    */
   /* screen output*/
+  $entity = 'administrator';
+  
   $admin_usernames_list = $this->getListFromDB('user_group', array('group_id' => 1));
   $admin_usernames = array();
   foreach ($admin_usernames_list as $record) {
@@ -2017,14 +2019,17 @@ function modifyAdmin() {
       $non_admins[] = $user;
     }
   }
-  $t = 'admin-list.html'; //maybe some changes for this one
+
+  $plural = $this->pluralise($entity);
+  $t = 'administrator.html'; //maybe some changes for this one
   $t = $this->twig->loadTemplate($t);
   $output = $t->render(array(
 			     'modes' => $this->user_visible_modes,
 			     'error' => $this->error,
 			     'entity' => $entity,
 			     'admin_users' => $admin_users,
-			     'non_admins' => $non_admins
+			     'non_admins' => $non_admins,
+			     'plural' => $plural
 			     ));
   return $output;
 

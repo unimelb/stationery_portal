@@ -10,6 +10,7 @@
  * @author Patrick Maslen (pmaslen@unimelb.edu.au)
  *
  * uses Twig templating system, without the cgiapp2 interface to same
+ * Also requires PDO
  */
 /**
  * required files
@@ -334,13 +335,15 @@ class Stationery extends Cgiapp2 {
     /* check database for user name */
     $error = $this->error;
     try {
-      //$conn = new PDO(DBCONNECT, DBUSER, DBPASS);
-      //$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
       $stmt = $this->conn->prepare($this->select[0]);
       $stmt->execute(array('id' => $_SESSION["username"]));
       if ($stmt->rowCount() == 0) {
-	// go to profile page
-	return $this->createProfile();
+	//go to profile page
+	//return $this->createProfile();
+	$modes = array();
+      }
+      else {
+	$modes = $this->user_visible_modes;
       }
     } catch(Exception $e) {
       $error = '<pre>ERROR: ' . $e->getMessage() . '</pre>';
@@ -348,7 +351,7 @@ class Stationery extends Cgiapp2 {
      $t = 'start.html';
     $t = $this->twig->loadTemplate($t);
     $output = $t->render(array(
-			       'modes' => $this->user_visible_modes,
+			       'modes' => $modes,
 			       'error' => $error
 			       ));
     return $output;
@@ -363,6 +366,7 @@ class Stationery extends Cgiapp2 {
   function createProfile() {
     $first_time = true;
     $error = "";
+    $action = $this->action . "?mode=" . "new_profile";
     if (isset($_REQUEST["submitted"])) {
       try {
 	$stmt = $this->conn->prepare($this->insert[0]);
@@ -429,7 +433,7 @@ class Stationery extends Cgiapp2 {
 			       'phone' => $phone,
 			       'departments1'=> $departments1,
 			       'departments2'=> $departments2,
-			       'action' => $this->action,
+			       'action' => $action,
 			       'error' => $error
 			       ));
     return $output;
@@ -528,6 +532,9 @@ class Stationery extends Cgiapp2 {
     try {
       $stmt = $this->conn->prepare($this->select[0]);
       $stmt->execute(array('id' => $_SESSION["username"]));
+      if ($stmt->rowCount() == 0) {
+	return $this->createProfile();
+      }
       while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 	$first_name = $row["given_name"];
 	$surname = $row["family_name"];

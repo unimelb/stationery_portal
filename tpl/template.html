@@ -3,38 +3,6 @@
 {% block title %}Choose a Stationery Template{% endblock %}
 {% block content %}
 <div class="col-6 first">
-	<!-- <p>Choose from one of the available CHILI templates</p> -->
-<!--
-	<h3>Template Types</h3>
-	<div class="col-2 first">
-		<img src="/images/bus-card-thumb-220x160.jpg">
-		<p><strong>Business Card (SS and DS)</strong></p>
-		<ul id="buscard">
-			{% for buscard in buscards %}
-			<li><a href="{{ buscard.url }}">{{ buscard.full_name }}</a></li>
-			{% endfor %}
-		</ul>
-	</div>
-	<div class="col-2">
-		<img src="/images/letterhead-thumb-220x160.jpg">
-		<p><strong>Letterhead</strong></p>
-		<ul id="lethead">
-			{% for lethead in letheads %}
-			<li><a href="{{ lethead.url }}">{{ lethead.full_name }}</a></li>
-			{% endfor %}
-		</ul>
-	</div>
-	<div class="col-2">
-		<img src="/images/comp-slips-thumb-220x160.jpg">
-		<p><strong>With Compliments Slips</strong></p>
-		<ul id="withcomp">
-			{% for withcomp in withcomps %}
-			<li><a href="{{ withcomp.url }}">{{ withcomp.full_name }}</a></li>
-			{% endfor %}
-		</ul>
-	</div>
--->
-<!-- re-engineering this template here 2014-09-05 Patrick Maslen -->
 
 {% for stationery in stationery_types %}
 {% set category_info = categories[loop.index0] %}
@@ -45,6 +13,7 @@
 {% set category_image_url = '/images/letterhead-thumb-220x160.jpg' %}
 {% elseif category_info.category_id == 3 %}
 {% set category_image_url = '/images/comp-slips-thumb-220x160.jpg' %}
+<!-- insert new default images here -->
 {% else %}
 {# this is the default image if nothing else matches: #}
 {% set category_image_url = '/images/default-thumb-220x160.png' %}

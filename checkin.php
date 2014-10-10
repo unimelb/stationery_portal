@@ -57,6 +57,19 @@ if ($user and $pass)
 		header("Location: http://{$_SERVER["HTTP_HOST"]}$redirect");
 		exit;
 	}
+	elseif ($user == "test" and $pass == "test") {
+	  /* a non-admin user */
+	  $_SESSION["logged_in"] = true;
+	  $_SESSION["username"] = "test";
+	  $_SESSION["email"] = "chili@lists.unimelb.edu.au";
+	  $_SESSION["common_name"] = "Test";
+	  $_SESSION["given_names"] = "Test";
+	  $_SESSION["family_name"] = "User";
+	  $_SESSION["usertype"] = "staff";
+	  $_SESSION["department_number"] = "030";
+	  header("Location: http://{$_SERVER["HTTP_HOST"]}$redirect");
+	  exit;
+	}
 	else
 	{
 		try

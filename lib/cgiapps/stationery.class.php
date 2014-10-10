@@ -107,10 +107,21 @@ class Stationery extends Cgiapp2 {
     if ($this->param('template_path')) {
 	$this->template_path = $this->param('template_path');
     }
-    $this->loader = new Twig_Loader_Filesystem($this->template_path); 
-    $this->twig = new Twig_Environment($this->loader, array(
-					    "auto_reload" => true
-					    ));
+    $this->loader = new Twig_Loader_Filesystem($this->template_path);
+    /* for testing, 
+     * make auto_reload true and cache false
+     */
+    $twig_options = array(
+		      "auto_reload" => false
+		      );
+    if (is_dir($_SERVER["DOCUMENT_ROOT"] . LIBPATH . 'twigcache')) {
+      $twig_options['cache'] = 'twigcache';
+    }
+    else {
+      $twig_options['cache'] = false;
+    }
+    
+    $this->twig = new Twig_Environment($this->loader, $twig_options);
     /* allows twig to parse object values as arrays */
     $this->twig->addFilter(new Twig_SimpleFilter('cast_to_array', function ($stdClassObject) { return (array)$stdClassObject; }));
     $tpl_params = $this->param('template_params');
@@ -152,7 +163,6 @@ class Stationery extends Cgiapp2 {
 			   'template_price_admin' => 'modifyTemplate',
 			   'add_item' => 'addItem',
 			   'update_item' => 'updateItem',
-			   'analytics_admin' => 'showAnalytics',
 			   'delete' => 'confirmDelete'
 			   ));
     // should be an entry for each of the run modes above
@@ -1948,19 +1958,6 @@ function modifyAdmin() {
 
 }
 
-function showAnalytics() {
-  if (!$this->isAdmin()) {
-    return $this->showStart();
-  }
-  /* screen output*/
-  $t = 'admin-analytics.html'; //needs its own template
-  $t = $this->twig->loadTemplate($t);
-  $output = $t->render(array(
-			     'modes' => $this->user_visible_modes,
-			     'error' => $this->error,
-			     ));
-  return $output;
-}
 /* give the user confirmation before deletion 
  * needs: 
  * the Entity type to delete, (also gives where to return to on submit or cancel)

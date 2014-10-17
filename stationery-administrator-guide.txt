@@ -1,0 +1,260 @@
+  Unimelb Stationery (stationery.staff.unimelb.edu.au) documentation
+  ==================================================================
+
+Author: Patrick Maslen
+Date: 2014-10-17 15:59:56 EST
+
+
+Table of Contents
+=================
+1 Intended audience
+2 Overview
+    2.1 Usage Summary
+    2.2 Systems
+        2.2.1 publishing portal
+        2.2.2 Chili publishing system
+        2.2.3 Database
+3 For administrators
+    3.1 day to day operation
+    3.2 modifying templates, department
+    3.3 modifying categories
+        3.3.1 is_active
+        3.3.2 view template_price
+    3.4 modifying administrators
+4 How do I...?
+    4.1 add a standard picture for a category
+    4.2 change the contents of the user email
+    4.3 change the contents of the admin email
+    4.4 change the admin email address
+5 For developers
+    5.1 locations
+        5.1.1 php-enabled web server
+        5.1.2 database
+    5.2 the code
+        5.2.1 github repository
+        5.2.2 lib/cgiapps/stationery.class.php
+        5.2.3 login code
+    5.3 the twig templates
+    5.4 Files and folders
+        5.4.1 checkin.php, loggedout.php, login.php, logout.php
+        5.4.2 css
+        5.4.3 images
+        5.4.4 includes
+        5.4.5 index.php
+        5.4.6 js
+        5.4.7 lib
+        5.4.8 output
+        5.4.9 tpl
+        5.4.10 twigcache
+
+
+1 Intended audience 
+--------------------
+This document is intended to help administrators of the stationery publishing system, with some notes to help potential developers too. This is not aimed at regular users of the system; sufficient documentation should be available on the site itself.
+
+2 Overview 
+-----------
+
+2.1 Usage Summary 
+==================
+Users log in to the publishing portal with their University credentials. They can select templates for business cards, letterhead and with compliments slips (and possibly other forms of stationery) appropriate to their department or the general University. The users can edit the stationery templates to include personal details, and view a proof pdf of the stationery. When satisfied, they enter their order details including delivery address and THEMIS code. Behind the scenes, an email is sent to the user with information about the order. Additional emails which also include a print-quality pdf are sent to the printer and the administration staff. The order is retained in a history section for each user.
+
+Administration staff can additionally modify departments, templates, stationery categories, and prices using the application.
+
+2.2 Systems 
+============
+There are three connected systems in the stationery portal: 
+
+2.2.1 publishing portal 
+~~~~~~~~~~~~~~~~~~~~~~~~
+The publishing portal is the system described in these notes. It connects to the database and the Chili publishing system (via SOAP calls).
+
+2.2.2 Chili publishing system 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This is the system which contains the print templates which can be modified.
+
+2.2.3 Database 
+~~~~~~~~~~~~~~~
+The database holds information about jobs, users, departments, templates and prices. Administrators can modify this information through the publishing portal
+
+3 For administrators 
+---------------------
+
+3.1 day to day operation 
+=========================
+As users complete their requests, emails will be sent by the system to all on the stationery-production@lists.unimelb.edu.au mailing list (see '[How do I...change the admin email address]' if you want to change it). These emails contain information about the orders and include a link to the zip file which contains the print pdf and a text note about the order (these are stored in the [output/ folder]). This zip file is intended for the printer. The system doesn't do more than compose the order information and pdf and notify you. Actually getting this information to the printer is not automated beyond the email list.
+
+[How do I...change the admin email address]: sec-4-4
+[output/ folder]: sec-5-4-8
+
+3.2 modifying templates, department 
+====================================
++ click on 'Modify Template' or 'Modify Department' in the Administration menu
+you can edit or add by pressing the buttons; or delete one or more items by marking the checkbox and clicking the 'Delete marked...' button near the bottom of the screen.
+
+3.3 modifying categories 
+=========================
++ click on 'Modify Category' in the Administration menu
+Deleting categories works as above.
+Adding or modifying categories have some additional steps.
+
+3.3.1 is_active 
+~~~~~~~~~~~~~~~~
+When you add or modify categories, there is a field called 'is_active'. This should be either 'yes' or 'no'. If it is 'yes' and the new category has at least one template associated with it, it will appear in the 'select template' screen using the default image. Otherwise, it will remain hidden to users. See also '[How do I...add a standard picture for a category]'
+
+[How do I...add a standard picture for a category]: sec-4-1
+
+3.3.2 view template_price 
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+This takes you to a similar add/edit/modify screen for Template prices for particular categories. These screens work as with [other similar screens] except that they are connected to a particular category.
+
+[other similar screens]: *modifying templates department
+
+3.4 modifying administrators 
+=============================
++ click on 'Admin access' in the Administrator menu
+You will see two lists. The first list, each item of which has a ticked checkbox next to it, is the administrators, who have access to all of the administrative functions. The second list is that of regular users. 'Ticked' users are administrators, so removing a tick from an administrator or adding a tick to a non-administrator followed by the 'Update' button will change the lists.
+
+4 How do I...? 
+---------------
+
+4.1 add a standard picture for a category 
+==========================================
++ add your image to the images/ folder with a name like: 'mycategory-thumb-220x160.png'
++ find the Id number for your new category at [http://stationery.staff.unimelb.edu.au/index.php?mode=category_admin]
++ edit the tpl/template.html file
+  + above the text '<!-- insert new default images here -->'insert the following lines:
+
+
+  {% elseif category_info.category_id == Id %}
+  {% set category_image_url = '/images/mycategory-thumb-220x160.jpg' %}
+
+
+4.2 change the contents of the user email 
+==========================================
+edit the file tpl/email.txt for wording changes
+
+4.3 change the contents of the admin email 
+===========================================
+edit the file tpl/admin_email.html
+
+4.4 change the admin email address 
+===================================
+Currently stationery-production@lists.unimelb.edu.au mailing list. You can change it by editing the file includes/email_admin.inc.php. Replace 'stationery-production@lists.unimelb.edu.au' with 'your-new-email@unimelb.edu.au'. Be careful to enclose the email address in quotation marks, as below:
+
+
+  <?php
+  define("ADMIN_EMAIL", 'stationery-production@lists.unimelb.edu.au');
+  ?>
+
+5 For developers 
+-----------------
+
+5.1 locations 
+==============
+
+5.1.1 php-enabled web server 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sftp to [your-unimelb-username]@beacon1-publish.its.unimelb.edu.au
+cd to stationery.staff.unimelb.edu.au
+* technical requirements/environment 
+  + PHP 5
+    + PDO enabled for MySQL
+    + Twig
+    + cgiapp2 (in lib folder)
+    + SOAP XML
+  
+
+5.1.2 database 
+~~~~~~~~~~~~~~~
+MySQL server
+located on beacon1.its.unimelb.edu.au
+database is chili
+user is chili_user
+password info is in includes/dbconnect
+
+5.2 the code 
+=============
+The main parts of code you are likely to change:
+
+5.2.1 github repository 
+~~~~~~~~~~~~~~~~~~~~~~~~
+[https://github.com/pmgm/stationery_portal] is the repo for the whole website. The repo is mine and I won't give you push access, but you can pull from it, fork it, send pull requests or whatever.
+
+5.2.2 lib/cgiapps/stationery.class.php 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This is a cgiapp2 subclass and the main repository of code. Here's the basics of what you need to know to work with cgiapp.
+1. Each screen of the app (called a /mode/) is mapped to a *public function* in stationery.class.php
+   + except for setup(), teardown(), handle_errors(), which are reserved for the application and do exactly what they say.
+2. the modes are mapped to functions by an internal variable, $this->run_modes, defined in setup()
+3. You can access a particular mode via the url index.php?mode=X where X is the mode name.
+4. no functions except the modes can be accessed from outside the application via URL parameters
+5. Each mode outputs values to a template, in this case using the Twig template system
+6. The templates are located in the tpl/ folder.
+
+5.2.3 login code 
+~~~~~~~~~~~~~~~~~
+A separate but integrated system is used for the University login (through LDAP). These files are connected with the unimelb LDAP login to the system. They are the top-level files checkin.php, loggedout.php, login.php, logout.php, plus some php code in the lib/ and includes/ folder
+
+5.3 the twig templates 
+=======================
+The templates contain all of the HTML and email output of the application, modified by website's css and js. They output as normal HTML after being interpreted by the stationery application.
+Good docs for Twig are found at [http://twig.sensiolabs.org/]
+The templates contain a mixture of 
++ text, which in most cases is HTML
++ values sent from the stationery.class.php app enclosed {{ thusly|filter }}. 
+  + The /filter/ if present is a Twig enhancement or change to the value.
++ twig functions like {% this %} which include branches and loops, include files and extensions.
+
+One key feature of twig is their /extensibility/. For example, base.html (which has unimelb page boilerplate) defines a /content/ block. Another template, start.html, begins with {% extends "base.html" %} That means it gets all the text of base.html, and overrides blocks which are specified locally, eg the 'content' block. Therefore templates can be 'DRY' without too much effort.
+
+5.4 Files and folders 
+======================
+The important files and folders in the directory
+
+5.4.1 checkin.php, loggedout.php, login.php, logout.php 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+These files are connected with the unimelb LDAP login to the system
+
+5.4.2 css 
+~~~~~~~~~~
+Stylesheets are found here
+
+5.4.3 images 
+~~~~~~~~~~~~~
+Images used by the website are all in here
+
+5.4.4 includes 
+~~~~~~~~~~~~~~~
+This folder includes specific settings for each server. Nothing in here should ever be version-controlled in github.
++ chili.inc.php: connection details for the chili app
++ dbconnect.inc.php: username and password for the local database
++ email_admin.inc.php: an email address to send administrator emails
++ libpath.inc.php: defines the path from the local web root
++ ldapconnect.inc.php: LDAP information for login
++ login_session_updater.class.php, passport.php: used by the university login system
++ storage.inc.php: defines the location to store uploaded files from the system
+
+5.4.5 index.php 
+~~~~~~~~~~~~~~~~
+The start page. This simply loads and runs the Stationery application
+
+5.4.6 js 
+~~~~~~~~~
+javascript libraries and scripts
+
+5.4.7 lib 
+~~~~~~~~~~
+PHP code is stored here, especially in cgiapps/stationery.class.php, which is where most of the stationery application happens.
+
+5.4.8 output 
+~~~~~~~~~~~~~
+output PDFs are stored here (as configured by includes/storage.inc.php)
+
+5.4.9 tpl 
+~~~~~~~~~~
+The HTML files for the various pages of the app are stored here. They use a system called Twig ([http://twig.sensiolabs.org/]). Values from the application are sent to the templates, appearing {{ between double curly brackets }}. Everything else appears on the screen as is, except for {% twig commands %} and {# comments #}
+
+5.4.10 twigcache 
+~~~~~~~~~~~~~~~~~
+The twig templating system uses this directory to cache and speed up templates

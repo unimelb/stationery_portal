@@ -120,7 +120,14 @@ class Stationery extends Cgiapp2 {
     else {
       $twig_options['cache'] = false;
     }
-    
+    /* for testing, 
+     * make auto_reload true and cache false
+     */
+    $testing = false;
+    if($testing) {
+      $twig_options["auto_reload"] = true;
+      $twig_options['cache'] = false;
+    }
     $this->twig = new Twig_Environment($this->loader, $twig_options);
     /* allows twig to parse object values as arrays */
     $this->twig->addFilter(new Twig_SimpleFilter('cast_to_array', function ($stdClassObject) { return (array)$stdClassObject; }));
@@ -163,7 +170,8 @@ class Stationery extends Cgiapp2 {
 			   'template_price_admin' => 'modifyTemplate',
 			   'add_item' => 'addItem',
 			   'update_item' => 'updateItem',
-			   'delete' => 'confirmDelete'
+			   'delete' => 'confirmDelete',
+			   'admin_guide' => 'showGuide'
 			   ));
     // should be an entry for each of the run modes above
     $this->run_modes_default_text = array(
@@ -180,10 +188,10 @@ class Stationery extends Cgiapp2 {
 					  'department_admin' => 'Modify Departments',
 					  'category_admin' => 'Modify Categories',
 					  'administrator_admin' => 'Administrator access',
-					  'analytics_admin' => 'Analytics',
 					  'add_item' => 'Create new item',
 					  'update_item' =>'Update item',
-					  'delete' => 'Confirm delete'
+					  'delete' => 'Confirm delete',
+					  'admin_guide' => 'Administrator Guide'
 					  );
     $this->user_visible_modes = array(
 			      'template' => 'Select Template',
@@ -193,7 +201,8 @@ class Stationery extends Cgiapp2 {
 			   'template_admin' => 'Modify Template',
 			   'category_admin' => 'Modify Category',
 			   'department_admin' => 'Modify Department',
-			   'administrator_admin' => 'Admin access'
+			   'administrator_admin' => 'Admin access',
+			   'admin_guide' => 'Guide'
 			   );
     $this->start_mode('start');
     $this->error_mode('handle_errors');
@@ -1854,6 +1863,21 @@ function modifyTemplate() {
 			     ));
   return $output;
 }
+/* shows the administrator guide */
+function showGuide() {
+  if (!$this->isAdmin()) {
+    return $this->showStart();
+  }
+  /* screen output*/
+  $t = 'admin-guide.html';
+  $t = $this->twig->loadTemplate($t);
+  $output = $t->render(array(
+			     'modes' => $this->user_visible_modes,
+			     'error' => $this->error
+			     ));
+  return $output;
+}
+
 function modifyDepartment() {
   $_REQUEST['entity'] = 'Department';
   return $this->modifyTemplate();

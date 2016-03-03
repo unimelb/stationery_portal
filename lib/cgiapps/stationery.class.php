@@ -1141,7 +1141,7 @@ function showConfirmation() {
   $quantities = $this->getPricelistFromJob($job_id);
   $stationery_title = "To print: " . $stationery_type;
   /* this comment is used in showFinal also */
-  $pick_up_comment = ' Please pick up from Marketing Office.';
+  $pick_up_comment = ' Please pick up from External Relations.';
   $t = 'confirm.html';
   $t = $this->twig->loadTemplate($t);
   $output = $t->render(array(

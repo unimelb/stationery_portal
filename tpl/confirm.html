@@ -2,6 +2,7 @@
 
 {% block title %}Confirm order{% endblock %}
 {% block content %}
+{% set defaultthemiscode = '5812' %}
 <!-- <p>Confirm order and take final details</p>
 <p>Requires:</p>
 <ul>
@@ -25,12 +26,20 @@
 		</select>
 		
 		<label class="col-2" for="themis">THEMIS code</label>
-		<input class="col-3" name="themis" maxlength="32" placeholder="xx-xxxx-xx-5573-xxxxxx-xxx-xx-xx" required = "required">
+		<input class="col-3" name="themis" maxlength="32" placeholder="xx-xxxx-xx-{{ defaultthemiscode }}-xxxxxx-xxx-xx-xx" required = "required">
 		<hr />
-		<note class="col-3 push-2">Please ensure the natural account code 5573 is used.</note>
+		<note class="col-3 push-2">Please ensure the natural account code {{ defaultthemiscode }} is used.</note>
+		<label class="col-2" for="approver">THEMIS approver</label>
+		<input class="col-3" name="approver" required="required">
+		<hr />
+		<note class="col-3 push-2">Name of the Financial
+      Approver (person with financial delegations) of the above Themis
+      string</note>
+		       
+		  
 	</fieldset>
 
-	  <label class="col-2">Collect from Marketing Office?</label>
+	  <label class="col-2">Collect from External Relations?</label>
 	  <div class="follower col-3">
 	  <label for="collecty">
 	    <input type="radio" name="collect" id="collecty" value="yes" />Yes -- you will be notified by email when your item is ready for collection.</label>
@@ -82,7 +91,7 @@ $("[name='themis']").keyup(function(event){
 			       if (countdown >-1 && event.target.value.length == reversed[countdown]) {
 				   event.target.value += "-";
 				   if (reversed[countdown] == 10){
-				       event.target.value += "5573-";
+				       event.target.value += "{{ defaultthemiscode }}-";
 				   }
 			       }
 			       else if (event.target.value.length > reversed[countdown]){

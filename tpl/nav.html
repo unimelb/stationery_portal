@@ -1,7 +1,6 @@
-<div class="nav-bar">
-  <ul>
+
     {% if modes|length > 2 %}
-		<li><a class="index" id="area_index-toggle" href="">Administration</a></li>
+<li><a href="/">Administration</a>{% include 'admin_menu_nav.html' %}</li>
     {% for key,value in modes|slice(-2) %}
     <li><a href="index.php?mode={{ key }}">{{ value }}</a></li>
     {% endfor %}
@@ -11,7 +10,7 @@
     {% endfor %}
     {% endif %}
     <li><strong><a href="logout.php">Sign out</a></strong></li>
-  </ul>
 
-</div>
+
+
 

@@ -1,8 +1,8 @@
-<div class="index_expand push-5">
-	<ul>
-		{% for key,value in modes|slice(0,5) %}
-		<li><a href="index.php?mode={{ key }}">{{ value }}</a></li>
-		{% endfor %}
-	</ul>
-	<hr />
+<div class="inner">
+  <ul>
+    {% for key,value in modes|slice(0,5) %}
+    <li><a href="index.php?mode={{ key }}">{{ value }}</a></li>
+    {% endfor %}
+  </ul>
 </div>
+

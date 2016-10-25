@@ -7,7 +7,7 @@
 <div id="order-history">
 	<ul class="order">
 		{% for job in jobs %}
-		<li><span class="order-left"><span class="job-id">{{ job.job_id }}.</span><a class="button" href="{{ job.url }}">Re-order</a></span><span class="order-right"><span class="job-order">{{ job.quantity }} x {{ job.template_name }}</span><span class="date">Last Ordered: {{ job.ordered }}</span></span></li>
+		<li class="no-li"><span class="job-id">&#35;{{ job.job_id }}.</span> <a href="{{ job.url }}">Re-order</a> <span class="job-order">{{ job.quantity }} x {{ job.template_name }}</span>, <span class="date">last ordered: {{ job.ordered }}</span></li>
 		{% endfor %} 
 	</ul>
 </div>
@@ -15,12 +15,10 @@
 <div id="order-history">
 	<ul class="order">
 		{% for job in incomplete %}	
-		<li><span class="order-left"><span class="job-id">{{ job.job_id }}.</span><a class="button" href="{{ job.url }}">Update</a></span><span class="order-right"><span class="job-unsub">{{ job.template_name }}</span></span></li>
+		<li class="no-li"><span class="job-id">&#35;{{ job.job_id }}.</span> <a href="{{ job.url }}">Update</a> <span class="job-unsub">{{ job.template_name }}</span></li>
 {% endfor %}
 	</ul>
 </div>
 {% endif %}
 {% endblock content %}
-{% block nav %}
-{% include 'nav.html' %}
-{% endblock nav %}
+

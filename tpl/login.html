@@ -2,15 +2,18 @@
 {% block title %}University Stationery login{% endblock %}
 {% block content %}
 {{ notice | raw }}
-	<p>&nbsp;</p>
 	<form method="post" action="checkin.php" id="login_form_login_prompt" style="z-index:1000;">
 		<fieldset>
-			<h3>Please login using your Unimelb staff credentials</h3>
-			<legend>Please login using your Unimelb staff credentials</legend>
-			<label for="userName" class="col-2">Username</label> <span class="col-3"><input id="userName" name="userName" type="text" size="30" /></span>
-			<label for="pw" class="col-2">Password</label> <span class="col-3"><input id="pw" name="pw" type="password" size="30" value="" /></span>
-			<hr>
-			<span class="push-2 col-3"><input type="submit" value="Login" id="log_in_out_button" /></span>
+		  <legend>Please login using your Unimelb staff credentials</legend>
+		  <div>
+		    <label for="userName">Username</label><input aria-required="true" data-error="Please enter your user name." id="userName" name="userName" type="text" size="30" />
+		  </div>
+		  <div>
+		    <label for="pw">Password</label><input aria-required="true" data-error="Please enter your unimelb password." id="pw" name="pw" type="password" size="30" value="" />
+		  </div>
 		</fieldset>
+		<footer>
+		  <input type="submit" value="Login" id="log_in_out_button" />
+		</footer>
 	</form>
 {% endblock %}

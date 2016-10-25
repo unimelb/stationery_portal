@@ -1,137 +1,40 @@
-<!DOCTYPE HTML>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>University Stationery : Marketing : The University of Melbourne</title>  
+{% extends "base.html" %}
+{% block title %}Edit template{% endblock %}
+{% block content %}
+<script>
 
-<!-- Authoriser and maintainer related meta data - developers, don't forget humans.txt   -->
-  <meta name="DC.Creator" content="The University of Melbourne">
+      var editor;
 
-  <meta name="UM.Authoriser.Name" content="">
-  <meta name="UM.Authoriser.Title" content="">
-  <meta name="UM.Maintainer.Name" content="">
-  <meta name="UM.Maintainer.Department" content="">
-  <meta name="UM.Maintainer.Email" content="">
-<!-- End authoriser and maintainer meta data -->
-<!-- Static meta data   -->
-  <meta name="DC.Rights" content="http://www.unimelb.edu.au/disclaimer">
-  <meta name="DC.Publisher" content="The University of Melbourne">
-  <meta name="DC.Format" content="text/html">
-  <meta name="DC.Language" content="en">
-  <meta name="DC.Identifier" content="http://www.unimelb.edu.au/">
-<!-- End static meta data -->
-<!-- Meta data to be autofilled -->
-  <meta name="DC.Date" content="">
-  <!--#config timefmt="%Y-%m-%d" --><meta name="DC.Date.Modified" content="<!--#echo var='LAST_MODIFIED' -->">
-<!-- End meta data to be autofilled -->
-  <meta content="width=device-width; initial-scale=0.67;" name="viewport">
+      function GetEditor()
+      {
+      if (document.getElementsByTagName("iframe").length > 0)
+      {
+      if (document.getElementsByTagName("iframe")[0].src != "")
+      {
+      frameWindow = document.getElementsByTagName("iframe")[0].contentWindow;
+      frameWindow.GetEditor(EditorLoaded);
+      }
+      }
+      }
 
-  <!-- GLOBAL RESOURCES -->
-  <!-- DO NOT CHANGE -->
-    <link rel="stylesheet" href="http://brand.unimelb.edu.au/web-templates/LATEST/css/complete.css">
-    <script src="http://brand.unimelb.edu.au/web-templates/LATEST/js/complete.js"></script>
-    <script src="http://brand.unimelb.edu.au/global-header/js/injection.js"></script>
-  <!-- /GLOBAL RESOURCES -->
-  <link rel="stylesheet" href="css/custom.css" media="screen">
-  <script type="text/javascript" src="js/custom.js"></script>
+      function EditorLoaded(jsInterface)
+      {
+      editor = frameWindow.editorObject;
+      }
+
+    </script>
+<p><strong>Step 1:</strong> Enter details to the left<br />
+  <strong>Step 2:</strong> Save stationery<br />
+  <strong>Step 3:</strong> Proof stationery as PDF<br />
+  <strong>Step 4:</strong> Once proof approved, submit order</p>
+
+<div id="buttons">
+  <a class="button" href="{{ proofurl }}">Proof PDF</a> <a class="button" href="{{ submiturl }}">Submit Order</a>
+</div>
 
 
-<script type="text/javascript">
 
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-9675738-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
-</head>
-<body class="no-logo sub-page">
-	
-	<div class="wrapper no-bottom">
-		
-    <div id="header" class="header">
-      
-      <div class="hgroup">
-        <h1><a href="/" title="University Stationery">University Stationery</a><br />&nbsp;</h1>
-				<div class="home-profile-wrapper">
-					{% include 'home-profile.html' %}
-				</div>
-      </div>
-      <div class="nav-wrapper">
-				{% include 'menu.html' %}
-      </div>
-    </div>
-
-		<h2>{% block title %}University Stationery{% endblock %}</h2>
-				
-	</div>
-	
-	<div class="wrapper short">
-		<div id="instructions">
-			<p><strong>Step 1:</strong> Enter details to the left<br />
-				<strong>Step 2:</strong> Save stationery<br />
-				<strong>Step 3:</strong> Proof stationery as PDF<br />
-				<strong>Step 4:</strong> Once proof approved, submit order</p>
-		</div>
-		<div id="buttons">
-			<a class="button" href="{{ proofurl }}">Proof PDF</a> <a class="button" href="{{ submiturl }}">Submit Order</a>
-		</div>
-	</div>
-		
-		<div class="edit" id="main">
-			<div id="content">
-				{% block error %}
-					{{(error|default(''))|raw}}
-				{% endblock %}
-				
-				<script>
-
-				var editor;
-
-				function GetEditor()
-				{
-				    if (document.getElementsByTagName("iframe").length > 0)
-				    {
-				      if (document.getElementsByTagName("iframe")[0].src != "")
-				      {
-				         frameWindow = document.getElementsByTagName("iframe")[0].contentWindow;
-				         frameWindow.GetEditor(EditorLoaded);
-				      }
-				    }
-				}
-
-				function EditorLoaded(jsInterface)
-				{
-				    editor = frameWindow.editorObject;
-				}
-
-				</script>
-				<iframe id="iframe" width="100%" height="800" onload="GetEditor()" src="{{ iframesrc }}" />			</div>
-		<!-- http://011s-chili-web.its.unimelb.edu.au/CHILI//Client_48/editor.aspx?doc=de5fa915-9376-4bf9-bc2b-fbec8195c5c1&ws=149598f7-4881-4fbf-86e5-675257f7f4c3&apiKey=ri6ggxyqdA5j5+xyptuoFYOP00geV025dCXweXgdPnoWgWBzMICHzC+7Z87CGpqWF2NvpcC_tdBJuYYfCsovKg&username=Anonymous&password= -->
-		<div class="wrapper">
-			<div class="aside col-2">
-				<h3>Having a Problem with this Portal?</h3>
-				<p><strong>UOM Chili Publish Admin</strong><br />
-					<strong>Email:</strong> <a href="mailto:&#x63;&#x68;&#x69;&#x6C;&#x69;&#x40;&#x6C;&#x69;&#x73;&#x74;&#x73;&#x2E;&#x75;&#x6E;&#x69;&#x6D;&#x65;&#x6C;&#x62;&#x2E;&#x65;&#x64;&#x75;&#x2E;&#x61;&#x75;">chili@lists.unimelb.edu.au</a></p>
-				<hr class="visible" />
-				<!-- {% block nav %}
-				{% endblock nav %} -->
-				<hr /><br />
-				<p><a class="icon document large" href="http://marketing.unimelb.edu.au/upto/"><strong>Looking for</strong>UPTO?</a></p>
-				<hr />
-			</div>
-			<hr>
-		</div>
-	</div>
-  <hr>
-  <div class="footer">
-    {% include 'mcd-footer.html' %}
-  </div>
-</body>
-</html>
+  <div class="fullwidth">
+    <iframe id="iframe" width="100%" height="800" onload="GetEditor()" src="{{ iframesrc }}" /></div>
+  <!-- http://011s-chili-web.its.unimelb.edu.au/CHILI//Client_48/editor.aspx?doc=de5fa915-9376-4bf9-bc2b-fbec8195c5c1&ws=149598f7-4881-4fbf-86e5-675257f7f4c3&apiKey=ri6ggxyqdA5j5+xyptuoFYOP00geV025dCXweXgdPnoWgWBzMICHzC+7Z87CGpqWF2NvpcC_tdBJuYYfCsovKg&username=Anonymous&password= -->
+  {% endblock %}

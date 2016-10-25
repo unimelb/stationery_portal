@@ -2,55 +2,68 @@
 
 {% block title %}Your Profile{% endblock %}
 {% block content %}
+<h3>Username: <span class="username">{{ user }}</span></h3>
 {% if first_time == true %}
-<p><span class="important">IMPORTANT:</span> Before you start using University Stationery, you must set up a profile by completing the form below.</p>
+<p class="alert-warning">IMPORTANT: Before you start using University Stationery, you must set up a profile by completing the form below.</p>
 {% endif %}
-<form action="{{ action }}" method="POST">
-	<fieldset class="personal-details">
-		<h3>Username: <span class="username">{{ user }}</span></h3>
-		<label class="col-2" for="firstname">First name</label>
-		<input class="col-3" name="firstname" id="firstname" required="required" value="{{ first_name }}" />
-		<label class="col-2" for="lastname">Last name</label>
-		<input class="col-3" name="lastname" id="lastname" required="required" value="{{ surname }}" />
-		<label class="col-2" for="phone">Telephone</label>
-		<input class="col-3" name="phone" id="phone" required="required" value="{{ phone }}"/>
-		<label class="col-2" for="email">Email</label>
-		<input class="col-3" type="email" name="email" id="email" required="required" value="{{ email }}" />
-	</fieldset>
-	
-	
-	
-	<p class="align-left">The system automatically grants access to the approved University of Melbourne corporate style for stationery.</p>
-	<p class="align-left">If you require access to other templates, such as those for Faculties or Graduate Schools, please select from the list below:</p>
-	<fieldset>
-<div class = "col-3 first">
-		{% for department in departments1 %}
-<label class="col-3" style="text-align: left;"><input type="checkbox" name="department-{{ department.department_id }}" value="{{ department.department_id }}" {% if department.department_id in active_depts %}checked="checked"{% endif %}/>
-		{% if department.acronym is not empty %}<abbr title="{{ department.name }}">{{ department.acronym }}</abbr>{% else %}{{ department.name }}
-		{% endif %}
-</label>
-		{% endfor %}
-</div>
-<div class = "col-3">
-{% for department in departments2 %}
-<label class="col-3" style="text-align: left;"><input type="checkbox" name="department-{{ department.department_id }}" value="{{ department.department_id }}" {% if department.department_id in active_depts %}checked="checked"{% endif %}/>
-		{% if department.acronym is not empty %}<abbr title="{{ department.name }}">{{ department.acronym }}</abbr>{% else %}{{ department.name }}
-		{% endif %}
-</label>
-		{% endfor %}
-</div>
-	</fieldset>
+<form action="{{ action }}" method="post">
+  <fieldset class="personal-details">
+    <legend>Please update your personal details</legend>
 
-	<label><input class="col-2 first" name="submitted" type="submit" value="Update details"></label>
-	<!-- <div  class="col-5"> -->
-	<h4 style="color:#cc0000;border-bottom:none;text-align:left !important;margin-left:0;">Once you UPDATE DETAILS you can<br />
-		<a href="index.php?mode=template" class="button">Select a Template</a></h4>
-	<!-- </div> -->
-	
-	
+    <div>
+      <label for="firstname">First name</label>
+      <input type="text" name="firstname" id="firstname" aria-required="true" value="{{ first_name }}" data-error="Please enter your first name" />
+    </div>
+    <div>
+      <label for="lastname">Last name</label>
+      <input type="text" name="lastname" id="lastname" aria-required="true" value="{{ surname }}" data-error="Please enter your family name"/>
+    </div>
+    <div>
+      <label for="phone">Telephone</label>
+      <input type="text" name="phone" id="phone" aria-required="true" value="{{ phone }}" data-error="A contact phone number is required here"/>
+    </div>
+    <div>
+      <label for="email">Email</label>
+      <input type="email" name="email" id="email" aria-required="true" value="{{ email }}" data-error="Please enter an email address"/>
+    </div>
+  </fieldset>
+  
+  
+  
+  <p>The system automatically grants access to the approved University of Melbourne corporate style for stationery.</p>
+  <p class="alert-info">If you require access to other templates, such as those for Faculties or Graduate Schools, please select from the list below</p>
+  <fieldset>
+    <legend>Select desired department templates</legend>
+    <div class="half">
+      <section>
+	{% for department in departments1 %}
+	<div class="inline">
+	  <input type="checkbox" id="department-{{ department.department_id }}" name="department-{{ department.department_id }}" value="{{ department.department_id }}" {% if department.department_id in active_depts %}checked="checked"{% endif %}/>
+	  <label for="department-{{ department.department_id }}">
+	    <span>{% if department.acronym is not empty %}<abbr title="{{ department.name }}">{{ department.acronym }}</abbr>{% else %}{{ department.name }}
+	      {% endif %}</span>
+	  </label>
+	</div>
+	{% endfor %}
+      </section>
+      <section>
+	{% for department in departments2 %}
+	<div class="inline">
+	  <input type="checkbox" id="department-{{ department.department_id }}" name="department-{{ department.department_id }}" value="{{ department.department_id }}" {% if department.department_id in active_depts %}checked="checked"{% endif %}/>
+	  <label for="department-{{ department.department_id }}">
+	    <span>{% if department.acronym is not empty %}<abbr title="{{ department.name }}">{{ department.acronym }}</abbr>{% else %}{{ department.name }}
+	      {% endif %}</span>
+	  </label>
+	</div>
+	{% endfor %}
+      </section>
+    </div>
+  </fieldset>
+  <footer>
+    <label><input name="submitted" type="submit" value="Update details"></label>
+  </footer>
+  <p>Once you have UPDATED DETAILS</p>
+  <p><a href="index.php?mode=template" class="button-small with-arrow cta">Select a Template</a></p>
 </form>
-
 {% endblock %}
-{% block nav %}
-{% include 'nav.html' %}
-{% endblock nav %}
+

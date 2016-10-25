@@ -40,6 +40,9 @@
       <div class="page-inner">
 	
 	<div role="main">
+	  <header>
+	  	    <h1>University Stationery</h1>
+	  </header>
 	  <div class="no-js" id="sitemap" role="navigation">
 	    <h2>Stationery navigation</h2>
 	    <ul>
@@ -47,32 +50,32 @@
 	      {% include 'nav.html' %}
 	    </ul>
 	  </div>
-          <h1><a href="/" title="University Stationery">University Stationery</a></h1>
 	  
-	  <h2>{% block title %}University Stationery{% endblock %}</h2>
-	  
-
-	    <section>
-	      {% block error %}
-	      {{(error|default(''))|raw}}
-	      {% endblock %}
-	      
-	      {% block content %}
-	      <p>Hello Giles!</p>
-	      {% endblock %}
-	    </section>
+	  <section>
+	    <h2>{% block title %}University Stationery{% endblock %}</h2>
+	    {% block error %}
+	    {{(error|default(''))|raw}}
+	    {% endblock %}
 	    
+	    {% block content %}
+	    <p>Hello Giles!</p>
+	    {% endblock %}
+	  </section>
+	  <div class="half">
 	    <section>
 	      <h3>Having a Problem with this Portal?</h3>
 	      <p><strong>UOM Chili Publish Admin</strong><br />
 		<strong>Email:</strong> <a href="mailto:&#x63;&#x68;&#x69;&#x6C;&#x69;&#x40;&#x6C;&#x69;&#x73;&#x74;&#x73;&#x2E;&#x75;&#x6E;&#x69;&#x6D;&#x65;&#x6C;&#x62;&#x2E;&#x65;&#x64;&#x75;&#x2E;&#x61;&#x75;">chili@lists.unimelb.edu.au</a></p>
-	      <div data-icon="mail">
-		<a class="icon envelope" href="/ordering-envelopes.html" target="_blank">Order Envelopes?</a>
-	      </div>
-	      <div data-icon="computer">
-		<a href="http://marketing.unimelb.edu.au/upto/">University Publishing Templates Online?</a>
-	      </div>
 	    </section>
+	    <section>
+	      <p>
+		Looking to <a href="/ordering-envelopes.html" target="_blank">Order Envelopes?</a>
+	      </p>
+	      <p>
+		Looking for <a href="http://marketing.unimelb.edu.au/upto/">University Publishing Templates Online?</a>
+	      </p>
+	    </section>
+	  </div>
 
 
 	</div>

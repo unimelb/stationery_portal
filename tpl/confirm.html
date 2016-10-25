@@ -16,121 +16,146 @@
 <p>sends proof and job data to temporary storage area</p>
 <p>redirect to <a href="index.php?mode=final">final screen</a></p> -->
 <h3>{{ stationery }}</h3>
-<form action="{{ action }}" method="POST">
-	<fieldset class="order">
-		<h3>Order Information</h3>
-		<label class="col-2" for="quantity">Quantity and price</label>
-		<select name ="quantity" class="col-3">{% for item in quantities %}
+<form action="{{ action }}" data-validate="" method="POST">
+  <fieldset class="order">
+    <legend>Order Information</legend>
+    <div>
+		<label for="quantity">Quantity and price</label>
+		<select name ="quantity" aria-required="true" class="alt" data-error="Please select quantity required">{% for item in quantities %}
 		<option value="{{ item.quantity }}@{{ item.price_AUD|number_format(2, '.', ',') }}">{{ item.quantity }} : ${{ item.price_AUD|number_format(2, '.', ',') }}</option>
 {% endfor %}
 		</select>
-		
-		<label class="col-2" for="themis">THEMIS code</label>
-		<input class="col-3" name="themis" maxlength="32" placeholder="xx-xxxx-xx-{{ defaultthemiscode }}-xxxxxx-xxx-xx-xx" required = "required">
-		<hr />
-		<note class="col-3 push-2">Please ensure the natural account code {{ defaultthemiscode }} is used.</note>
-		<label class="col-2" for="approver">THEMIS approver</label>
-		<input class="col-3" name="approver" required="required">
-		<hr />
-		<note class="col-3 push-2">Name of the Financial
-      Approver (person with financial delegations) of the above Themis
-      string</note>
-		       
-		  
+    </div>
+    <div>
+		<label for="themis">THEMIS code</label>
+		<input type="text" name="themis" maxlength="32" placeholder="xx-xxxx-xx-{{ defaultthemiscode }}-xxxxxx-xxx-xx-xx" aria-required="true" data-error="Please enter a correct THEMIS code xx-xxxx-xx-{{ defaultthemiscode }}-xxxxxx-xxx-xx-xx" />
+		<p class="alert-warning">Please ensure the natural account code {{ defaultthemiscode }} is used.</p>
+    </div>
+		<div>
+		<label for="approver">THEMIS approver</label>
+		<input type="text" name="approver" aria-required="true" data-error="Please enter THEMIS approver" />
+		<p class="alert-info">Name of the Financial
+		  Approver (person with financial delegations) of the above Themis code</p>
+		</div>
 	</fieldset>
-
-	  <label class="col-2">Collect from External Relations?</label>
-	  <div class="follower col-3">
-	  <label for="collecty">
-	    <input type="radio" name="collect" id="collecty" value="yes" />Yes -- you will be notified by email when your item is ready for collection.</label>
-	  
-	  <label for="collectn"><input type="radio" name="collect" id="collectn" value="no" />No</label>
+  <fieldset>
+    <div>
+	  <legend>Collect from External Relations?</legend>
+	  <div class="inline">
+	    <input type="radio" name="collect" id="collecty" value="yes" aria-required="true" data-error="Please choose yes or no"/>
+	    <label for="collecty"><span>Yes -- you will be notified by email when your item is ready for collection.</span></label>
 	  </div>
-	
-
-	
-	
-	<fieldset class="address">
-		<h3>Delivery Address</h3>
-		<label class="col-2" for="addressee">Addressee/Name</label>
-		<input class="col-3" name="addressee" id="addressee" required = "required">
-		<label class="col-2" for="location">Department/Location</label>
-		<input class="col-3" name="location" id="location" placeholder="eg. department, level, office no, etc" required="required" >
-		<label class="col-2" for="number">Street number</label>
-		<input class="col-3" name="number" id="number">
-		<label class="col-2" for="street">Street name</label>
-		<input class="col-3" name="street" id="street">
-		<label class="col-2" for="town">Campus/Suburb</label>
-		<input class="col-3" name="town" id="town" required = "required" >
-		<label class="col-2" for="postcode">Postcode</label>
-		<input class="col-3" name="postcode" id="postcode" required = "required">
+	  <div class="inline">
+	    <input type="radio" name="collect" id="collectn" value="no" />
+	    <label for="collectn"><span>No</span></label>
+	  </div>
+    </div>
+  </fieldset>
+  <fieldset class="address">
+    <legend>Delivery Address</legend>
+    <div>
+		<label for="addressee">Addressee/Name</label>
+		<input type="text" name="addressee" id="addressee" aria-required="true" data-error="Adressee is required" />
+    </div>
+    <div>
+		<label for="location">Department/Location</label>
+		<input type="text" name="location" id="location" placeholder="eg. department, level, office no, etc" aria-required="true" data-error="Please enter a department" />
+    </div>
+    <div>
+		<label for="number">Street number</label>
+		<input type="text" name="number" id="number" />
+    </div>
+    <div>
+		<label for="street">Street name</label>
+		<input type="text" name="street" id="street">
+    </div>
+    <div>
+		<label for="town">Campus/Suburb</label>
+		<input type="text" name="town" id="town" aria-required="true" data-error="Please enter suburb or campus" />
+    </div>
+    <div>
+		<label for="postcode">Postcode</label>
+		<input type="text" name="postcode" id="postcode" aria-required="true" data-error="Please supply a valid postcode" />
+    </div>
 		<!-- note that 2-letter country code is a field in the database, but deliveries are assumed to be in Australia for now 2014-02-07 -->
-	</fieldset>
+  </fieldset>
 	
 	<fieldset>
-		<h3>Additional information</h3>
-		<textarea class="col-6" name="comments" id="comments"></textarea>
+	  <legend>Additional information</legend>
+	  <div>
+	    <label for="comments">Comments relating to the delivery</label>
+	    <textarea name="comments" id="comments" placeholder="Extra information here"></textarea>
+	  </div>
 	</fieldset>
-	<hr />
-	<div class="pullout">
-		<p class="pullquote smaller align-center">Please check that all information entered above is correct before placing your order.</p>
-	</div>
-	<hr /><br />
+
+  <p class="alert-warning">Please check that all information entered above is correct before placing your order.</p>
+  <footer>
 	<input id="job" name="job" type="hidden" value="{{ job_id }}" />
-	<label><input class="button-text" name="submitted" type="submit" value="Place Order"></label>
+	<label><input name="submitted" type="submit" value="Place Order"></label>
+  </footer>
 </form>
 <script type="text/javascript">
-var reversed = [29, 26, 22, 10, 7, 2];
-var hyphen_count = reversed.length -1;
-var countdown = hyphen_count;
-var removehyphen;
-$("[name='themis']").keyup(function(event){
-			       if(event.target.value.length < 2){
-				   countdown = hyphen_count;
-			       }
-			       if (countdown >-1 && event.target.value.length == reversed[countdown]) {
-				   event.target.value += "-";
-				   if (reversed[countdown] == 10){
-				       event.target.value += "{{ defaultthemiscode }}-";
-				   }
-			       }
-			       else if (event.target.value.length > reversed[countdown]){
-				   countdown --;
-			       }
+  /* themisinator makes entering themis codes easy */
+  var reversed = [29, 26, 22, 10, 7, 2];
+  var hyphen_count = reversed.length -1;
+  var countdown = hyphen_count;
+  var removehyphen;
+  var themis = document.querySelectorAll("[name='themis']");
+  for(var i=0; i<themis.length; i++){
+				themis[i].addEventListener('keyup', function() {
+				if(event.target.value.length < 2){
+							       countdown = hyphen_count;
+							       }
+							       if (countdown >-1 && event.target.value.length == reversed[countdown]) {
+				event.target.value += "-";
+				if (reversed[countdown] == 10){
+				event.target.value += "{{ defaultthemiscode }}-";
+				}
+				}
+				else if(event.target.value.length > reversed[countdown]) {
+    countdown --;
+    }
     removehyphen = event.target.value.replace(/--/g, '-');
     event.target.value = removehyphen;
-			   }
-			  );
+    });
+    }
 </script>
 <script type="text/javascript">
 var comments_text = '{{ pick_up_comment }}';
 var old_comment = '';
 var new_comment = '';
-$("#collecty").click(function(event){
+
+document.querySelector("#collecty").addEventListener('click', function() {
 /* fill in address fields with default info */
-$("#addressee").val('{{ default_address.addressee }}');
-$("#location").val('{{ default_address.location }}');
-$("#number").val('{{ default_address.street_number }}');
-$("#street").val('{{ default_address.street }}');
-$("#town").val('{{ default_address.town }}');
-$("#postcode").val('{{ default_address.postcode }}');
+document.getElementById("addressee").value = '{{ default_address.addressee }}';
+document.getElementById("addressee").value = '{{ default_address.addressee }}';
+document.getElementById("location").value = '{{ default_address.location }}';
+document.getElementById("number").value = '{{ default_address.street_number }}';
+document.getElementById("street").value = '{{ default_address.street }}';
+document.getElementById("town").value = '{{ default_address.town }}';
+document.getElementById("postcode").value = '{{ default_address.postcode }}';
 /* add to comments */
-old_comment = $("#comments").val();
+old_comment = document.getElementById("comments").value;
 new_comment = old_comment + comments_text;
-$("#comments").val(new_comment);
+document.getElementById("comments").value = new_comment;
 /* disable address fields */
-$("fieldset.address input").attr("disabled", "disabled");
+var addressfields = document.querySelectorAll("fieldset.address input");
+for(var i=0; i< addressfields.length; i++) {
+    addressfields[i].setAttribute("disabled", "disabled");
+}
 });
-$("#collectn").click(function(event){
-/* enable address fields */
-$("fieldset.address input").removeAttr("disabled");
-old_comment = $("#comments").val();
-new_comment = old_comment.replace(comments_text, '');
-$("#comments").val(new_comment);
-$("fieldset.address input").val('');
+
+document.querySelector("#collectn").addEventListener('click', function() {
+    var addressfields = document.querySelectorAll("fieldset.address input");
+    for(var i=0; i< addressfields.length; i++) {
+	addressfields[i].removeAttribute("disabled");
+	addressfields[i].value = "";
+    }
+    old_comment = document.getElementById("comments").value;
+    new_comment = old_comment.replace(comments_text, '');
+    document.getElementById("comments").value = new_comment;
+    
 });
 </script>
 {% endblock %}
-{% block nav %}
-{% include 'nav.html' %}
-{% endblock nav %}
+

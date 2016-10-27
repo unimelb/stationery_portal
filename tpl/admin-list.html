@@ -20,16 +20,14 @@
 {% for key, value in item|cast_to_array %}
 <td>{{ value }}</td>
 {% endfor %}
-<td><a class="button" href="{{ editurl }}{% if item.id is defined %}{{ item.id }}{% else %}{% for key, value in item|cast_to_array %}&id[{{ key }}]={{ value }}{% endfor %}{% endif %}" aria-label="Edit {{ entity }} {% if item.id is defined %}{{ item.id }}{% else %}{% for key, value in item|cast_to_array %}{% if not loop.first %}, {% else %}with attributes {% endif %}{{ key }}:{{ value }}{% endfor %}{% endif %}">Edit</a></td>
+<td><a href="{{ editurl }}{% if item.id is defined %}{{ item.id }}{% else %}{% for key, value in item|cast_to_array %}&id[{{ key }}]={{ value }}{% endfor %}{% endif %}" aria-label="Edit {{ entity }} {% if item.id is defined %}{{ item.id }}{% else %}{% for key, value in item|cast_to_array %}{% if not loop.first %}, {% else %}with attributes {% endif %}{{ key }}:{{ value }}{% endfor %}{% endif %}">Edit</a></td>
 </tr>
 {% endfor %}
 </table>
 <label for="submitted">Confirmation required: </label>
 
-<input name="submitted" type="submit" value="Delete marked {{ plural }}"/>
+<input class="warning" name="submitted" type="submit" value="Delete marked {{ plural }}"/>
 </form>
 <p><a class="button" href="{{ addurl }}">Add new {{ entity }}</a></p>
 {% endblock %}
-{% block nav %}
-{% include 'nav.html' %}
-{% endblock nav %}
+

@@ -3,39 +3,41 @@
 {% block title %}Update {{ entity|title }}{% endblock %}
 {% block content %}
 <form action="{{ action }}" method="POST">
+  <fieldset>
 {% for property in properties %}
 {% set propertyno = loop.index0 %}
 {% if property is iterable %}
 {% for key, value in property %}
+<div>
 <label for="{{entity|lower}}_{{ key }}_id">{{ key|title }}</label>
-
-<select name="{{entity|lower}}_{{ key }}_id">
-{% for subentity in value %}
+<select name="{{entity|lower}}_{{ key }}_id" aria-label="Please select {{ key|title }}">
+  <optgroup>
+  {% for subentity in value %}
 <option value="{{ subentity.id }}"{% if subentity.id == item[propertyno] %} selected="selected"{% endif %}>{{ subentity.description }}</option>
 {% endfor %}
+  </optgroup>
 </select>
-
+</div>
 {% endfor %}
 {% else %}
+<div>
 <label for="{{entity|lower}}_{{ property }}">{{ property }}</label> 
-<input name="{{entity|lower}}_{{ property }}" value="{{ item[loop.index0] }}"{% if property == 'id' %} disabled="disabled"{% endif %} />
-
+<input type="text" name="{{entity|lower}}_{{ property }}" value="{{ item[loop.index0] }}"{% if property == 'id' %} disabled="disabled"{% endif %} />
+</div>
 {% endif %}
-<br />
 {% endfor %}
 <input type="hidden" name="entity" value="{{ entity|lower }}" />
 {% if parent_entity is not empty %}<input type="hidden" name="parent_entity" value="{{ parent_entity|lower }}" />{% endif %}
 {% if parent_id is not empty %}<input type="hidden" name="parent_id" value="{{ parent_id }}" />{% endif %}
-<input name="submitted" type="submit" value="Update this {{ entity }}"/>
-
+  </fieldset>
+  <footer>
+    <input name="submitted" type="submit" value="Update this {{ entity }}"/>
+  </footer>
 <!-- <p><a class="button" href="#">Create this {{ entity }}</a></p>-->
-
+  
 </form>
 {% if special.active %}
 <p><a class="button" href="{{ special.action }}">View {{ special.entity }}</a><p>
 {% endif %}
-<p><a class="button" href="{{ returnurl }}">Return to {{ entity }} administration</a><p>
+<p><a href="{{ returnurl }}">Return to {{ entity }} administration</a><p>
 {% endblock %}
-{% block nav %}
-{% include 'nav.html' %}
-{% endblock nav %}

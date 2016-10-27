@@ -43,18 +43,22 @@
 	  <header>
 	  	    <h1>University Stationery</h1>
 	  </header>
+	  {% block navmenu %}
 	  <div class="no-js" id="sitemap" role="navigation">
-	    <h2>Stationery navigation</h2>
+	    <h2>University Stationery</h2>
 	    <ul>
 	      {% include 'home-profile.html' %}
 	      {% include 'nav.html' %}
 	    </ul>
 	  </div>
+	  {% endblock %}
 	  
 	  <section>
 	    <h2>{% block title %}University Stationery{% endblock %}</h2>
 	    {% block error %}
+	    {% if error %}<div class="flash flash--info">
 	    {{(error|default(''))|raw}}
+	    </div>{% endif %}
 	    {% endblock %}
 	    
 	    {% block content %}

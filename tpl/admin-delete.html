@@ -18,13 +18,11 @@
 {% endfor %}
 {% if parent_entity is not empty %}<input type="hidden" name="parent_entity" value="{{ parent_entity|lower }}" />{% endif %}
 {% if parent_id is not empty %}<input type="hidden" name="parent_id" value="{{ parent_id }}" />{% endif %}
-<input name="submitted_confirm" type="submit" value="Yes - go ahead and delete"/>
+<footer>
+<input name="submitted_confirm" class="warning" type="submit" value="Yes - go ahead and delete"/>
+</footer>
 </form>
 {% else %}<p>Nothing to delete!<p>
 {% endif %}
-<p><a class="button" href="{{ returnurl }}">{% if item_list|length > 0 %}No, r{% else %}R{% endif %}eturn to {{ entity }} administration</a><p>
-
+<p><a class="button-small with-arrow" href="{{ returnurl }}">{% if item_list|length > 0 %}No, r{% else %}R{% endif %}eturn to {{ entity }} administration</a><p>
 {% endblock %}
-{% block nav %}
-{% include 'nav.html' %}
-{% endblock nav %}

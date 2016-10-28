@@ -1515,10 +1515,12 @@ function showFinal() {
  + comments 
   */
   $job_name = $this->getTemplateName($job_id);
+  $stationery_type = $this->getTemplateNameFromJob($job_id);
   /* db query needed here */
-   $textfilename = FILESTORE . $job_name . ".txt";
+  $textfilename = FILESTORE . $job_name . ".txt";
   $pdffilename = FILESTORE . $job_name . ".pdf";
   $zipfilename = FILESTORE . $job_name . ".zip";
+  $csvfilename = FILESTORE . $job_name . ".csv";
   /* get task id for the pdf creation*/
   $dom = new DOMDocument();
   $dom->loadXML($taskXML->DocumentCreatePDFResult);
@@ -1589,6 +1591,54 @@ function showFinal() {
     fwrite($file, $key . ": " . $value . PHP_EOL);
   }
   fclose($file);
+  /* generate csv file */
+  $userprofile = $this->getProfile($_SESSION["username"]);
+  $csv_headers = array(
+      'order number',
+      'date ordered',
+      'item',
+      'quantity',
+      'order by',
+      'order by email',
+      'themis code',
+      'themis approver',
+      'sell price',
+      'comments',
+      'adressee',
+      'location',
+      'street number',
+      'street',
+      'town',
+      'postcode'
+  );
+  $csv_data = array(
+      $ordernumber,
+      $today,
+      $stationery_type,
+      $quantity,
+      $userprofile->given_name . " " . $userprofile->family_name,
+      $userprofile->email,
+      $_REQUEST["themis"],
+      $_REQUEST["approver"],
+      $price,
+      $instructions 
+  );
+  foreach($address_info as $key=>$value) {
+      $csv_data[] = $value;
+  }
+  $csvunified = array($csv_headers, $csv_data);
+  if (count($csv_headers) == count($csv_data)) {
+      $file = fopen($csvfilename,'w');
+      if ($file === FALSE) {
+          $this->error = "Can’t open file! " . $csvfilename;
+      }
+      else {
+          foreach ($csvunified as $fields) {
+              fputcsv($file, $fields);
+          }
+          fclose($file);
+      }
+  }
   
   /* copy the pdf to the output folder */
   $ch = curl_init();
@@ -1604,7 +1654,7 @@ function showFinal() {
   curl_close($ch);
   file_put_contents( $pdffilename, $pdf );
   /*
- *** zip text and print pdf
+ *** zip text, csv and print pdf
  remove the original files, keep only the zip if possible
   */
   $zip = new ZipArchive;
@@ -1612,18 +1662,20 @@ function showFinal() {
   if ($res === TRUE){
     try {
       $zip->addFile($textfilename, str_replace(FILESTORE, '', $textfilename));
+      $zip->addFile($csvfilename, str_replace(FILESTORE, '', $csvfilename));
       $zip->addFile($pdffilename, str_replace(FILESTORE, '', $pdffilename));
       $zip->close();
       /* finally, remove the textfile and pdffile */
       unlink($textfilename);
       unlink($pdffilename);
+      unlink($csvfilename);
     } catch(Exception $e) {
       $this->error .= 'zip creation failed because of' . $e->getMessage();
     }
   }
   
-  $userprofile = $this->getProfile($_SESSION["username"]);
-  $stationery_type = $this->getTemplateNameFromJob($job_id);
+  
+  
   /* email client and admin with details about order
    * send admin url of zip file in output folder;
    * send client details of order*/

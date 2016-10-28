@@ -5,6 +5,7 @@ Your order confirmation is below.
 Your Order #{{ ordernumber }} (placed on {{ order_date }})
 {{ stationery_type }}
 {{ quantity }} @ ${{ price }}
+Charged to THEMIS code: {{ themis }}
 
 Delivery Address
 ================

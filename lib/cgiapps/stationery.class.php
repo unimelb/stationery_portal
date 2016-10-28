@@ -1563,18 +1563,19 @@ function showFinal() {
     $handling_cost = '';
     $cost_price = '';
   }
- 
+  $ordernumber = substr($job_name, 0, 4);
   $yaml_array =  array(
-		       'job information' => $job_name . "-print.pdf",
-		       'url' => $pdfurl,
-		       'quantity' => $quantity,
-		       'base cost' => $cost_price,
-		       'handling cost' => $handling_cost,
-		       'sell price' => $price,
-		       'date' => $today,
-		       'THEMIS code' => $_REQUEST["themis"],
-		       'comments' => $instructions
-		       );
+      'order number' => $ordernumber,
+      'url' => $pdfurl,
+      'quantity' => $quantity,
+      /*'base cost' => $cost_price,
+        'handling cost' => $handling_cost,*/
+      'sell price' => $price,
+      'date ordered' => $today,
+      'THEMIS code' => $_REQUEST["themis"],
+      'comments' => $instructions,
+      'job information' => $job_name . "-print.pdf"
+  );
     
   $file = fopen($textfilename,'w');
   if ($file === FALSE) {
@@ -1620,7 +1621,7 @@ function showFinal() {
       $this->error .= 'zip creation failed because of' . $e->getMessage();
     }
   }
-  $ordernumber = substr($job_name, 0, 4);
+  
   $userprofile = $this->getProfile($_SESSION["username"]);
   $stationery_type = $this->getTemplateNameFromJob($job_id);
   /* email client and admin with details about order
@@ -1638,7 +1639,8 @@ function showFinal() {
 			'order_date' => $today,
 			'ordernumber' => $ordernumber,
 			'zipurl' => $zipurl,
-			'comments' => $instructions
+			'comments' => $instructions,
+            'themis' => $_REQUEST["themis"]
 			);
    $t2 = 'email.txt';
    $t2 = $this->twig->loadTemplate($t2);

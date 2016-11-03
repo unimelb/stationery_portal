@@ -168,6 +168,7 @@ class Stationery extends Cgiapp2 {
 			   'category_admin' => 'modifyCategory',
 			   'administrator_admin' => 'modifyAdmin',
 			   'template_price_admin' => 'modifyTemplate',
+               'printer_admin' => 'modifyPrinter',
 			   'add_item' => 'addItem',
 			   'update_item' => 'updateItem',
 			   'delete' => 'confirmDelete',
@@ -187,6 +188,7 @@ class Stationery extends Cgiapp2 {
 					  'template_admin' => 'Modify Templates',
 					  'department_admin' => 'Modify Departments',
 					  'category_admin' => 'Modify Categories',
+                      'printer_admin' => 'Modify Printers',
 					  'administrator_admin' => 'Administrator access',
 					  'add_item' => 'Create new item',
 					  'update_item' =>'Update item',
@@ -201,6 +203,7 @@ class Stationery extends Cgiapp2 {
 			   'template_admin' => 'Modify Template',
 			   'category_admin' => 'Modify Category',
 			   'department_admin' => 'Modify Department',
+               'printer_admin' => 'Modify Printer',
 			   'administrator_admin' => 'Admin access',
 			   'admin_guide' => 'Guide'
 			   );
@@ -1938,6 +1941,10 @@ function modifyDepartment() {
 }
 function modifyCategory() {
    $_REQUEST['entity'] = 'Category';
+   return $this->modifyTemplate();
+}
+function modifyPrinter() {
+   $_REQUEST['entity'] = 'Printer';
    return $this->modifyTemplate();
 }
 private function getAdminUsernames() {

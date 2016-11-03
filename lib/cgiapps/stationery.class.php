@@ -752,8 +752,8 @@ class Stationery extends Cgiapp2 {
   /* API calls:
    * 1. ResourceItemCopy to create new doc from template
    * public string ResourceItemCopy ( string apiKey, string resourceName, string itemID, string newName, string folderPath );
-   * 2. DocumentGetEditorURL to get URL for new document
-   * public string DocumentGetEditorURL ( string apiKey, string itemID, string workSpaceID, string viewPrefsID, string constraintsID, bool viewerOnly, bool forAnonymousUser );
+   * 2. DocumentGetHTMLEditorURL to get URL for new document
+   * public string DocumentGetHTMLEditorURL ( string apiKey, string itemID, string workSpaceID, string viewPrefsID, string constraintsID, bool viewerOnly, bool forAnonymousUser );
    */
   function editTemplate() {
     $blankDocTemplateID = $_REQUEST["id"];
@@ -801,7 +801,7 @@ class Stationery extends Cgiapp2 {
     $apikey = $this->apikey;
     $username = $this->chili_user;
     $password = $this->chili_pass;
-    $DocumentGetEditorURL_params = array(
+    $DocumentGetHTMLEditorURL_params = array(
 					 "apiKey" => $this->apikey,
 					 "itemID" => $itemID,
 					 "workSpaceID" => $ws,
@@ -810,11 +810,11 @@ class Stationery extends Cgiapp2 {
 					 "viewerOnly" => false,
 					 "forAnonymousUser" => false
 					 );
-    $urlinfo = $this->client->DocumentGetEditorURL($DocumentGetEditorURL_params);
+    $urlinfo = $this->client->DocumentGetHTMLEditorURL($DocumentGetHTMLEditorURL_params);
     $dom = new DOMDocument();
-    $dom->loadXML($urlinfo->DocumentGetEditorURLResult);
+    $dom->loadXML($urlinfo->DocumentGetHTMLEditorURLResult);
     $src = $dom->getElementsByTagName("urlInfo")->item(0)->getAttribute("url");
-    $src_extra = "&username=$username&password=$password";
+    $src_extra = "&username=$username&password=$password&fullWS=true";
     $error = "";
  
     $t = 'edit.html';

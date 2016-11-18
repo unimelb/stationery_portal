@@ -1,7 +1,21 @@
 {% extends "base.html" %}
 {% block title %}Edit template{% endblock %}
 {% block content %}
-<script>
+<script type="text/javascript" defer>
+  /* avoid iframe stealing focus */
+  /*
+*   window.onload = function() {
+*   // blur the iframe
+*   document.getElementById("iframe").blur();
+*   // set focus on instructions
+*   document.getElementById("instructions").focus();
+*   // when iframe tries to focus, focus #instructions
+*   document.getElementById("instructions").onblur = function() {
+*      this.focus();
+*    };
+  *   };
+  */
+  var initialFocus = false;
   /* used to get an 'editor' object which can respond to CHILI events
    * unfortunately blocked by cross-site scripting issues */
       var editor;
@@ -26,8 +40,8 @@
       }
 
 </script>
-
-<p id="instructions"><strong>Step 1:</strong> Enter details to the left<br />
+<a name="instructions" id="instructions"></a> 
+<p><strong>Step 1:</strong> Enter details to the left<br />
   <strong>Step 2: Save stationery [IMPORTANT]</strong><br />
   <strong>Step 3:</strong> Proof stationery as PDF<br />
   <strong>Step 4:</strong> Once proof approved, submit order</p>
@@ -38,5 +52,11 @@
 
 <div class="fullwidth">
   <!-- change onload="" to onload="GetEditor" if cross-site scripting is not a problem -->
-    <iframe id="iframe" width="100%" height="900" onload="" src="{{ iframesrc }}" /></div>  
+  <iframe id="iframe" width="100%" height="800" onload="GetEditor" onfocus="if (initialFocus==false) { document.getElementById('instructions').focus(); initialFocus = true; }" src="{{ iframesrc }}"></iframe>
+</div>
+
+<div>
+  <p class="alert-warning">Don't forget to SAVE STATIONERY before you proof</p>
+  <a class="button" href="{{ proofurl }}">Proof PDF</a> <a class="button" href="{{ submiturl }}">Submit Order</a>
+</div>
   {% endblock %}

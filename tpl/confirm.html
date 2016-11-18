@@ -28,7 +28,7 @@
     </div>
     <div>
 		<label for="themis">THEMIS code</label>
-		<input type="text" name="themis" maxlength="32" placeholder="xx-xxxx-xx-{{ defaultthemiscode }}-xxxxxx-xxx-xx-xx" aria-required="true" data-error="Please enter a correct THEMIS code xx-xxxx-xx-{{ defaultthemiscode }}-xxxxxx-xxx-xx-xx" pattern="\d{2}-\d{4}-\d{2}-{{ defaultthemiscode }}-\d{6}-\d{3}-\d{2}-\d{2}" title="THEMIS code xx-xxxx-xx-{{ defaultthemiscode }}-xxxxxx-xxx-xx-xx"/>
+		<input type="text" name="themis" maxlength="32" placeholder="xx-xxxx-xx-{{ defaultthemiscode }}-xxxxxx-xxx-xx-xx" aria-required="true" data-error="Please enter a correct THEMIS code xx-xxxx-xx-{{ defaultthemiscode }}-xxxxxx-xxx-xx-xx" pattern="\d{2}-\d{4}-\d{2}-{{ defaultthemiscode }}-\d{6}-[A-Za-z0-9]{3}-\d{2}-\d{2}" title="THEMIS code xx-xxxx-xx-{{ defaultthemiscode }}-xxxxxx-xxx-xx-xx"/>
 		<p class="alert-warning">Please ensure the natural account code {{ defaultthemiscode }} is used.</p>
     </div>
 		<div>

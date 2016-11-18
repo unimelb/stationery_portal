@@ -11,6 +11,9 @@
 <div>
 <label for="{{entity|lower}}_{{ key }}_id">{{ key|title }}</label>
 <select name="{{entity|lower}}_{{ key }}_id" aria-label="Please select {{ key|title }}">
+  <option value="">
+    (No {{ key|title }} selected)
+  </option>
   <optgroup>
   {% for subentity in value %}
 <option value="{{ subentity.id }}"{% if subentity.id == item[propertyno] %} selected="selected"{% endif %}>{{ subentity.description }}</option>

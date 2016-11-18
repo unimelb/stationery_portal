@@ -927,7 +927,7 @@ class Stationery extends Cgiapp2 {
 	  $value = trim($value);
 	  if (strlen($value) == 0)
 	    {
-	      $value === null;
+	      $value = null;
 	    }
 	}
       $lcasekey = strtolower($key);
@@ -1294,17 +1294,23 @@ private function updateThing($thing, $thing_id, $thing_details) {
    $settings = array();
     $statement = "";
     $conditions = array();
+    $nullparams = array();
     foreach ($thing_details as $key => $value) {
       if (is_string($value))
 	{
 	  $value = trim($value);
 	  if (strlen($value) == 0)
 	    {
-	      $value === null;
+            // empty strings become NULL
+          $nullparams[] = $key;
 	    }
 	}
       $lcasekey = $key; // don't need lower case
       $settings[] = $lcasekey . " = " . ":" . $lcasekey;
+    }
+    // change appropriate values in thing_details to null
+    foreach ($nullparams as $nullkey) {
+        $thing_details[$nullkey] = null;
     }
     $settext = implode(", ", $settings);
     //print_r("settext: $settext\n");

@@ -3,22 +3,30 @@
 {% block title %}Order History{% endblock %}
 {% block content %}
 <h3>Previous Orders</h3>
-{% if jobs|length >0 %}
+
 <div id="order-history">
-	<ul class="order">
-		{% for job in jobs %}
-		<li class="no-li"><span class="job-id">&#35;{{ job.job_id }}.</span> <a href="{{ job.url }}">Re-order</a> <span class="job-order">{{ job.quantity }} x {{ job.template_name }}</span>, <span class="date">last ordered: {{ job.ordered }}</span></li>
-		{% endfor %} 
-	</ul>
+  {% if jobs|length >0 %}
+  <ul class="order">
+    {% for job in jobs %}
+    <li class="no-li"><span class="job-id">&#35;{{ job.job_id }}.</span> <a href="{{ job.url }}">Re-order</a> <span class="job-order">{{ job.quantity }} x {{ job.template_name }}</span>, <span class="date">last ordered: {{ job.ordered }}</span></li>
+    {% endfor %} 
+  </ul>
+  {% else %}
+  <p>No previously submitted orders</p>
+  {% endif %}
 </div>
 <h3>Unsubmitted Orders</h3>
-<div id="order-history">
-	<ul class="order">
-		{% for job in incomplete %}	
-		<li class="no-li"><span class="job-id">&#35;{{ job.job_id }}.</span> <a href="{{ job.url }}">Update</a> <span class="job-unsub">{{ job.template_name }}</span></li>
-{% endfor %}
-	</ul>
+<div id="unsubmitted-order-history">
+  {% if incomplete|length >0 %}
+  <ul class="order">
+    {% for job in incomplete %}	
+    <li class="no-li"><span class="job-id">&#35;{{ job.job_id }}.</span> <a href="{{ job.url }}">Update</a> <span class="job-unsub">{{ job.template_name }}</span></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>No unsubmitted orders</p>
+  {% endif %}
 </div>
-{% endif %}
+
 {% endblock content %}
 

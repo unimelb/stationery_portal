@@ -52,7 +52,7 @@
 
 <div class="fullwidth">
   <!-- change onload="" to onload="GetEditor" if cross-site scripting is not a problem -->
-  <iframe id="iframe" width="100%" height="{% if category_id == 2 %}2750{% elseif category_id == 4 %}2500{% else %}1500{% endif %}" onload="GetEditor" onfocus="if (initialFocus==false) { document.getElementById('instructions').focus(); initialFocus = true; }" src="{{ iframesrc }}"></iframe>
+  <iframe id="iframe" width="100%" height="{% if category_id == 2 %}800{% elseif category_id == 4 %}800{% else %}800{% endif %}" onload="GetEditor" onfocus="if (initialFocus==false) { document.getElementById('instructions').focus(); initialFocus = true; }" src="{{ iframesrc }}"></iframe>
 </div>
 
 <div>

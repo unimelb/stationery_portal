@@ -308,12 +308,7 @@ class Stationery extends Cgiapp2 {
   /**
    * mode functions here
    */
-  /**
-   * showStart
-   * Starting page -- shows instructions on how to use the app.
-   * redirect to showProfile if no profile is defined locally
-   * for this username ($_SESSION["username"])
-   */
+  
   /* get info about a user. Used in final and showprofile */
   /* returns false if no matched profile */
   private function getProfile($username) {
@@ -353,6 +348,12 @@ class Stationery extends Cgiapp2 {
       return false;
     }
   }
+    /**
+   * showStart
+   * Starting page -- shows instructions on how to use the app.
+   * redirect to showProfile if no profile is defined locally
+   * for this username ($_SESSION["username"])
+   */
   function showStart() {
     /* check database for user name */
     $error = $this->error;
@@ -798,7 +799,7 @@ class Stationery extends Cgiapp2 {
     }
     $proofurl = $this->action . "?mode=proof&base=$base&proof=true&samesame=same&job=$job_id";
     $submiturl = $this->action . "?mode=confirm&job=$job_id";
-
+    $job_category_id = $this->getCategoryFromJob($job_id);
     $doc = $itemID;
     $ws = CHILI_WS;
     $apikey = $this->apikey;
@@ -827,7 +828,8 @@ class Stationery extends Cgiapp2 {
 			       'submiturl' => $submiturl,
 			       'error' => $error,
 			       'modes' => $this->user_visible_modes,
-			       'iframesrc' => $src . $src_extra
+			       'iframesrc' => $src . $src_extra,
+                   'category_id' => $job_category_id
 			       ));
     return $output;
   }
@@ -1400,8 +1402,12 @@ function showFinal() {
   $error = "";
 
    $instructions = '';
+   $stationery_title = '';
   if(isset($_REQUEST["comments"])) {
     $instructions = $_REQUEST["comments"];
+  }
+  if(isset($_REQUEST["stationerytitle"])) {
+      $stationery_title = str_replace('"', '', $_REQUEST["stationerytitle"]);
   }
   if (isset($_REQUEST["collect"]) and $_REQUEST["collect"] == 'yes') {
     $address_id = 1;
@@ -1607,6 +1613,7 @@ function showFinal() {
       'date ordered',
       'item',
       'quantity',
+      'name or title',
       'order by',
       'order by email',
       'themis code',
@@ -1625,6 +1632,7 @@ function showFinal() {
       $today,
       $stationery_type,
       $quantity,
+      $stationery_title,
       $userprofile->given_name . " " . $userprofile->family_name,
       $userprofile->email,
       $_REQUEST["themis"],
@@ -1670,7 +1678,7 @@ function showFinal() {
   $res = $zip->open($zipfilename, ZipArchive::CREATE);
   if ($res === TRUE){
     try {
-      $zip->addFile($textfilename, str_replace(FILESTORE, '', $textfilename));
+        //$zip->addFile($textfilename, str_replace(FILESTORE, '', $textfilename));
       $zip->addFile($csvfilename, str_replace(FILESTORE, '', $csvfilename));
       $zip->addFile($pdffilename, str_replace(FILESTORE, '', $pdffilename));
       $zip->close();

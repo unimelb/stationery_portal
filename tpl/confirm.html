@@ -28,7 +28,7 @@
     </div>
     <div>
 		<label for="themis">THEMIS code</label>
-		<input type="text" name="themis" maxlength="32" placeholder="xx-xxxx-xx-{{ defaultthemiscode }}-xxxxxx-xxx-xx-xx" aria-required="true" data-error="Please enter a correct THEMIS code xx-xxxx-xx-{{ defaultthemiscode }}-xxxxxx-xxx-xx-xx" pattern="\d{2}-\d{4}-\d{2}-{{ defaultthemiscode }}-\d{6}-[A-Za-z0-9]{3}-\d{2}-\d{2}" title="THEMIS code xx-xxxx-xx-{{ defaultthemiscode }}-xxxxxx-xxx-xx-xx"/>
+		<input type="text" name="themis" maxlength="32" placeholder="xx-xxxx-xx-{{ defaultthemiscode }}-xxxxxx-xxx-xx-xx" aria-required="true" data-error="Please enter a correct THEMIS code xx-xxxx-xx-{{ defaultthemiscode }}-xxxxxx-xxx-xx-xx" pattern="\d{2}-\d{4}-[A-Za-z0-9]{2}-{{ defaultthemiscode }}-\d{6}-[A-Za-z0-9]{3}-\d{2}-\d{2}" title="THEMIS code xx-xxxx-xx-{{ defaultthemiscode }}-xxxxxx-xxx-xx-xx"/>
 		<p class="alert-warning">Please ensure the natural account code {{ defaultthemiscode }} is used.</p>
     </div>
 		<div>
@@ -36,6 +36,11 @@
 		<input type="text" name="approver" aria-required="true" data-error="Please enter THEMIS approver" />
 		<p class="alert-info">Name of the Financial
 		  Approver (person with financial delegations) of the above Themis code</p>
+		</div>
+		<div>
+		  <label for="stationerytitle">Name/Title on stationery</label>
+		  <input type="text" name="stationerytitle" aria-required="true" data-error="Please enter name or title as it appears on the stationery" />
+		  <p class="alert-info">The name of the person or organisation appearing on the stationery item</p>
 		</div>
 	</fieldset>
   <fieldset>

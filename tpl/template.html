@@ -3,31 +3,29 @@
 {% block title %}Choose a Stationery Template{% endblock %}
 {% block content %}
 
-<ul class="feature-listing-3">
+<ul class="simple-listing simple-listing--three">
 {% for stationery in stationery_types %}
 {% set category_info = categories[loop.index0] %}
 {# images for categories here #}
 {% if category_info.category_id == 1 %}
-{% set category_image_url = '/images/bus-card-thumb-220x160.jpg' %}
+{% set category_image_url = '/images/bus-card-thumb-220x160-Nu.jpg' %}
 {% elseif category_info.category_id == 2 %}
-{% set category_image_url = '/images/letterhead-thumb-220x160.jpg' %}
+{% set category_image_url = '/images/letterhead-thumb-220x160-Nu.jpg' %}
 {% elseif category_info.category_id == 3 %}
-{% set category_image_url = '/images/comp-slips-thumb-220x160.jpg' %}
+{% set category_image_url = '/images/comp-slips-thumb-220x160-Nu.jpg' %}
 <!-- insert new default images here -->
 {% else %}
 {# this is the default image if nothing else matches: #}
 {% set category_image_url = '/images/default-thumb-220x160.png' %}
 {% endif %}
 <!-- set default category image -->
-<li>
-<figure>
-  <img alt="" src="{{ image_path }}{{ category_image_url }}" />
-</figure>
-<strong>{{ category_info.description }}{% if category_info.description == 'Business Card' %} (SS and DS){% endif%}</strong>
+<li class="simple-listing__item">
+<div class="simple-listing__img" style="background-image: url({{ image_path }}{{ category_image_url }});"></div>
+<h3 class="simple-listing__heading">{{ category_info.description }}{% if category_info.description == 'Business Card' %} (SS and DS){% endif%}</h3>
 
 		<!--<ul> -->
 			{% for type in stationery %}
-			<p><a href="{{ type.url }}">{{ type.full_name }}</a></p>
+			<p class="simple-listing__excerpt"><a href="{{ type.url }}">{{ type.full_name }}</a></p>
 			{% endfor %}		<!--</ul> -->
 </li>
 {% endfor %}

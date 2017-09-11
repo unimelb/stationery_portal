@@ -24,7 +24,7 @@
 <h3 class="simple-listing__heading">{{ category_info.description }}{% if category_info.description == 'Business Card' %} (SS and DS){% endif%}</h3>
 
 		<!--<ul> -->
-			{% for type in stationery %}
+			{% for type in stationery|sort(True) %}
 			<p class="simple-listing__excerpt"><a href="{{ type.url }}">{{ type.full_name }}</a></p>
 			{% endfor %}		<!--</ul> -->
 </li>

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Edit template{% endblock %}
 {% block content %}
-<script type="text/javascript" defer>
+<!--<script type="text/javascript" defer>
   /* avoid iframe stealing focus */
   /*
 *   window.onload = function() {
@@ -39,7 +39,7 @@
         editor = frameWindow.editorObject;
       }
 
-</script>
+</script> -->
 <a name="instructions" id="instructions"></a> 
 <p><strong>Step 1:</strong> Enter details to the left<br />
   <strong>Step 2: Save stationery [IMPORTANT]</strong><br />
@@ -53,7 +53,7 @@
 
 <div class="fullwidth">
   <!-- change onload="" to onload="GetEditor" if cross-site scripting is not a problem -->
-  <iframe id="iframe" width="100%" height="{% if category_id == 2 %}800{% elseif category_id == 4 %}800{% else %}800{% endif %}" onload="GetEditor" onfocus="if (initialFocus==false) { document.getElementById('instructions').focus(); initialFocus = true; }" src="{{ iframesrc }}"></iframe>
+  <iframe id="iframe" width="100%" height="{% if category_id == 2 %}800{% elseif category_id == 4 %}800{% else %}800{% endif %}" src="{{ iframesrc }}"></iframe>
 </div>
 
 <div>

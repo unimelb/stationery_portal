@@ -53,7 +53,7 @@
 
 <div class="fullwidth">
   <!-- change onload="" to onload="GetEditor" if cross-site scripting is not a problem -->
-  <iframe id="iframe" width="100%" height="{% if category_id == 2 %}800{% elseif category_id == 4 %}800{% else %}800{% endif %}" src="{{ iframesrc }}"></iframe>
+  <iframe id="iframe" width="100%" height="{% if category_id == 2 %}800{% elseif category_id == 4 %}800{% else %}800{% endif %}" src="{{ iframesrc }}" onload="frameLoaded(this)"></iframe>
 </div>
 
 <div>

@@ -8,7 +8,10 @@
   {% if jobs|length >0 %}
   <ul class="order">
     {% for job in jobs %}
-    <li class="no-li"><span class="job-id">&#35;{{ job.job_id }}.</span> <a href="{{ job.url }}">Re-order</a> <span class="job-order">{{ job.quantity }} x {{ job.template_name }}</span>, <span class="date">last ordered: {{ job.ordered }}</span></li>
+    {% if job.ordered > 1504792800 %}
+    {# 1504792800 corresponds to 2017-09-08, when new templates were introduced #}
+    <li class="no-li"><span class="job-id">&#35;{{ job.job_id }}.</span> <a href="{{ job.url }}">Re-order</a> <span class="job-order">{{ job.quantity }} x {{ job.template_name }}</span>, <span class="date">last ordered: {{ job.ordered|date('d F Y') }}</span></li>
+    {% endif %}
     {% endfor %} 
   </ul>
   {% else %}
@@ -19,8 +22,11 @@
 <div id="unsubmitted-order-history">
   {% if incomplete|length >0 %}
   <ul class="order">
-    {% for job in incomplete %}	
+    {% for job in incomplete %}
+    {% if job.job_id > 4300 %}
+    {# job 4300 is approximately when the newest 2017 templates were introduced #}
     <li class="no-li"><span class="job-id">&#35;{{ job.job_id }}.</span> <a href="{{ job.url }}">Update</a> <span class="job-unsub">{{ job.template_name }}</span></li>
+    {% endif %}
     {% endfor %}
   </ul>
   {% else %}

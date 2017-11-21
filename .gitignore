@@ -1,8 +1,7 @@
 /includes/
 output/.htaccess
-
+*~
 output/0034-johnvb-BusinessCard(DS).txt
-
 output/0032-godzilla-Letterhead.txt
 
 output/test.txt

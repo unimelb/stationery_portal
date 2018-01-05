@@ -20,10 +20,10 @@ Delivery Address
 
 {% endif %}Turnaround and delivery
 =======================
-Orders approved by 3:00 PM Thursday will be delivered to the Marketing Office on the following Tuesday afternoon.
+Orders approved by 3:00 PM Thursday will be delivered to the External Relations Office on the following Tuesday afternoon.
 
-Stationery is despatched through the University's internal mail system to the address details above, or can be collected from Marketing Office at level 3/780 Elizabeth St.
+Stationery is despatched through the University's internal mail system to the address details above, or can be collected from External Relations Office at Level 6 - 757 Swanston St.
 
-Please Note: Marketing takes no responsibility for the delivery once it leaves the Marketing Office.
+Please Note: External Relations can take no responsibility for the delivery once it leaves our office.
 
 Please do not reply to this email.

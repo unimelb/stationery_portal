@@ -14,9 +14,6 @@ install: config
 
 includes:
 	mkdir -p $(current_dir)/includes
-	#set -a
-	#. $(current_dir)$(SU)stationery.conf
-	#set +a
 
 clean:
 	rm -rf $(current_dir)/includes

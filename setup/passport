@@ -1,0 +1,24 @@
+<?php
+/**
+ * Authentication redirector
+ *
+ * @package utilities
+ * @subpackage authentication
+ * @see login.php
+ * @copyright University of Melbourne, 2005
+ * @author Damian Sweeney <dsweeney@unimelb.edu.au>
+ */
+
+/**
+ * Verifies that the user has the correct cookie settings to be logged
+ * in. Otherwise sends them to the login page.
+ */
+//session_name("stationery");
+//session_start();
+if (!(isset($_SESSION["logged_in"]) and $_SESSION["logged_in"] == true))
+{
+	$_SESSION["nologin_from"] = $_SERVER["SCRIPT_NAME"] . '?' . $_SERVER['QUERY_STRING'];
+	header("Location: http://{$_SERVER["HTTP_HOST"]}".LIBPATH."/login.php");
+	exit;
+}
+?>

@@ -1,0 +1,4 @@
+<?php
+define("FILESTORE", DIRECTORY_SEPARATOR . "servers" . DIRECTORY_SEPARATOR . "http" . DIRECTORY_SEPARATOR . "stationery.staff.unimelb.edu.au" . DIRECTORY_SEPARATOR . "output" . DIRECTORY_SEPARATOR);
+define("FILEURL", 'http://stationery-test.staff.unimelb.edu.au/output/');
+?>

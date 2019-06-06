@@ -1,0 +1,13 @@
+<?php
+/**
+ * The path from the server root to the appropriate lib directory.
+ * It requires a leading but no trailing slash.
+ * Default is '', which indicates that 'lib' is located at the server root
+ * For example for meid the LIBPATH would be '/meid'
+ * Note that this file should be unique for each server and
+ * should _not_ be version controlled.
+ */
+define("LIBPATH", '/stationery-dev');
+/*session_name('stationery'); */
+/*session_start(); */
+?>

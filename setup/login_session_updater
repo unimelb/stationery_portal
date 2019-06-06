@@ -1,0 +1,41 @@
+<?php
+/**
+ * observer for inserting login details into the database
+ */
+
+require_once(dirname(__FILE__) . "/../lib/find_path.inc.php");
+require_once($_SERVER["DOCUMENT_ROOT"] . LIBPATH . "/lib/interfaces/observer.interface.php");
+
+/**
+ * Observer interface
+ */
+class LoginSessionUpdater implements IObserver {
+	/**
+	 * update an observable
+	 */
+	public function update(IObservable $observable)
+	{
+		if ($observable->isAuthenticated())
+		{
+			$_SESSION["logged_in"] = true;
+			$fields = $observable->getFields();
+			$field_names = array(
+				"username" => "uid",
+				"email" => "mail",
+				"common_name" => "displayname",
+				"given_names" => "givenname",
+				"family_name" => "sn",
+				"usertype" => "auedupersontype",
+				"student_subtype" => "auedupersonsubtype",
+				"department_number" => "departmentnumber"
+				);
+			foreach ($field_names as $session_id => $ldap_id)
+			{
+				if (array_key_exists($ldap_id, $fields))
+				{
+					$_SESSION[$session_id] = $fields[$ldap_id];
+				}
+			}
+		}
+	}
+}

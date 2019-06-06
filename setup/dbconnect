@@ -1,0 +1,5 @@
+<?php
+define("DBCONNECT", 'mysql:host=localhost;dbname=stationery');
+define ("DBUSER", 'chili_user');
+define ("DBPASS", 'fakepassword');
+?>

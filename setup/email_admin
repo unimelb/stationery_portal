@@ -1,0 +1,3 @@
+<?php
+define("ADMIN_EMAIL", 'stationery-none@lists.unimelb.edu.au');
+?>

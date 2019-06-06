@@ -1,0 +1,4 @@
+<?php
+define("LDAP_CONNECTION", 'ldaps://centaur.unimelb.edu.au');
+define("LDAP_DN", 'ou=people,o=unimelb');
+?>

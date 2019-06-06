@@ -19,7 +19,7 @@ includes:
 clean:
 	rm -rf $(current_dir)/includes
 
-config: includes $(current_dir)$(IN)dbconnect$(INC) $(current_dir)$(IN)chili$(INC) $(current_dir)$(IN)email_admin$(INC) $(current_dir)$(IN)libpath$(INC) $(current_dir)$(IN)ldapconnect$(INC) $(current_dir)$(IN)storage$(INC)
+config: includes $(current_dir)$(IN)dbconnect$(INC) $(current_dir)$(IN)chili$(INC) $(current_dir)$(IN)email_admin$(INC) $(current_dir)$(IN)libpath$(INC) $(current_dir)$(IN)ldapconnect$(INC) $(current_dir)$(IN)storage$(INC) $(current_dir)$(IN)login_session_updater.class.php $(current_dir)$(IN)passport.php
 
 
 $(current_dir)$(IN)dbconnect$(INC):
@@ -30,6 +30,12 @@ $(current_dir)$(IN)dbconnect$(INC):
 
 $(current_dir)$(IN)chili$(INC):
 	cp $(current_dir)$(SU)chili $(current_dir)$(IN)chili$(INC)
+
+$(current_dir)$(IN)login_session_updater.class.php:
+	cp $(current_dir)$(SU)login_session_updater $@
+
+$(current_dir)$(IN)passport.php:
+	cp $(current_dir)$(SU)passport $@
 
 $(current_dir)$(IN)email_admin$(INC):
 	cp $(current_dir)$(SU)email_admin $(current_dir)$(IN)email_admin$(INC)
@@ -48,6 +54,7 @@ $(current_dir)$(IN)storage$(INC):
 	cp $(current_dir)$(SU)storage $(current_dir)$(IN)storage$(INC)
 	sed -ri "s/(FILESTORE\", ).*/\1$(subst /,'.DIRECTORY_SEPARATOR.',($(current_dir)$(STATIONERY_FILESTORE)))'\);/" $@
 	sed -ri "s/(FILESTORE\", )\('\.(.*)/\1\2/" $@
+	sed -ri "s/(FILEURL\", ').*/\1$(STATIONERY_FILEURL)'\);/" $@
 
 .PHONY: install clean config
 

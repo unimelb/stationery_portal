@@ -4,17 +4,25 @@ INC := .inc.php
 # Assume the Makefile is at the top level of the repository
 current_dir := $(shell pwd)
 include $(current_dir)$(SU)stationery.conf
+mysqlconnect := mysql -u $(STATIONERY_DBUSER) -h $(STATIONERY_DBHOST) -p$(STATIONERY_DBPASS) $(STATIONERY_DBNAME)
 # the stationery.conf include file is the key configuration variable collection
+sqlfiles := $(shell find $(current_dir)$(SU) -name *.sql | sort)
 production: ldapconnect$(INC) libpath$(INC) dbconnect$(INC) passport.php login_session_updater.class.php
 	cd includes
 
 ldapconnect$(INC): 
 	cp $(SU)ldapconnect ldapconnect$(INC)
 
-install: config
+database : $(sqlfiles)
+	@echo "connecting to database"
+	$(mysqlconnect) < "$<"
+
+install: config database
+
 
 includes:
 	mkdir -p $(current_dir)/includes
+
 
 clean:
 	rm -rf $(current_dir)/includes
@@ -56,7 +64,7 @@ $(current_dir)$(IN)storage$(INC):
 	sed -ri "s/(FILESTORE\", )\('\.(.*)/\1\2/" $@
 	sed -ri "s/(FILEURL\", ').*/\1$(STATIONERY_FILEURL)'\);/" $@
 
-.PHONY: install clean config
+.PHONY: install clean config database
 
 
 

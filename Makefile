@@ -24,11 +24,13 @@ nodb: config
 includes:
 	mkdir -p $(current_dir)/includes
 
+output:
+	mkdir -p $(current_dir)$(STATIONERY_FILESTORE)
 
 clean:
 	rm -rf $(current_dir)/includes
 
-config: includes $(current_dir)$(IN)dbconnect$(INC) $(current_dir)$(IN)chili$(INC) $(current_dir)$(IN)email_admin$(INC) $(current_dir)$(IN)libpath$(INC) $(current_dir)$(IN)ldapconnect$(INC) $(current_dir)$(IN)storage$(INC) $(current_dir)$(IN)login_session_updater.class.php $(current_dir)$(IN)passport.php
+config: includes output $(current_dir)$(IN)dbconnect$(INC) $(current_dir)$(IN)chili$(INC) $(current_dir)$(IN)email_admin$(INC) $(current_dir)$(IN)libpath$(INC) $(current_dir)$(IN)ldapconnect$(INC) $(current_dir)$(IN)storage$(INC) $(current_dir)$(IN)login_session_updater.class.php $(current_dir)$(IN)passport.php
 
 
 $(current_dir)$(IN)dbconnect$(INC):

@@ -1,0 +1,10 @@
+<?php
+define("CHILI_APP", 'https://your.chili.instance.org/CHILI/');
+define("CHILI_ENV", 'https://your.chili.instance.org/CHILI/stationery/');
+/* updated to https 2017-05-05 */
+/*define("CHILI_WS", 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');*/
+define("CHILI_WS", 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+define("CHILI_PROOF", 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+define("CHILI_PRINT", 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+/* interface.aspx */
+?>

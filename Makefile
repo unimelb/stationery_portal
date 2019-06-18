@@ -15,7 +15,7 @@ ldapconnect$(INC):
 
 database : $(sqlfiles)
 	@echo "connecting to database"
-	$(mysqlconnect) < "$<"
+	for statement in $^; do $(mysqlconnect) < $$statement; done
 
 install: config database
 

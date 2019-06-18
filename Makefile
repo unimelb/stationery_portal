@@ -19,6 +19,7 @@ database : $(sqlfiles)
 
 install: config database
 
+nodb: config
 
 includes:
 	mkdir -p $(current_dir)/includes
@@ -38,6 +39,11 @@ $(current_dir)$(IN)dbconnect$(INC):
 
 $(current_dir)$(IN)chili$(INC):
 	cp $(current_dir)$(SU)chili $(current_dir)$(IN)chili$(INC)
+	sed -ri "s/(CHILI_APP\", ').*/\1$(CHILI_APP)'\);/" $@
+	sed -ri "s/(CHILI_ENV\", ').*/\1$(CHILI_ENV)'\);/" $@
+	sed -ri "s/(CHILI_WS\", ').*/\1$(CHILI_WS)'\);/" $@
+	sed -ri "s/(CHILI_PROOF\", ').*/\1$(CHILI_PROOF)'\);/" $@
+	sed -ri "s/(CHILI_PRINT\", ').*/\1$(CHILI_PRINT)'\);/" $@
 
 $(current_dir)$(IN)login_session_updater.class.php:
 	cp $(current_dir)$(SU)login_session_updater $@
@@ -64,7 +70,7 @@ $(current_dir)$(IN)storage$(INC):
 	sed -ri "s/(FILESTORE\", )\('\.(.*)/\1\2/" $@
 	sed -ri "s/(FILEURL\", ').*/\1$(STATIONERY_FILEURL)'\);/" $@
 
-.PHONY: install clean config database
+.PHONY: install clean config database nodb
 
 
 

@@ -1,6 +1,20 @@
 -- stationery015.sql
--- an amalgamation of view definitions from sql 012-014
+-- an amalgamation of view definitions from sql 010-014
 -- necessary because the view permissions are user-specific
+-- department_view
+create or replace view department_view as
+select department_id as id, name, acronym from department
+order by acronym, id;
+-- revised template_view
+create or replace view template_view as
+select t.template_id as id, t.short_name, c.description as category, '' as department from template t, category c
+where t.category_id = c.category_id
+and t.department_id IS NULL
+UNION
+select t.template_id as id, t.short_name, c.description as category, d.acronym as department 
+from template t, category c, department d 
+where t.category_id = c.category_id and t.department_id = d.department_id
+order by department, id;
 -- revise template_price_view
 create or replace view template_price_view as
 SELECT category_id, quantity, price_AUD, handling_cost

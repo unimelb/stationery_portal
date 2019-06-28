@@ -5,17 +5,14 @@ INC := .inc.php
 current_dir := $(shell pwd)
 include $(current_dir)$(SU)stationery.conf
 # the stationery.conf include file is the key configuration variable collection
-production: ldapconnect$(INC) libpath$(INC) dbconnect$(INC) passport.php login_session_updater.class.php
-	cd includes
-
-ldapconnect$(INC): 
-	cp $(SU)ldapconnect ldapconnect$(INC)
-
-
-install: config
+install: config dataviews
 
 includes:
 	mkdir -p $(current_dir)/includes
+
+dataviews:
+	@echo "Adding views to database"
+	@mysql -u $(STATIONERY_DBNAME) -h $(STATIONERY_DBHOST) -p$(STATIONERY_DBPASS) $(STATIONERY_DBNAME) <$(current_dir)$(SU)stationery015.sql
 
 output:
 	mkdir -p $(current_dir)$(STATIONERY_FILESTORE)

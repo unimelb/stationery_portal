@@ -12,7 +12,7 @@ includes:
 
 dataviews:
 	@echo "Adding views to database"
-	@mysql -u $(STATIONERY_DBNAME) -h $(STATIONERY_DBHOST) -p$(STATIONERY_DBPASS) $(STATIONERY_DBNAME) <$(current_dir)$(SU)stationery015.sql
+	mysql -u $(STATIONERY_DBNAME) -h $(STATIONERY_DBHOST) -p$(STATIONERY_DBPASS) $(STATIONERY_DBNAME) <$(current_dir)$(SU)stationery015.sql
 
 output:
 	mkdir -p $(current_dir)$(STATIONERY_FILESTORE)

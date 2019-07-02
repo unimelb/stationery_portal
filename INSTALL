@@ -1,0 +1,14 @@
+Requirements
+PHP 5+
+- soap installed
+MySQL/MariaDB
+
+First:
+1. set up a virtual PHP web host 
+2. create a mysql database with user
+3. install sql schema from data dump
+
+Change to the root directory of the virtual host
+1. run .configure, which creates a file called setup/stationery.conf
+2. edit setup/stationery.conf to include your values
+3. make install

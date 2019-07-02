@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# configure script for stationery portal
+# run this before 'make'
+if [ ! -f ./setup/stationery.conf ]; then
+    cp setup/stationery.conf_template setup/stationery.conf && echo "Configuration file created OK." 
+fi
+echo "Please edit the file setup/stationery.conf with local values before running 'make'"
+

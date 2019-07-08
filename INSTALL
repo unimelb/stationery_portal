@@ -1,6 +1,7 @@
 Requirements
 PHP 5+
 - soap installed
+- curl installed
 MySQL/MariaDB
 
 First:

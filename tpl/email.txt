@@ -20,7 +20,7 @@ Delivery Address
 
 {% endif %}Turnaround and delivery
 =======================
-Orders approved by 3:00 PM Thursday will be delivered to the External Relations Office on the following Tuesday afternoon.
+Orders approved by 1:00 PM Wednesday will be delivered to the Design, Print and Merchandise office on the following Monday afternoon.
 
 Stationery is despatched through the University's internal mail system to the address details above, or can be collected from the External Relations Office at Level 6 - 757 Swanston St.
 

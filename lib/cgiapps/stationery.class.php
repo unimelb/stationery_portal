@@ -1581,7 +1581,7 @@ function showFinal() {
     $handling_cost = '';
     $cost_price = '';
   }
-  $ordernumber = substr($job_name, 0, 4);
+  $ordernumber = substr($job_name, 0, strpos($job_name, '-'));
   $yaml_array =  array(
       'order number' => $ordernumber,
       'url' => $pdfurl,

@@ -58,8 +58,8 @@ $(current_dir)$(IN)ldapconnect$(INC):
 
 $(current_dir)$(IN)storage$(INC):
 	cp $(current_dir)$(SU)storage $(current_dir)$(IN)storage$(INC)
-	sed -ri "s/(FILESTORE\", ).*/\1$(subst /,'.DIRECTORY_SEPARATOR.',($(current_dir)$(STATIONERY_FILESTORE)))'\);/" $@
-	sed -ri "s/(FILESTORE\", )\('\.(.*)/\1\2/" $@
+	sed -ri "s/(FILESTORE\", ).*/\1$(subst /,'.DIRECTORY_SEPARATOR.',$(current_dir)$(STATIONERY_FILESTORE)').DIRECTORY_SEPARATOR\);/" $@
+	sed -ri "s/(FILESTORE\", )'\.(.*)/\1\2/" $@
 	sed -ri "s/(FILEURL\", ').*/\1$(STATIONERY_FILEURL)'\);/" $@
 
 .PHONY: install clean config

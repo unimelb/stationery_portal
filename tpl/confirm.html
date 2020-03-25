@@ -47,15 +47,21 @@
     <div>
 	  <legend>Collect from Marketing and Communications?</legend>
 	  <div class="inline">
-	    <input type="radio" name="collect" id="collecty" value="yes" aria-required="true" data-error="Please choose yes or no"/>
+	    <!-- modified to default "no" due to COVID19 March 2020 -->
+	    <input type="radio" name="collect" id="collecty" value="yes" aria-required="true" data-error="Please choose yes or no" readonly />
 	    <label for="collecty"><span>Yes -- you will be notified by email when your item is ready for collection.</span></label>
 	  </div>
 	  <div class="inline">
-	    <input type="radio" name="collect" id="collectn" value="no" />
+	    <input type="radio" name="collect" id="collectn" value="no" checked="checked" readonly />
 	    <label for="collectn"><span>No</span></label>
 	  </div>
     </div>
   </fieldset>
+  <div class="notice notice--warning">
+    <p><strong>Please Note:</strong></p>
+    <p>DUE TO COVID19, COLLECTION OF STATIONERY FROM OUR OFFICE IS CURRENTLY SUSPENDED.</p>
+    <p>PLEASE ENTER A VAILD UNIVERSITY ADDRESS WHEN SUBMITTING YOUR ORDER AND THESE WILL BE DELIVERED VIA INTERNAL MAIL WITHIN 7 WORKING DAYS FROM WHEN YOUR ORDER IS SENT TO PRINT.</p>
+  </div>
   <fieldset class="address">
     <legend>Delivery Address</legend>
     <div>
